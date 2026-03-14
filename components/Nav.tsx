@@ -1,8 +1,13 @@
 'use client'
-import { useState, useEffect } from 'react'
-import Image from 'next/image'
 
-export function Nav() {
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+
+interface NavProps {
+  variant?: 'main' | 'real-estate'
+}
+
+export function Nav({ variant = 'main' }: NavProps) {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -11,56 +16,62 @@ export function Nav() {
     return () => window.removeEventListener('scroll', fn)
   }, [])
 
+  const base: React.CSSProperties = {
+    position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+    padding: '0 24px',
+    background: scrolled ? 'rgba(10,10,10,0.90)' : 'transparent',
+    backdropFilter: scrolled ? 'blur(12px)' : 'none',
+    borderBottom: scrolled ? '1px solid rgba(255,166,0,0.10)' : 'none',
+    transition: 'all 0.3s ease',
+  }
+
+  if (variant === 'real-estate') {
+    return (
+      <header style={base}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Link href="/" style={{ fontSize: '13px', color: 'rgba(255,166,0,0.7)', textDecoration: 'none', transition: 'color 0.2s' }}
+            onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = '#ffa600')}
+            onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,166,0,0.7)')}>
+            ← montero.cool
+          </Link>
+          <span style={{ fontFamily: 'var(--font-cinzel)', fontSize: '15px', color: '#ffa600', letterSpacing: '0.08em' }}>
+            Real Estate by montero.
+          </span>
+          <a href="#pricing" style={{
+            fontSize: '13px', fontWeight: 600, padding: '7px 16px',
+            background: 'rgba(255,166,0,0.12)', border: '1px solid rgba(255,166,0,0.35)',
+            color: '#ffa600', borderRadius: '8px', textDecoration: 'none',
+          }}>
+            Join Waitlist
+          </a>
+        </div>
+      </header>
+    )
+  }
+
   return (
-    <header style={{
-      position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-      padding: '0 24px',
-      background: scrolled ? 'rgba(15,17,23,0.85)' : 'transparent',
-      backdropFilter: scrolled ? 'blur(12px)' : 'none',
-      borderBottom: scrolled ? '1px solid rgba(79,110,247,0.1)' : 'none',
-      transition: 'all 0.3s ease',
-    }}>
-      <div style={{
-        maxWidth: '1100px',
-        margin: '0 auto',
-        height: '64px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}>
-        <a href="/" style={{ display: 'flex', alignItems: 'center' }}>
-          <Image
-            src="/logo.png"
-            alt="montero.cool"
-            width={120}
-            height={32}
-            style={{ height: '32px', width: 'auto', objectFit: 'contain' }}
-          />
-        </a>
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-          {([['Work', '#case-study'], ['Pricing', '#pricing'], ['Contact', '#contact']] as [string, string][]).map(([label, href]) => (
-            <a
-              key={href}
-              href={href}
-              style={{ fontSize: '14px', color: '#8B95A9', textDecoration: 'none', transition: 'color 0.2s' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#FFFFFF')}
-              onMouseLeave={e => (e.currentTarget.style.color = '#8B95A9')}
-            >
+    <header style={base}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Link href="/" style={{ fontFamily: 'var(--font-cinzel)', fontSize: '20px', fontWeight: 700, color: '#ffa600', textDecoration: 'none', letterSpacing: '0.05em' }}>
+          montero.
+        </Link>
+        <nav style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
+          {[['Work', '#case-studies'], ['Services', '#services'], ['Contact', '#contact']].map(([label, href]) => (
+            <a key={href} href={href} style={{ fontSize: '14px', color: 'rgba(255,255,255,0.55)', textDecoration: 'none', transition: 'color 0.2s' }}
+              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = '#fff')}
+              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.55)')}>
               {label}
             </a>
           ))}
-          <a
-            href="#pricing"
-            style={{
-              fontSize: '14px', fontWeight: 600, padding: '8px 18px',
-              background: '#4F6EF7', color: '#FFFFFF', borderRadius: '8px',
-              textDecoration: 'none', transition: 'opacity 0.2s',
-            }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
-            onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-          >
-            Try Agent OS
-          </a>
+          <Link href="/real-estate" style={{
+            fontSize: '13px', fontWeight: 600, padding: '7px 16px',
+            background: 'rgba(255,166,0,0.12)', border: '1px solid rgba(255,166,0,0.35)',
+            color: '#ffa600', borderRadius: '8px', textDecoration: 'none',
+          }}
+            onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,166,0,0.22)')}
+            onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,166,0,0.12)')}>
+            Real Estate Agents →
+          </Link>
         </nav>
       </div>
     </header>

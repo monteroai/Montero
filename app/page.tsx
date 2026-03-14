@@ -1,19 +1,19 @@
-import { Hero } from '@/components/Hero'
-import { WhatWeBuild } from '@/components/WhatWeBuild'
-import { CaseStudy } from '@/components/CaseStudy'
-import { Pricing } from '@/components/Pricing'
-import { HowItWorks } from '@/components/HowItWorks'
-import { ContactSection } from '@/components/ContactSection'
+import { Nav } from '@/components/Nav'
+import { MainHero } from '@/components/MainHero'
+import { Services } from '@/components/Services'
+import { CaseStudies } from '@/components/CaseStudies'
+import { MainContact } from '@/components/MainContact'
 
 export default function HomePage() {
   return (
-    <main>
-      <Hero />
-      <WhatWeBuild />
-      <CaseStudy />
-      <Pricing />
-      <HowItWorks />
-      <ContactSection />
-    </main>
+    <>
+      <Nav variant="main" />
+      <main>
+        <MainHero />
+        <Services />
+        <CaseStudies />
+        <MainContact />
+      </main>
+    </>
   )
 }

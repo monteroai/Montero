@@ -1,20 +1,19 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Cinzel } from 'next/font/google'
 import './globals.css'
-import { Nav } from '@/components/Nav'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const inter   = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const cinzel  = Cinzel({ subsets: ['latin'], variable: '--font-cinzel', weight: ['400', '600', '700'] })
 
 export const metadata: Metadata = {
-  title: 'montero.cool — AI for real estate teams',
-  description: 'MLS remarks, listing presentations, and market intelligence — automated for real estate agents.',
+  title: 'montero. — AI automation for businesses that move fast',
+  description: 'AI automation, custom workflows, and intelligent content tools for real estate teams, restaurants, law firms, and anyone who moves fast.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body style={{ fontFamily: 'var(--font-inter), Inter, sans-serif' }}>
-        <Nav />
+    <html lang="en" className={`${inter.variable} ${cinzel.variable}`}>
+      <body style={{ fontFamily: 'var(--font-inter), Inter, sans-serif', background: '#0a0a0a' }}>
         {children}
       </body>
     </html>
