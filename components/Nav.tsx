@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { BullMark } from './BullMark'
 
 interface NavProps {
   variant?: 'main' | 'real-estate'
@@ -29,13 +30,13 @@ export function Nav({ variant = 'main' }: NavProps) {
     return (
       <header style={base}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link href="/" style={{ fontSize: '13px', color: 'rgba(255,166,0,0.7)', textDecoration: 'none', transition: 'color 0.2s' }}
+          <Link href="/" style={{ fontSize: '13px', color: 'rgba(255,166,0,0.7)', textDecoration: 'none', transition: 'color 0.2s', display: 'flex', alignItems: 'center', gap: '8px' }}
             onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = '#ffa600')}
             onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,166,0,0.7)')}>
             ← montero.cool
           </Link>
           <span style={{ fontFamily: 'var(--font-cinzel)', fontSize: '15px', color: '#ffa600', letterSpacing: '0.08em' }}>
-            Real Estate by montero.
+            Real Estate by MONTERO
           </span>
           <a href="#pricing" style={{
             fontSize: '13px', fontWeight: 600, padding: '7px 16px',
@@ -52,8 +53,11 @@ export function Nav({ variant = 'main' }: NavProps) {
   return (
     <header style={base}>
       <div style={{ maxWidth: '1100px', margin: '0 auto', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Link href="/" style={{ fontFamily: 'var(--font-cinzel)', fontSize: '20px', fontWeight: 700, color: '#ffa600', textDecoration: 'none', letterSpacing: '0.05em' }}>
-          montero.
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+          <BullMark size={28} />
+          <span style={{ fontFamily: 'var(--font-cinzel)', fontSize: '18px', fontWeight: 700, color: '#ffa600', letterSpacing: '0.08em' }}>
+            MONTERO
+          </span>
         </Link>
         <nav style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
           {[['Work', '#case-studies'], ['Services', '#services'], ['Contact', '#contact']].map(([label, href]) => (

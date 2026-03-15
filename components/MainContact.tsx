@@ -87,7 +87,7 @@ export function MainContact() {
         )}
 
         <p style={{ textAlign: 'center', marginTop: '48px', fontSize: '12px', color: 'rgba(255,255,255,0.20)' }}>
-          © {new Date().getFullYear()} montero. · ai@montero.cool
+          © {new Date().getFullYear()} MONTERO · ai@montero.cool
         </p>
       </div>
     </section>

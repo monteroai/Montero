@@ -74,7 +74,7 @@ export function WhyMontero() {
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <div style={{ marginBottom: '56px' }}>
             <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#ffa600', marginBottom: '16px' }}>
-              Why montero.
+              Why MONTERO
             </div>
             <h2 style={{ fontFamily: 'var(--font-cinzel)', fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 600, color: '#FFFFFF', maxWidth: '500px' }}>
               The way it should have always worked.

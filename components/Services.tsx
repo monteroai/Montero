@@ -60,9 +60,19 @@ export function Services() {
                 padding: '36px 30px',
                 background: i % 2 === 0 ? '#0e0e0e' : '#111111',
                 borderRight: '1px solid rgba(255,166,0,0.07)',
+                position: 'relative', overflow: 'hidden',
                 ...(isMobile ? { flexShrink: 0, width: '80vw', scrollSnapAlign: 'start', borderRadius: '12px', border: '1px solid rgba(255,166,0,0.10)' } : {}),
               }}
             >
+              {/* Ghost number */}
+              <div style={{
+                position: 'absolute', bottom: '-12px', right: '10px',
+                fontFamily: 'var(--font-cinzel)', fontSize: '88px', fontWeight: 700, lineHeight: 1,
+                color: 'rgba(255,166,0,0.045)', userSelect: 'none', pointerEvents: 'none',
+              }}>
+                {String(i + 1).padStart(2, '0')}
+              </div>
+
               <motion.div
                 initial={{ width: 0 }}
                 whileInView={{ width: 32 }}

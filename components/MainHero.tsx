@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { ElectricalGrid } from './ElectricalGrid'
+import { BullMark } from './BullMark'
 
 const ROTATING = [
   'AI Automation',
@@ -35,36 +36,34 @@ export function MainHero() {
         <ElectricalGrid />
       </motion.div>
 
-      {/* Center logo watermark */}
+      {/* Bull watermark */}
       <div style={{
         position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
         pointerEvents: 'none', zIndex: 1,
       }}>
-        <div style={{ position: 'relative' }}>
-          {/* Radial glow behind wordmark */}
+        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {/* Radial glow */}
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.8 }}
-            transition={{ duration: 1.5, ease: 'easeOut' }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 2, ease: 'easeOut' }}
             style={{
               position: 'absolute',
-              width: '400px',
-              height: '400px',
-              background: 'radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%)',
+              width: '520px', height: '520px',
+              background: 'radial-gradient(circle, rgba(255,166,0,0.10) 0%, transparent 68%)',
               borderRadius: '50%',
-              pointerEvents: 'none',
-              top: '50%',
-              left: '50%',
+              top: '50%', left: '50%',
               transform: 'translate(-50%, -50%)',
             }}
           />
-          <span style={{
-            fontFamily: 'var(--font-cinzel)', fontSize: 'clamp(100px, 20vw, 220px)',
-            fontWeight: 700, color: 'rgba(255,166,0,0.04)', letterSpacing: '0.05em',
-            userSelect: 'none', position: 'relative',
-          }}>
-            montero.
-          </span>
+          {/* Bull icon */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.8, ease: 'easeOut' }}
+          >
+            <BullMark size={340} opacity={0.055} />
+          </motion.div>
         </div>
       </div>
 
@@ -81,26 +80,38 @@ export function MainHero() {
         </div>
 
         {/* Wordmark */}
-        <h1 style={{
-          fontFamily: 'var(--font-cinzel)',
-          fontSize: 'clamp(52px, 9vw, 96px)',
-          fontWeight: 700,
-          letterSpacing: '0.04em',
-          background: 'linear-gradient(135deg, #ffd470 0%, #ffa600 50%, #ffbf1f 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-          marginBottom: '24px',
-          lineHeight: 1.05,
-        }}>
-          montero.
-        </h1>
+        <motion.h1
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
+          style={{
+            fontFamily: 'var(--font-cinzel)',
+            fontSize: 'clamp(52px, 9vw, 96px)',
+            fontWeight: 700,
+            letterSpacing: '0.06em',
+            background: 'linear-gradient(135deg, #ffd470 0%, #ffa600 50%, #ffbf1f 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            marginBottom: '24px',
+            lineHeight: 1.05,
+          }}>
+          MONTERO
+        </motion.h1>
 
-        <p style={{ fontSize: 'clamp(16px, 2.5vw, 20px)', color: 'rgba(255,255,255,0.60)', lineHeight: 1.65, maxWidth: '600px', margin: '0 auto 40px' }}>
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: 'easeOut', delay: 0.45 }}
+          style={{ fontSize: 'clamp(16px, 2.5vw, 20px)', color: 'rgba(255,255,255,0.60)', lineHeight: 1.65, maxWidth: '600px', margin: '0 auto 40px' }}>
           Automation &amp; AI for businesses that move fast.
-        </p>
+        </motion.p>
 
-        <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: 'easeOut', delay: 0.65 }}
+          style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
           <a href="#case-studies" style={{
             padding: '14px 30px', fontSize: '15px', fontWeight: 600,
             border: '1px solid rgba(255,166,0,0.4)', color: '#ffa600',
@@ -122,13 +133,14 @@ export function MainHero() {
             onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = '1')}>
             Get Started
           </a>
-        </div>
+        </motion.div>
 
         {/* Scroll hint */}
-        <div style={{ marginTop: '60px', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ marginTop: '64px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,166,0,0.3)' }}>scroll</span>
           <div style={{
             width: '1px', height: '48px',
-            background: 'linear-gradient(to bottom, rgba(255,166,0,0.6), transparent)',
+            background: 'linear-gradient(to bottom, rgba(255,166,0,0.5), transparent)',
           }} />
         </div>
       </div>

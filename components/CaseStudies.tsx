@@ -1,5 +1,10 @@
 'use client'
 import { motion } from 'framer-motion'
+import { BullMark } from './BullMark'
+
+// Seeded heat values for CT card (avoids hydration mismatch from Math.random)
+const HEAT = [0.9,0.3,0.6,0.8,0.2,0.7,0.4,0.5,0.8,0.9,0.2,0.6,0.7,0.1,0.8,0.3,0.9,0.5,0.4,0.6,0.7,0.8,0.2,0.3,0.6,0.9,0.4,0.7,0.3,0.8,0.5,0.1,0.9,0.6,0.2,0.8,0.4,0.7,0.3,0.5]
+const CHART = [58,82,44,92,67,78,86,61,95,72]
 
 const CASES = [
   {
@@ -68,6 +73,40 @@ export function CaseStudies() {
                 overflow: 'hidden',
               }}
             >
+              {/* Decorative mock visual — card 0 = dashboard chart, card 1 = heatmap */}
+              {i === 0 ? (
+                <div style={{ position: 'absolute', top: 20, right: 20, opacity: 0.13, pointerEvents: 'none' }}>
+                  <div style={{ width: 130, height: 84, border: '1px solid #ffa600', borderRadius: 6, padding: '8px 8px 6px', background: 'rgba(0,0,0,0.4)' }}>
+                    <div style={{ height: 5, background: 'rgba(255,166,0,0.4)', borderRadius: 3, marginBottom: 6, width: '75%' }} />
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 44 }}>
+                      {CHART.map((h, j) => (
+                        <div key={j} style={{ flex: 1, height: `${h}%`, background: 'linear-gradient(to top, #ffa600, #ffd470)', borderRadius: '2px 2px 0 0' }} />
+                      ))}
+                    </div>
+                    <div style={{ marginTop: 5, display: 'flex', gap: 5 }}>
+                      <div style={{ flex: 2, height: 6, background: 'rgba(255,166,0,0.5)', borderRadius: 2 }} />
+                      <div style={{ flex: 1, height: 6, background: 'rgba(255,166,0,0.3)', borderRadius: 2 }} />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ position: 'absolute', top: 20, right: 20, opacity: 0.12, pointerEvents: 'none' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 3 }}>
+                    {HEAT.map((v, j) => (
+                      <div key={j} style={{ width: 12, height: 12, borderRadius: 2, background: `rgba(34,197,94,${v})` }} />
+                    ))}
+                  </div>
+                  <div style={{ marginTop: 6, fontSize: 7, color: 'rgba(34,197,94,0.6)', letterSpacing: '0.1em', textTransform: 'uppercase', textAlign: 'right' }}>
+                    foot traffic density
+                  </div>
+                </div>
+              )}
+
+              {/* Bull corner mark */}
+              <div style={{ position: 'absolute', bottom: 18, right: 18, opacity: 0.08, pointerEvents: 'none' }}>
+                <BullMark size={52} />
+              </div>
+
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
                 <div>
                   <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,166,0,0.7)', marginBottom: '6px' }}>

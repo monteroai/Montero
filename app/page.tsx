@@ -1,5 +1,6 @@
 import { Nav } from '@/components/Nav'
 import { MainHero } from '@/components/MainHero'
+import { TickerStrip } from '@/components/TickerStrip'
 import { Services } from '@/components/Services'
 import { CaseStudies } from '@/components/CaseStudies'
 import { WhyMontero } from '@/components/WhyMontero'
@@ -11,6 +12,7 @@ export default function HomePage() {
       <Nav variant="main" />
       <main>
         <MainHero />
+        <TickerStrip />
         <Services />
         <CaseStudies />
         <WhyMontero />
