@@ -5,58 +5,84 @@ interface BullMarkProps {
 }
 
 export function BullMark({ size = 40, opacity = 1, className }: BullMarkProps) {
-  const s = size
   return (
     <svg
-      viewBox="-8 -8 216 216"
-      width={s}
-      height={s}
+      viewBox="0 0 120 100"
+      width={size}
+      height={size * (100 / 120)}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       style={{ opacity, display: 'block', flexShrink: 0 }}
       className={className}
     >
       <defs>
-        <linearGradient id="bullG" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#ffd470" />
-          <stop offset="55%" stopColor="#ffa600" />
-          <stop offset="100%" stopColor="#b87400" />
+        <linearGradient id="bullG" x1="0" y1="0" x2="120" y2="100" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#e8c774" />
+          <stop offset="50%" stopColor="#d4a24a" />
+          <stop offset="100%" stopColor="#a07830" />
         </linearGradient>
       </defs>
 
-      <path d="M 70,67 C 57,50 34,22 47,5 C 53,-1 64,9 73,43 L 74,55"
-            stroke="url(#bullG)" strokeWidth="5.5" strokeLinecap="round" />
-      <path d="M 130,67 C 143,50 166,22 153,5 C 147,-1 136,9 127,43 L 126,55"
-            stroke="url(#bullG)" strokeWidth="5.5" strokeLinecap="round" />
+      {/* Left horn — wide sweep upward and outward */}
+      <path
+        d="M 38,42 C 30,32 18,14 8,6 C 4,3 2,6 4,12 C 8,22 22,34 34,42"
+        stroke="url(#bullG)" strokeWidth="3.5" strokeLinecap="round"
+      />
+      {/* Right horn — mirror */}
+      <path
+        d="M 82,42 C 90,32 102,14 112,6 C 116,3 118,6 116,12 C 112,22 98,34 86,42"
+        stroke="url(#bullG)" strokeWidth="3.5" strokeLinecap="round"
+      />
 
-      <path d="M 100,60 C 87,60 75,64 68,71 C 57,78 51,93 50,108 C 48,123 51,138 57,150 C 65,164 80,173 100,174 C 120,173 135,164 143,150 C 149,138 152,123 150,108 C 149,93 143,78 132,71 C 125,64 113,60 100,60 Z"
-            stroke="url(#bullG)" strokeWidth="4.5" />
+      {/* Head — broad, angular bull face */}
+      <path
+        d="M 34,42 C 30,46 26,54 28,64 C 30,74 38,82 46,86 C 50,88 54,90 60,90 C 66,90 70,88 74,86 C 82,82 90,74 92,64 C 94,54 90,46 86,42 C 80,38 70,36 60,36 C 50,36 40,38 34,42 Z"
+        stroke="url(#bullG)" strokeWidth="3" fill="none"
+      />
 
-      <path d="M 63,83 C 44,77 38,97 50,104"
-            stroke="url(#bullG)" strokeWidth="3.5" strokeLinecap="round" />
-      <path d="M 137,83 C 156,77 162,97 150,104"
-            stroke="url(#bullG)" strokeWidth="3.5" strokeLinecap="round" />
+      {/* Left ear */}
+      <path
+        d="M 32,44 C 26,40 22,44 26,50"
+        stroke="url(#bullG)" strokeWidth="2.5" strokeLinecap="round"
+      />
+      {/* Right ear */}
+      <path
+        d="M 88,44 C 94,40 98,44 94,50"
+        stroke="url(#bullG)" strokeWidth="2.5" strokeLinecap="round"
+      />
 
-      <path d="M 88,65 C 72,59 54,54 42,63"
-            stroke="#ffa600" strokeWidth="3" strokeLinecap="round" opacity="0.55" />
-      <path d="M 86,74 C 67,68 48,70 40,82"
-            stroke="#ffa600" strokeWidth="2" strokeLinecap="round" opacity="0.35" />
-      <path d="M 84,83 C 66,79 50,83 44,95"
-            stroke="#ffa600" strokeWidth="1.5" strokeLinecap="round" opacity="0.2" />
+      {/* Left eye — angular, fierce */}
+      <path
+        d="M 43,56 C 45,52 51,52 53,56 C 51,59 45,59 43,56 Z"
+        stroke="url(#bullG)" strokeWidth="2" fill="rgba(212,162,74,0.08)"
+      />
+      {/* Right eye */}
+      <path
+        d="M 67,56 C 69,52 75,52 77,56 C 75,59 69,59 67,56 Z"
+        stroke="url(#bullG)" strokeWidth="2" fill="rgba(212,162,74,0.08)"
+      />
 
-      <path d="M 75,101 C 78,95 88,94 91,101 C 88,107 78,107 75,101 Z"
-            stroke="url(#bullG)" strokeWidth="2.5" fill="rgba(255,166,0,0.1)" />
-      <path d="M 109,101 C 112,95 122,94 125,101 C 122,107 112,107 109,101 Z"
-            stroke="url(#bullG)" strokeWidth="2.5" fill="rgba(255,166,0,0.1)" />
+      {/* Nose bridge */}
+      <line x1="60" y1="62" x2="60" y2="74" stroke="rgba(212,162,74,0.2)" strokeWidth="1.5" />
 
-      <line x1="100" y1="76" x2="100" y2="138" stroke="rgba(255,166,0,0.15)" strokeWidth="1.5" />
+      {/* Snout / muzzle — wide, strong */}
+      <ellipse cx="60" cy="80" rx="16" ry="8"
+        stroke="url(#bullG)" strokeWidth="2.5" fill="rgba(212,162,74,0.04)"
+      />
+      {/* Left nostril */}
+      <ellipse cx="53" cy="80" rx="4" ry="3"
+        stroke="url(#bullG)" strokeWidth="1.8" fill="rgba(212,162,74,0.08)"
+      />
+      {/* Right nostril */}
+      <ellipse cx="67" cy="80" rx="4" ry="3"
+        stroke="url(#bullG)" strokeWidth="1.8" fill="rgba(212,162,74,0.08)"
+      />
 
-      <ellipse cx="100" cy="156" rx="24" ry="15"
-               stroke="url(#bullG)" strokeWidth="3.5" fill="rgba(255,166,0,0.04)" />
-      <ellipse cx="90" cy="156" rx="6.5" ry="5.5"
-               stroke="url(#bullG)" strokeWidth="2" fill="rgba(255,166,0,0.1)" />
-      <ellipse cx="110" cy="156" rx="6.5" ry="5.5"
-               stroke="url(#bullG)" strokeWidth="2" fill="rgba(255,166,0,0.1)" />
+      {/* Nose ring — signature bull detail */}
+      <path
+        d="M 55,84 C 55,90 65,90 65,84"
+        stroke="url(#bullG)" strokeWidth="2" strokeLinecap="round" fill="none"
+      />
     </svg>
   )
 }

@@ -39,3 +39,8 @@ a, button, [role="button"] { cursor: pointer; }
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}

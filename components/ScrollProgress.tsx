@@ -8,7 +8,7 @@ export function ScrollProgress() {
     <motion.div
       style={{
         position: 'fixed', top: 0, left: 0, right: 0, height: '2px',
-        background: '#C9A84C', transformOrigin: '0%', scaleX, zIndex: 9999,
+        background: 'var(--gold)', transformOrigin: '0%', scaleX, zIndex: 9999,
       }}
     />
   )
