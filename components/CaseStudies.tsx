@@ -1,10 +1,10 @@
 'use client'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { BullMark } from './BullMark'
 
-// Seeded heat values for CT card (avoids hydration mismatch from Math.random)
-const HEAT = [0.9,0.3,0.6,0.8,0.2,0.7,0.4,0.5,0.8,0.9,0.2,0.6,0.7,0.1,0.8,0.3,0.9,0.5,0.4,0.6,0.7,0.8,0.2,0.3,0.6,0.9,0.4,0.7,0.3,0.8,0.5,0.1,0.9,0.6,0.2,0.8,0.4,0.7,0.3,0.5]
 const CHART = [58,82,44,92,67,78,86,61,95,72]
+const HEAT  = [0.9,0.3,0.6,0.8,0.2,0.7,0.4,0.5,0.8,0.9,0.2,0.6,0.7,0.1,0.8,0.3,0.9,0.5,0.4,0.6,0.7,0.8,0.2,0.3,0.6,0.9,0.4,0.7,0.3,0.8,0.5,0.1,0.9,0.6,0.2,0.8,0.4,0.7,0.3,0.5]
 
 const CASES = [
   {
@@ -20,8 +20,8 @@ const CASES = [
     link: 'https://themagyarreport.com',
     linkLabel: 'themagyarreport.com →',
     tag: 'Live',
-    // TODO: NanoBanana — luxury Greenwich CT waterfront home
-    background: 'linear-gradient(135deg, #0a1628 0%, #1B2B5E 60%, #0e2040 100%)',
+    image: '/images/case-magyar.jpg',
+    overlay: 'linear-gradient(135deg, rgba(10,22,40,0.88) 0%, rgba(27,43,94,0.80) 60%, rgba(14,32,64,0.88) 100%)',
   },
   {
     client: 'CT Restaurant Location Analysis',
@@ -36,8 +36,8 @@ const CASES = [
     link: null,
     linkLabel: null,
     tag: 'Completed',
-    // TODO: NanoBanana — aerial Stamford CT
-    background: 'linear-gradient(135deg, #0a0f0a 0%, #1a2e1a 60%, #0f1a0f 100%)',
+    image: '/images/case-restaurant.jpg',
+    overlay: 'linear-gradient(135deg, rgba(10,15,10,0.88) 0%, rgba(20,35,20,0.82) 60%, rgba(15,26,15,0.88) 100%)',
   },
 ]
 
@@ -62,7 +62,6 @@ export function CaseStudies() {
               whileHover={{ scale: 1.03 }}
               transition={{ duration: 0.4 }}
               style={{
-                background: c.background,
                 border: '1px solid rgba(255,166,0,0.12)',
                 borderRadius: '16px',
                 padding: '36px 30px',
@@ -71,11 +70,25 @@ export function CaseStudies() {
                 gap: '20px',
                 position: 'relative',
                 overflow: 'hidden',
+                background: '#0a0a0a',
               }}
             >
+              {/* Photo background */}
+              <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+                <Image
+                  src={c.image}
+                  alt=""
+                  fill
+                  style={{ objectFit: 'cover', objectPosition: 'center' }}
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+                {/* Dark gradient overlay */}
+                <div style={{ position: 'absolute', inset: 0, background: c.overlay }} />
+              </div>
+
               {/* Decorative mock visual — card 0 = dashboard chart, card 1 = heatmap */}
               {i === 0 ? (
-                <div style={{ position: 'absolute', top: 20, right: 20, opacity: 0.13, pointerEvents: 'none' }}>
+                <div style={{ position: 'absolute', top: 20, right: 20, opacity: 0.22, pointerEvents: 'none', zIndex: 2 }}>
                   <div style={{ width: 130, height: 84, border: '1px solid #ffa600', borderRadius: 6, padding: '8px 8px 6px', background: 'rgba(0,0,0,0.4)' }}>
                     <div style={{ height: 5, background: 'rgba(255,166,0,0.4)', borderRadius: 3, marginBottom: 6, width: '75%' }} />
                     <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 44 }}>
@@ -90,7 +103,7 @@ export function CaseStudies() {
                   </div>
                 </div>
               ) : (
-                <div style={{ position: 'absolute', top: 20, right: 20, opacity: 0.12, pointerEvents: 'none' }}>
+                <div style={{ position: 'absolute', top: 20, right: 20, opacity: 0.18, pointerEvents: 'none', zIndex: 2 }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 3 }}>
                     {HEAT.map((v, j) => (
                       <div key={j} style={{ width: 12, height: 12, borderRadius: 2, background: `rgba(34,197,94,${v})` }} />
@@ -103,7 +116,7 @@ export function CaseStudies() {
               )}
 
               {/* Bull corner mark */}
-              <div style={{ position: 'absolute', bottom: 18, right: 18, opacity: 0.08, pointerEvents: 'none' }}>
+              <div style={{ position: 'absolute', bottom: 18, right: 18, opacity: 0.12, pointerEvents: 'none', zIndex: 2 }}>
                 <BullMark size={52} />
               </div>
 
