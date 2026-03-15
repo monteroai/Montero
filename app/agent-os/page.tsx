@@ -2,17 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import {
-  Camera, FileText, Package, Users, Settings, ArrowRight,
-  Building2, Clock, Star, Bell, TrendingUp, Mail,
-  Sparkles, ChevronRight, Plus, MessageSquare,
-} from 'lucide-react'
 
 const navy = '#1B2B5E'
 const blue = '#2563eb'
 const textDark = '#1e293b'
 const textMuted = '#64748b'
-const border = '#e2e8f0'
 
 function getGreeting() {
   const h = new Date().getHours()
@@ -21,402 +15,433 @@ function getGreeting() {
   return 'Good evening'
 }
 
-interface QuickAction {
-  icon: React.ReactNode
-  title: string
-  desc: string
-  href: string
-  color: string
-  bg: string
-}
-
-const quickActions: QuickAction[] = [
-  {
-    icon: <Camera size={22} />,
-    title: 'New Listing',
-    desc: 'Upload photos, get MLS remarks, social copy & virtual staging — all at once',
-    href: '/agent-os/photos',
-    color: '#2563eb',
-    bg: 'rgba(37,99,235,0.06)',
-  },
-  {
-    icon: <FileText size={22} />,
-    title: 'Write Remarks',
-    desc: 'Generate polished MLS remarks tuned to your voice and style',
-    href: '/agent-os/remarks',
-    color: '#7c3aed',
-    bg: 'rgba(124,58,237,0.06)',
-  },
-  {
-    icon: <Package size={22} />,
-    title: 'Content Pack',
-    desc: 'Full marketing kit — Instagram, Facebook, email subjects & SMS',
-    href: '/agent-os/content',
-    color: '#059669',
-    bg: 'rgba(5,150,105,0.06)',
-  },
-  {
-    icon: <Users size={22} />,
-    title: 'Collaborations',
-    desc: 'Request listing intel from co-brokers and buyer agents',
-    href: '/agent-os/context',
-    color: '#d97706',
-    bg: 'rgba(217,119,6,0.06)',
-  },
-]
-
-interface ListingItem {
-  id: string
-  address: string
-  status: 'active' | 'pending' | 'coming_soon'
-  hasRemarks: boolean
-  hasContent: boolean
-  hasStaging: boolean
-  hasContext: boolean
-  price?: string
-}
-
-const demoListings: ListingItem[] = [
-  { id: '1', address: '42 Riverside Ave, Cos Cob CT', status: 'active', hasRemarks: true, hasContent: true, hasStaging: false, hasContext: true, price: '$1,250,000' },
-  { id: '2', address: '18 Harbor Point Rd, Stamford CT', status: 'active', hasRemarks: true, hasContent: false, hasStaging: false, hasContext: false, price: '$875,000' },
-  { id: '3', address: '7 Meadow Lane, Greenwich CT', status: 'coming_soon', hasRemarks: false, hasContent: false, hasStaging: false, hasContext: false, price: '$2,100,000' },
-]
-
-interface PriorityItem {
-  icon: React.ReactNode
-  label: string
-  detail: string
-  action: string
-  href: string
-  urgency: 'high' | 'medium' | 'low'
-}
-
-function StatusDot({ done }: { done: boolean }) {
+/* ── Glass card wrapper ── */
+function Glass({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
-    <span style={{
-      display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%',
-      background: done ? '#16a34a' : '#d1d5db',
-      border: done ? '1px solid #86efac' : '1px solid #e5e7eb',
-      flexShrink: 0,
-    }} />
+    <div style={{
+      background: 'rgba(255,255,255,0.62)',
+      backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+      borderRadius: '18px', border: '1px solid rgba(255,255,255,0.55)',
+      boxShadow: '0 2px 20px rgba(0,0,0,0.04)',
+      ...style,
+    }}>
+      {children}
+    </div>
   )
 }
 
-function StatusLabel({ label, done }: { label: string; done: boolean }) {
+/* ── Sidebar project item ── */
+function SidebarItem({ icon, label, count, color, href, indent }: {
+  icon: React.ReactNode; label: string; count?: number; color?: string; href?: string; indent?: boolean
+}) {
+  const content = (
+    <div
+      style={{
+        display: 'flex', alignItems: 'center', gap: '10px',
+        padding: indent ? '8px 14px 8px 28px' : '8px 14px',
+        borderRadius: '10px', cursor: 'pointer', transition: 'background 0.15s',
+        fontSize: '13px', fontWeight: indent ? 400 : 600, color: textDark,
+      }}
+      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.5)')}
+      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+    >
+      <span style={{ display: 'flex', color: color || '#94a3b8', flexShrink: 0 }}>{icon}</span>
+      <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
+      {count !== undefined && (
+        <span style={{
+          fontSize: '11px', fontWeight: 700, minWidth: '22px', height: '22px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          borderRadius: '8px', background: 'rgba(0,0,0,0.05)', color: textMuted,
+        }}>
+          {count}
+        </span>
+      )}
+    </div>
+  )
+  if (href) return <Link href={href} style={{ textDecoration: 'none' }}>{content}</Link>
+  return content
+}
+
+/* ── Task card ── */
+function TaskCard({ icon, children, highlight, href }: {
+  icon: React.ReactNode; children: React.ReactNode; highlight?: boolean; href?: string
+}) {
+  const card = (
+    <div
+      style={{
+        display: 'flex', alignItems: 'flex-start', gap: '12px',
+        padding: '14px 16px', borderRadius: '14px',
+        background: highlight ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.45)',
+        border: highlight ? '1px solid rgba(255,255,255,0.7)' : '1px solid rgba(255,255,255,0.4)',
+        cursor: 'pointer', transition: 'all 0.15s',
+        boxShadow: highlight ? '0 2px 12px rgba(0,0,0,0.04)' : 'none',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.background = 'rgba(255,255,255,0.85)'
+        e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.06)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.background = highlight ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.45)'
+        e.currentTarget.style.boxShadow = highlight ? '0 2px 12px rgba(0,0,0,0.04)' : 'none'
+      }}
+    >
+      <span style={{ display: 'flex', flexShrink: 0, color: blue, marginTop: '1px' }}>{icon}</span>
+      <div style={{ flex: 1, minWidth: 0 }}>{children}</div>
+      {href && (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: '2px' }}>
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      )}
+    </div>
+  )
+  if (href) return <Link href={href} style={{ textDecoration: 'none', display: 'block' }}>{card}</Link>
+  return card
+}
+
+/* ── Activity item ── */
+function ActivityItem({ icon, title, detail, color }: {
+  icon: React.ReactNode; title: string; detail: string; color: string
+}) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: done ? '#16a34a' : '#94a3b8', fontWeight: 500 }}>
-      <StatusDot done={done} />
-      {label}
-    </span>
+    <div style={{
+      display: 'flex', alignItems: 'flex-start', gap: '10px',
+      padding: '12px 14px', borderRadius: '12px',
+      background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.4)',
+      marginBottom: '8px',
+    }}>
+      <span style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        width: '28px', height: '28px', borderRadius: '8px',
+        background: `${color}12`, color, flexShrink: 0,
+      }}>
+        {icon}
+      </span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontSize: '13px', fontWeight: 600, color: textDark, margin: '0 0 2px' }}>{title}</p>
+        <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0, lineHeight: 1.4 }}>{detail}</p>
+      </div>
+    </div>
   )
 }
 
-const statusColors = {
-  active: { bg: '#dcfce7', color: '#16a34a', label: 'Active' },
-  pending: { bg: '#fef3c7', color: '#d97706', label: 'Pending' },
-  coming_soon: { bg: '#dbeafe', color: '#2563eb', label: 'Coming Soon' },
+/* ── Icons ── */
+const icons = {
+  house: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+  chart: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>,
+  users: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+  plus: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+  chat: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+  megaphone: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 11 18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>,
+  target: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
+  doc: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>,
+  camera: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>,
+  send: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>,
+  phone: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
+  sparkle: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>,
+  check: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+  alert: <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>,
+  settings: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>,
 }
+
+/* ── Quick command chips ── */
+const quickCommands = [
+  { label: '/write remarks', href: '/agent-os/remarks' },
+  { label: '/content pack', href: '/agent-os/content' },
+  { label: '/stage photos', href: '/agent-os/photos' },
+  { label: 'outreach email', href: '/agent-os/remarks' },
+  { label: 'market update', href: '/agent-os/content' },
+]
 
 export default function CommandCenter() {
   const [greeting, setGreeting] = useState('')
+  const [activityTab, setActivityTab] = useState<'progress' | 'done'>('progress')
 
-  useEffect(() => {
-    setGreeting(getGreeting())
-  }, [])
-
-  const needsAttention: PriorityItem[] = [
-    { icon: <Package size={14} />, label: '2 listings need content packs', detail: '18 Harbor Point, 7 Meadow Lane', action: 'Generate', href: '/agent-os/content', urgency: 'high' },
-    { icon: <Camera size={14} />, label: '3 listings have no staged photos', detail: 'Virtual staging increases engagement 40%', action: 'Stage now', href: '/agent-os/photos', urgency: 'medium' },
-    { icon: <Users size={14} />, label: '1 new context submission', detail: 'From Sarah Chen on 42 Riverside Ave', action: 'Review', href: '/agent-os/context', urgency: 'low' },
-    { icon: <Mail size={14} />, label: 'Intro letters ready to send', detail: '5 new listings in your target areas', action: 'View', href: '/agent-os/remarks', urgency: 'medium' },
-  ]
-
-  const urgencyColors = {
-    high: { dot: '#ef4444', bg: '#fef2f2', border: '#fecaca' },
-    medium: { dot: '#f59e0b', bg: '#fffbeb', border: '#fde68a' },
-    low: { dot: '#3b82f6', bg: '#eff6ff', border: '#bfdbfe' },
-  }
+  useEffect(() => { setGreeting(getGreeting()) }, [])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
-      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '32px 28px 80px' }}>
+    <>
+      {/* ════ LEFT SIDEBAR ════ */}
+      <Glass style={{ width: '240px', flexShrink: 0, display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
+        <div style={{ padding: '14px 10px', flex: 1 }}>
 
-        {/* Greeting */}
-        <div style={{ marginBottom: '28px' }}>
-          <h1 style={{ fontSize: '26px', fontWeight: 700, color: navy, marginBottom: '4px' }}>
-            {greeting}
-          </h1>
-          <p style={{ fontSize: '14px', color: textMuted, lineHeight: 1.6 }}>
-            Your command center — everything you need for your listings, all in one place.
-          </p>
-        </div>
+          {/* Active Deals */}
+          <SidebarItem icon={<span style={{ color: '#ef4444' }}>{icons.alert}</span>} label="Active Deals" count={3} color="#ef4444" />
 
-        {/* Stats row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '28px' }}>
-          {[
-            { label: 'Active Listings', value: '3', icon: <Building2 size={16} />, color: blue },
-            { label: 'Content Generated', value: '12', icon: <TrendingUp size={16} />, color: '#059669' },
-            { label: 'Collabs Received', value: '4', icon: <MessageSquare size={16} />, color: '#d97706' },
-            { label: 'Needs Attention', value: '2', icon: <Bell size={16} />, color: '#ef4444' },
-          ].map((stat) => (
-            <div key={stat.label} style={{
-              background: '#ffffff', border: `1px solid ${border}`, borderRadius: '12px',
-              padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '8px',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ color: stat.color, display: 'flex' }}>{stat.icon}</span>
-                <span style={{ fontSize: '24px', fontWeight: 700, color: navy }}>{stat.value}</span>
-              </div>
-              <span style={{ fontSize: '11px', fontWeight: 600, color: textMuted, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                {stat.label}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Quick Actions */}
-        <div style={{ marginBottom: '28px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-            <Sparkles size={15} style={{ color: blue }} />
-            <h2 style={{ fontSize: '13px', fontWeight: 700, color: textDark, letterSpacing: '0.06em', textTransform: 'uppercase', margin: 0 }}>
-              Quick Actions
-            </h2>
+          <div style={{ padding: '4px 0 8px' }}>
+            <SidebarItem icon={icons.house} label="Listings to Sell" count={2} color="#f59e0b" indent />
+            <SidebarItem icon={icons.chart} label="Listings to Win" count={3} color="#2563eb" indent />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-            {quickActions.map((action) => (
-              <Link
-                key={action.title}
-                href={action.href}
-                style={{
-                  background: '#ffffff', border: `1px solid ${border}`, borderRadius: '14px',
-                  padding: '20px', textDecoration: 'none', transition: 'all 0.15s',
-                  display: 'flex', flexDirection: 'column', gap: '10px',
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLElement).style.borderColor = action.color;
-                  (e.currentTarget as HTMLElement).style.boxShadow = `0 0 0 1px ${action.color}20`
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLElement).style.borderColor = border;
-                  (e.currentTarget as HTMLElement).style.boxShadow = 'none'
-                }}
-              >
+
+          <SidebarItem icon={icons.plus} label="New Project" color="#94a3b8" />
+
+          <div style={{ height: '1px', background: 'rgba(0,0,0,0.06)', margin: '10px 14px' }} />
+
+          {/* Individual listings */}
+          <div style={{ padding: '4px 0' }}>
+            <p style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 14px 6px', margin: 0 }}>
+              Active Deals
+            </p>
+            <SidebarItem icon={<span style={{ color: '#f59e0b' }}>{icons.house}</span>} label="42 Riverside Ave" href="/agent-os/photos" indent />
+            <SidebarItem icon={<span style={{ color: '#2563eb' }}>{icons.house}</span>} label="18 Harbor Point Rd" href="/agent-os/photos" indent />
+            <SidebarItem icon={<span style={{ color: '#2563eb' }}>{icons.house}</span>} label="7 Meadow Lane" href="/agent-os/photos" indent />
+          </div>
+
+          <div style={{ height: '1px', background: 'rgba(0,0,0,0.06)', margin: '10px 14px' }} />
+
+          <SidebarItem icon={icons.users} label="Buyers to Represent" color="#7c3aed" />
+          <SidebarItem icon={icons.plus} label="New Project" color="#94a3b8" />
+
+          <div style={{ height: '1px', background: 'rgba(0,0,0,0.06)', margin: '10px 14px' }} />
+
+          <SidebarItem icon={icons.settings} label="Settings" color="#94a3b8" href="/agent-os/settings" />
+        </div>
+      </Glass>
+
+      {/* ════ CENTER COLUMN ════ */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, gap: '12px' }}>
+        <Glass style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'auto', padding: '28px 32px 20px' }}>
+
+          {/* Greeting */}
+          <div style={{ marginBottom: '24px' }}>
+            <h1 style={{ fontSize: '28px', fontWeight: 700, color: navy, margin: '0 0 4px' }}>
+              {greeting}.
+            </h1>
+            <p style={{ fontSize: '15px', color: textMuted, margin: 0 }}>
+              Here&apos;s what you should do next...
+            </p>
+          </div>
+
+          {/* Task cards */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+
+            <TaskCard icon={icons.chat} href="/agent-os/context">
+              <p style={{ fontSize: '14px', fontWeight: 600, color: textDark, margin: 0 }}>
+                Follow up with 3 buyer agents
+              </p>
+              <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
+                {['S.C.', 'M.J.', 'R.T.'].map(initials => (
+                  <span key={initials} style={{
+                    width: '26px', height: '26px', borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #dbeafe, #c7d2fe)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '9px', fontWeight: 700, color: '#4338ca',
+                    border: '2px solid rgba(255,255,255,0.8)',
+                  }}>
+                    {initials}
+                  </span>
+                ))}
+              </div>
+            </TaskCard>
+
+            <TaskCard icon={icons.megaphone} highlight href="/agent-os/content">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                <p style={{ fontSize: '14px', fontWeight: 600, color: textDark, margin: 0 }}>
+                  Create marketing for 18 Harbor Point Rd
+                </p>
+              </div>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px',
+                padding: '10px 14px', borderRadius: '10px',
+                background: 'rgba(37,99,235,0.04)', border: '1px solid rgba(37,99,235,0.1)',
+              }}>
                 <div style={{
-                  width: '42px', height: '42px', borderRadius: '10px',
-                  background: action.bg, display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', color: action.color,
+                  width: '64px', height: '48px', borderRadius: '8px',
+                  background: 'linear-gradient(135deg, #dbeafe, #e0e7ff)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
                 }}>
-                  {action.icon}
+                  <span style={{ color: '#2563eb' }}>{icons.house}</span>
                 </div>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '15px', fontWeight: 700, color: navy }}>{action.title}</span>
-                    <ArrowRight size={14} style={{ color: action.color }} />
-                  </div>
-                  <p style={{ fontSize: '13px', color: textMuted, lineHeight: 1.5, margin: 0 }}>
-                    {action.desc}
-                  </p>
+                  <p style={{ fontSize: '13px', fontWeight: 600, color: navy, margin: '0 0 1px' }}>18 Harbor Point Rd</p>
+                  <p style={{ fontSize: '13px', color: textMuted, margin: 0 }}>$875,000</p>
                 </div>
+              </div>
+            </TaskCard>
+
+            <TaskCard icon={icons.camera} href="/agent-os/photos">
+              <p style={{ fontSize: '14px', fontWeight: 600, color: textDark, margin: 0 }}>
+                Stage photos for 7 Meadow Lane
+              </p>
+            </TaskCard>
+
+            <TaskCard icon={icons.doc} href="/agent-os/remarks">
+              <p style={{ fontSize: '14px', fontWeight: 600, color: textDark, margin: 0 }}>
+                Write listing remarks for 42 Riverside Ave
+              </p>
+            </TaskCard>
+
+            <TaskCard icon={icons.target}>
+              <p style={{ fontSize: '14px', fontWeight: 600, color: textDark, margin: 0 }}>
+                Find new listing opportunities in Greenwich
+              </p>
+            </TaskCard>
+          </div>
+
+          {/* Action buttons */}
+          <div style={{ display: 'flex', gap: '8px', marginTop: '20px', flexWrap: 'wrap' }}>
+            <Link href="/agent-os/content" style={{
+              padding: '10px 22px', borderRadius: '12px', fontSize: '13px', fontWeight: 600,
+              background: 'linear-gradient(135deg, #f472b6, #c084fc, #818cf8)',
+              color: '#ffffff', border: 'none', cursor: 'pointer', textDecoration: 'none',
+              boxShadow: '0 2px 8px rgba(196,132,252,0.3)',
+            }}>
+              Generate Outreach
+            </Link>
+            <Link href="/agent-os/remarks" style={{
+              padding: '10px 22px', borderRadius: '12px', fontSize: '13px', fontWeight: 600,
+              background: 'rgba(255,255,255,0.6)', color: textDark,
+              border: '1px solid rgba(255,255,255,0.5)', cursor: 'pointer', textDecoration: 'none',
+            }}>
+              Write Remarks
+            </Link>
+            <Link href="/agent-os/photos" style={{
+              display: 'inline-flex', alignItems: 'center', gap: '4px',
+              padding: '10px 22px', borderRadius: '12px', fontSize: '13px', fontWeight: 600,
+              background: 'rgba(255,255,255,0.6)', color: textDark,
+              border: '1px solid rgba(255,255,255,0.5)', cursor: 'pointer', textDecoration: 'none',
+            }}>
+              Stage Photos
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </Link>
+          </div>
+
+        </Glass>
+
+        {/* Command bar */}
+        <Glass style={{ padding: '14px 18px' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '12px',
+            padding: '10px 16px', borderRadius: '12px',
+            background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.5)',
+            marginBottom: '10px',
+          }}>
+            <span style={{ flex: 1, fontSize: '14px', color: '#94a3b8' }}>Ask anything...</span>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button style={{
+                width: '32px', height: '32px', borderRadius: '8px',
+                background: 'transparent', border: 'none', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8',
+              }}>
+                {icons.send}
+              </button>
+              <button style={{
+                width: '32px', height: '32px', borderRadius: '50%',
+                background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                border: 'none', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff',
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Quick command chips */}
+          <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
+            {quickCommands.map(cmd => (
+              <Link
+                key={cmd.label}
+                href={cmd.href}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '4px',
+                  padding: '6px 14px', borderRadius: '9999px', fontSize: '12px', fontWeight: 500,
+                  background: 'rgba(255,255,255,0.5)', color: textMuted,
+                  border: '1px solid rgba(255,255,255,0.4)', whiteSpace: 'nowrap',
+                  textDecoration: 'none', transition: 'all 0.15s',
+                }}
+              >
+                <span style={{ color: '#cbd5e1' }}>·</span> {cmd.label}
               </Link>
             ))}
           </div>
-        </div>
-
-        {/* Two column: My Listings + Needs Attention */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '16px', marginBottom: '28px' }}>
-
-          {/* My Listings */}
-          <div style={{ background: '#ffffff', border: `1px solid ${border}`, borderRadius: '14px', overflow: 'hidden' }}>
-            <div style={{ padding: '16px 20px', borderBottom: `1px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Building2 size={15} style={{ color: blue }} />
-                <h2 style={{ fontSize: '13px', fontWeight: 700, color: textDark, letterSpacing: '0.06em', textTransform: 'uppercase', margin: 0 }}>
-                  My Listings
-                </h2>
-              </div>
-              <button style={{
-                display: 'inline-flex', alignItems: 'center', gap: '4px',
-                fontSize: '12px', fontWeight: 600, color: blue, background: 'rgba(37,99,235,0.06)',
-                border: '1px solid rgba(37,99,235,0.15)', borderRadius: '8px',
-                padding: '5px 12px', cursor: 'pointer',
-              }}>
-                <Plus size={12} /> Add Listing
-              </button>
-            </div>
-
-            <div style={{ padding: '8px' }}>
-              {demoListings.map((listing, i) => {
-                const st = statusColors[listing.status]
-                return (
-                  <div
-                    key={listing.id}
-                    style={{
-                      padding: '14px 16px', borderRadius: '10px',
-                      marginBottom: i < demoListings.length - 1 ? '4px' : 0,
-                      cursor: 'pointer', transition: 'background 0.15s',
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.background = '#f8fafc')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <div>
-                        <p style={{ fontSize: '14px', fontWeight: 600, color: navy, margin: '0 0 2px' }}>{listing.address}</p>
-                        {listing.price && <p style={{ fontSize: '13px', color: textMuted, margin: 0, fontWeight: 500 }}>{listing.price}</p>}
-                      </div>
-                      <span style={{
-                        fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '9999px',
-                        background: st.bg, color: st.color, letterSpacing: '0.04em', textTransform: 'uppercase',
-                      }}>
-                        {st.label}
-                      </span>
-                    </div>
-                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                      <StatusLabel label="Remarks" done={listing.hasRemarks} />
-                      <StatusLabel label="Content" done={listing.hasContent} />
-                      <StatusLabel label="Staged" done={listing.hasStaging} />
-                      <StatusLabel label="Context" done={listing.hasContext} />
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Needs Attention */}
-          <div style={{ background: '#ffffff', border: `1px solid ${border}`, borderRadius: '14px', overflow: 'hidden' }}>
-            <div style={{ padding: '16px 20px', borderBottom: `1px solid ${border}`, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Bell size={15} style={{ color: '#ef4444' }} />
-              <h2 style={{ fontSize: '13px', fontWeight: 700, color: textDark, letterSpacing: '0.06em', textTransform: 'uppercase', margin: 0 }}>
-                Needs Attention
-              </h2>
-            </div>
-            <div style={{ padding: '8px' }}>
-              {needsAttention.map((item, i) => {
-                const uc = urgencyColors[item.urgency]
-                return (
-                  <Link
-                    key={i}
-                    href={item.href}
-                    style={{
-                      display: 'block', padding: '12px 14px', borderRadius: '10px',
-                      marginBottom: i < needsAttention.length - 1 ? '4px' : 0,
-                      textDecoration: 'none', transition: 'background 0.15s',
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.background = '#f8fafc')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                      <span style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        width: '28px', height: '28px', borderRadius: '8px',
-                        background: uc.bg, border: `1px solid ${uc.border}`,
-                        color: uc.dot, flexShrink: 0, marginTop: '1px',
-                      }}>
-                        {item.icon}
-                      </span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: '13px', fontWeight: 600, color: textDark, margin: '0 0 2px' }}>{item.label}</p>
-                        <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0, lineHeight: 1.4 }}>{item.detail}</p>
-                      </div>
-                      <ChevronRight size={14} style={{ color: '#cbd5e1', flexShrink: 0, marginTop: '4px' }} />
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom row: Team + Intro Letters */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-
-          {/* Team Overview */}
-          <div style={{ background: '#ffffff', border: `1px solid ${border}`, borderRadius: '14px', overflow: 'hidden' }}>
-            <div style={{ padding: '16px 20px', borderBottom: `1px solid ${border}`, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Users size={15} style={{ color: '#7c3aed' }} />
-              <h2 style={{ fontSize: '13px', fontWeight: 700, color: textDark, letterSpacing: '0.06em', textTransform: 'uppercase', margin: 0 }}>
-                Team
-              </h2>
-            </div>
-            <div style={{ padding: '20px', textAlign: 'center' }}>
-              <div style={{
-                width: '48px', height: '48px', borderRadius: '12px',
-                background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.15)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                margin: '0 auto 12px', color: '#7c3aed',
-              }}>
-                <Users size={22} />
-              </div>
-              <p style={{ fontSize: '14px', fontWeight: 600, color: navy, marginBottom: '4px' }}>Team management</p>
-              <p style={{ fontSize: '12px', color: '#94a3b8', lineHeight: 1.5, marginBottom: '14px' }}>
-                Add agents, track performance, and coordinate listings across your team.
-              </p>
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: '4px',
-                fontSize: '11px', fontWeight: 600, color: '#7c3aed',
-                background: 'rgba(124,58,237,0.06)', padding: '5px 12px', borderRadius: '8px',
-              }}>
-                <Clock size={11} /> Coming soon
-              </span>
-            </div>
-          </div>
-
-          {/* Intro Letters */}
-          <div style={{ background: '#ffffff', border: `1px solid ${border}`, borderRadius: '14px', overflow: 'hidden' }}>
-            <div style={{ padding: '16px 20px', borderBottom: `1px solid ${border}`, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Mail size={15} style={{ color: '#059669' }} />
-              <h2 style={{ fontSize: '13px', fontWeight: 700, color: textDark, letterSpacing: '0.06em', textTransform: 'uppercase', margin: 0 }}>
-                Intro Letters
-              </h2>
-            </div>
-            <div style={{ padding: '20px', textAlign: 'center' }}>
-              <div style={{
-                width: '48px', height: '48px', borderRadius: '12px',
-                background: 'rgba(5,150,105,0.06)', border: '1px solid rgba(5,150,105,0.15)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                margin: '0 auto 12px', color: '#059669',
-              }}>
-                <Mail size={22} />
-              </div>
-              <p style={{ fontSize: '14px', fontWeight: 600, color: navy, marginBottom: '4px' }}>Prospecting letters</p>
-              <p style={{ fontSize: '12px', color: '#94a3b8', lineHeight: 1.5, marginBottom: '14px' }}>
-                AI-generated intro letters for FSBO, expired, and target area listings.
-              </p>
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: '4px',
-                fontSize: '11px', fontWeight: 600, color: '#059669',
-                background: 'rgba(5,150,105,0.06)', padding: '5px 12px', borderRadius: '8px',
-              }}>
-                <Clock size={11} /> Coming soon
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* DNA Profile link */}
-        <Link
-          href="/agent-os/settings"
-          style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            background: '#ffffff', border: `1px solid ${border}`, borderRadius: '12px',
-            padding: '14px 20px', marginTop: '16px', textDecoration: 'none',
-            transition: 'border-color 0.15s',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.borderColor = blue)}
-          onMouseLeave={e => (e.currentTarget.style.borderColor = border)}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Settings size={16} style={{ color: textMuted }} />
-            <div>
-              <p style={{ fontSize: '13px', fontWeight: 600, color: textDark, margin: 0 }}>Agent DNA & Settings</p>
-              <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>Your voice profile, preferences, and account settings</p>
-            </div>
-          </div>
-          <ChevronRight size={16} style={{ color: '#cbd5e1' }} />
-        </Link>
-
+        </Glass>
       </div>
-    </div>
+
+      {/* ════ RIGHT PANEL ════ */}
+      <Glass style={{ width: '280px', flexShrink: 0, display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
+        {/* Header */}
+        <div style={{ padding: '18px 18px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+          <h2 style={{ fontSize: '15px', fontWeight: 700, color: navy, margin: 0 }}>Generated for you</h2>
+          <Link href="/agent-os/content" style={{ fontSize: '12px', fontWeight: 600, color: blue, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            View All
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </Link>
+        </div>
+
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: '4px', padding: '0 18px', marginBottom: '14px' }}>
+          {(['progress', 'done'] as const).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActivityTab(tab)}
+              style={{
+                padding: '7px 16px', borderRadius: '10px', fontSize: '12px', fontWeight: 600,
+                border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+                background: activityTab === tab ? 'rgba(255,255,255,0.7)' : 'transparent',
+                color: activityTab === tab ? textDark : '#94a3b8',
+                boxShadow: activityTab === tab ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
+              }}
+            >
+              {tab === 'progress' ? 'In Progress' : 'Done'}
+            </button>
+          ))}
+        </div>
+
+        {/* Activity items */}
+        <div style={{ padding: '0 12px 18px', flex: 1 }}>
+          {activityTab === 'progress' ? (
+            <>
+              <ActivityItem
+                icon={icons.phone}
+                title="Follow up with Mike Johnson"
+                detail="Past buyer checking in"
+                color="#f59e0b"
+              />
+              <ActivityItem
+                icon={icons.megaphone}
+                title="Social ads for 18 Harbor Point"
+                detail="Instagram and Facebook ads are being prepared"
+                color="#2563eb"
+              />
+              <ActivityItem
+                icon={icons.target}
+                title="Scanning Greenwich listings"
+                detail="Looking for teardown and flip opportunities"
+                color="#059669"
+              />
+            </>
+          ) : (
+            <>
+              <ActivityItem
+                icon={<span style={{ color: '#16a34a' }}>{icons.check}</span>}
+                title="Remarks for 42 Riverside"
+                detail="MLS-ready, 128 words, matches your voice"
+                color="#16a34a"
+              />
+              <ActivityItem
+                icon={<span style={{ color: '#16a34a' }}>{icons.check}</span>}
+                title="Content pack for 42 Riverside"
+                detail="Instagram, Facebook, email, SMS all generated"
+                color="#16a34a"
+              />
+              <ActivityItem
+                icon={<span style={{ color: '#16a34a' }}>{icons.check}</span>}
+                title="Context from Sarah Chen"
+                detail="Buyer intel submitted for 42 Riverside Ave"
+                color="#16a34a"
+              />
+            </>
+          )}
+
+          <Link href="/agent-os/content" style={{
+            display: 'flex', alignItems: 'center', gap: '4px',
+            fontSize: '12px', fontWeight: 600, color: textMuted,
+            textDecoration: 'none', padding: '8px 14px', marginTop: '4px',
+          }}>
+            View All <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </Link>
+        </div>
+      </Glass>
+    </>
   )
 }
