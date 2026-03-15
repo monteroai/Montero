@@ -16,12 +16,18 @@ function getGreeting() {
   return 'Good evening, Charles'
 }
 
-/* ── Glass panel ── */
+/* ── Glass panel (sidebar only — no blur on scrolling content) ── */
 const glass: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.55)',
-  backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
+  background: 'rgba(255,255,255,0.72)',
+  backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
   borderRadius: '20px', border: `1px solid ${border}`,
   boxShadow: '0 4px 24px rgba(0,0,0,0.03)',
+}
+/* ── Card style for scrolling content (no backdrop-filter = no lag) ── */
+const card: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.85)',
+  borderRadius: '18px', border: '1px solid rgba(255,255,255,0.6)',
+  boxShadow: '0 2px 12px rgba(0,0,0,0.03)',
 }
 
 /* ── Listings data ── */
@@ -191,7 +197,7 @@ export default function ListingWorkspace() {
       </div>
 
       {/* ═══ MAIN WORKSPACE ═══ */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'auto', gap: '12px' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'auto', gap: '12px', willChange: 'transform', transform: 'translateZ(0)' }}>
 
         {/* Listing header */}
         <div style={{ padding: '4px 8px 0' }}>
@@ -214,7 +220,7 @@ export default function ListingWorkspace() {
         </div>
 
         {/* Progress bar */}
-        <div style={{ ...glass, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ ...card, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ display: 'flex', gap: '6px', flex: 1 }}>
             {steps.map(s => (
               <div key={s.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
@@ -404,12 +410,9 @@ function Section({ id, title, icon, done, children }: {
 }) {
   return (
     <div id={id} style={{
-      ...({
-        background: 'rgba(255,255,255,0.55)',
-        backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
-        borderRadius: '18px', border: '1px solid rgba(255,255,255,0.5)',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.03)',
-      }),
+      background: 'rgba(255,255,255,0.85)',
+      borderRadius: '18px', border: '1px solid rgba(255,255,255,0.6)',
+      boxShadow: '0 2px 12px rgba(0,0,0,0.03)',
       padding: '18px 22px', overflow: 'hidden',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
