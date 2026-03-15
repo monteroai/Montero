@@ -41,18 +41,23 @@ export function Nav({ variant = 'main' }: NavProps) {
 
   if (variant === 'real-estate') {
     return (
-      <header style={bar}>
+      <header style={{
+        ...bar,
+        background: scrolled ? 'rgba(15,23,42,0.95)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(12px)' : 'none',
+        borderBottom: scrolled ? '1px solid rgba(255,255,255,0.08)' : '1px solid transparent',
+      }}>
         <div style={inner}>
-          <Link href="/" style={{ fontSize: '13px', color: 'var(--text-dim)', transition: 'color 0.2s' }}>
+          <Link href="/" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', transition: 'color 0.2s' }}>
             ← montero.cool
           </Link>
-          <span style={{ fontFamily: 'var(--font-cinzel)', fontSize: '15px', color: 'var(--re-gold)', letterSpacing: '0.06em' }}>
+          <span style={{ fontFamily: 'var(--font-cinzel)', fontSize: '15px', color: '#ffffff', letterSpacing: '0.06em' }}>
             Agent OS
           </span>
           <a href="#pricing" style={{
             fontSize: '13px', fontWeight: 600, padding: '7px 16px',
-            background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)',
-            color: 'var(--re-gold)', borderRadius: '8px',
+            background: '#2563eb', border: '1px solid rgba(37,99,235,0.5)',
+            color: '#ffffff', borderRadius: '8px',
           }}>
             Join Waitlist
           </a>

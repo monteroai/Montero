@@ -81,34 +81,67 @@ export function WhyMontero() {
             </h2>
           </motion.div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+          <div style={{ position: 'relative', paddingLeft: '48px' }}>
+            {/* Connecting timeline line */}
+            <motion.div
+              initial={{ height: 0 }}
+              whileInView={{ height: '100%' }}
+              viewport={{ once: true, amount: 0.1 }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+              style={{
+                position: 'absolute', left: '15px', top: 0,
+                width: '1px', background: 'linear-gradient(to bottom, var(--gold), rgba(212,162,74,0.1))',
+              }}
+            />
+
             {CARDS.map((card, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                whileHover={{
-                  y: -4,
-                  boxShadow: '0 16px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(212,162,74,0.1)',
-                }}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.6, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
                 style={{
-                  padding: '32px 28px',
+                  position: 'relative',
+                  padding: '28px 28px 28px 32px',
+                  marginBottom: i < CARDS.length - 1 ? '8px' : 0,
                   background: 'var(--bg-raised)',
                   border: '1px solid var(--border)',
                   borderRadius: 'var(--radius)',
-                  transition: 'border-color 0.3s',
+                  transition: 'border-color 0.3s, box-shadow 0.3s',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = 'rgba(212,162,74,0.2)'
+                  e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(212,162,74,0.08)'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = 'var(--border)'
+                  e.currentTarget.style.boxShadow = 'none'
                 }}
               >
+                {/* Timeline node */}
                 <motion.div
-                  initial={{ width: 0 }}
-                  whileInView={{ width: 28 }}
+                  initial={{ scale: 0 }}
+                  whileInView={{ scale: 1 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.1 + 0.2 }}
-                  style={{ height: '2px', background: 'var(--gold)', marginBottom: '20px', borderRadius: '1px' }}
+                  transition={{ duration: 0.4, delay: i * 0.12 + 0.1 }}
+                  style={{
+                    position: 'absolute', left: '-40px', top: '32px',
+                    width: '12px', height: '12px', borderRadius: '50%',
+                    background: 'var(--bg)', border: '2px solid var(--gold)',
+                    boxShadow: '0 0 12px rgba(212,162,74,0.25)',
+                  }}
                 />
-                <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '10px', lineHeight: 1.3 }}>{card.title}</h3>
+
+                {/* Step number */}
+                <span style={{
+                  fontFamily: 'var(--font-cinzel)', fontSize: '11px', fontWeight: 700,
+                  color: 'var(--gold)', letterSpacing: '0.1em', display: 'block', marginBottom: '10px',
+                }}>
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+
+                <h3 style={{ fontSize: '17px', fontWeight: 600, marginBottom: '10px', lineHeight: 1.3 }}>{card.title}</h3>
                 <p style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.7 }}>{card.body}</p>
               </motion.div>
             ))}

@@ -44,6 +44,23 @@ export function MainHero() {
         overflow: 'hidden',
       }}
     >
+      {/* Animated dot grid */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        backgroundImage: 'radial-gradient(circle, rgba(212,162,74,0.12) 1px, transparent 1px)',
+        backgroundSize: '48px 48px',
+        maskImage: 'radial-gradient(ellipse 90% 70% at 50% 40%, black 10%, transparent 65%)',
+        WebkitMaskImage: 'radial-gradient(ellipse 90% 70% at 50% 40%, black 10%, transparent 65%)',
+      }} />
+
+      {/* Scan line sweeping over grid */}
+      <div style={{
+        position: 'absolute', left: 0, right: 0, height: '30%',
+        background: 'linear-gradient(to bottom, transparent, rgba(212,162,74,0.04), transparent)',
+        animation: 'gridScan 10s linear infinite',
+        pointerEvents: 'none',
+      }} />
+
       {/* Ambient glow orbs */}
       <motion.div
         animate={{ x: [0, 60, -30, 0], y: [0, -40, 30, 0] }}
