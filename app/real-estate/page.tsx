@@ -147,16 +147,19 @@ export default function RealEstatePage() {
               }}>
                 See How It Works
               </a>
-              <a href="#pricing" style={{
+              <a href="/agent-os" style={{
                 padding: '13px 28px', fontSize: '14px', fontWeight: 600,
                 background: blue, color: '#ffffff', borderRadius: 'var(--radius)',
                 transition: 'opacity 0.2s',
               }}>
-                Start Free
+                Launch Agent OS
               </a>
             </motion.div>
           </div>
         </section>
+
+        {/* Gradient transition: dark hero → white content */}
+        <div style={{ height: '120px', background: 'linear-gradient(180deg, #1e3a5f 0%, #ffffff 100%)' }} />
 
         <HowItWorksRE />
         <VoiceComparison />
@@ -226,7 +229,14 @@ export default function RealEstatePage() {
         </section>
 
         <RECaseStudy />
+
+        {/* Gradient: white case study → gray pricing */}
+        <div style={{ height: '80px', background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)' }} />
+
         <REPricing />
+
+        {/* Gradient: gray pricing → dark footer */}
+        <div style={{ height: '80px', background: `linear-gradient(180deg, #f8fafc 0%, ${navyDark} 100%)` }} />
 
         {/* Footer */}
         <div style={{ padding: '40px 24px', background: navyDark, textAlign: 'center' }}>

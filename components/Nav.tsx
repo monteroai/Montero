@@ -54,13 +54,13 @@ export function Nav({ variant = 'main' }: NavProps) {
           <span style={{ fontFamily: 'var(--font-cinzel)', fontSize: '15px', color: '#ffffff', letterSpacing: '0.06em' }}>
             Agent OS
           </span>
-          <a href="#pricing" style={{
+          <Link href="/agent-os" style={{
             fontSize: '13px', fontWeight: 600, padding: '7px 16px',
             background: '#2563eb', border: '1px solid rgba(37,99,235,0.5)',
             color: '#ffffff', borderRadius: '8px',
           }}>
-            Join Waitlist
-          </a>
+            Open Agent OS
+          </Link>
         </div>
       </header>
     )

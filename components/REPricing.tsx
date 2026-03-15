@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { motion } from 'framer-motion'
 
 const PLANS = [
@@ -28,61 +27,7 @@ const PLANS = [
   },
 ]
 
-function WaitlistForm({ plan }: { plan: string }) {
-  const [email, setEmail] = useState('')
-  const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setStatus('sending')
-    try {
-      const res = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, plan }),
-      })
-      if (!res.ok) throw new Error()
-      setStatus('done')
-      setEmail('')
-    } catch {
-      setStatus('error')
-    }
-  }
-
-  if (status === 'done') return (
-    <p style={{ fontSize: '13px', color: '#16a34a', fontWeight: 500, padding: '10px 0' }}>
-      You're on the list.
-    </p>
-  )
-
-  return (
-    <form onSubmit={submit} style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
-      <input
-        type="email"
-        placeholder="your@email.com"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        required
-        style={{
-          flex: 1, minWidth: '160px', padding: '10px 12px', fontSize: '13px',
-          background: '#f8fafc', border: '1px solid #e2e8f0',
-          borderRadius: '8px', color: '#1e293b', outline: 'none',
-          fontFamily: 'var(--font-inter), Inter, sans-serif',
-          transition: 'border-color 0.2s',
-        }}
-      />
-      <button type="submit" disabled={status === 'sending'} style={{
-        padding: '10px 18px', fontSize: '13px', fontWeight: 600,
-        background: '#2563eb', color: '#ffffff', border: 'none', borderRadius: '8px',
-        cursor: 'pointer', opacity: status === 'sending' ? 0.6 : 1,
-        fontFamily: 'var(--font-inter), Inter, sans-serif',
-      }}>
-        {status === 'sending' ? 'Sending…' : 'Notify me'}
-      </button>
-      {status === 'error' && <p style={{ width: '100%', fontSize: '12px', color: '#ef4444' }}>Something went wrong.</p>}
-    </form>
-  )
-}
+import Link from 'next/link'
 
 export function REPricing() {
   const blue = '#2563eb'
@@ -156,18 +101,21 @@ export function REPricing() {
                 ))}
               </ul>
 
-              {plan.name === 'Agency' ? (
-                <a href="#contact" style={{
-                  display: 'block', textAlign: 'center', padding: '11px',
-                  border: `1px solid #bfdbfe`, color: blue,
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <Link href="/agent-os" style={{
+                  display: 'block', textAlign: 'center', padding: '12px',
+                  background: plan.highlight ? blue : '#eff6ff',
+                  color: plan.highlight ? '#ffffff' : blue,
+                  border: plan.highlight ? 'none' : `1px solid #bfdbfe`,
                   borderRadius: '10px', fontSize: '14px', fontWeight: 600,
-                  background: '#eff6ff',
+                  transition: 'opacity 0.2s',
                 }}>
-                  Contact us
-                </a>
-              ) : (
-                <WaitlistForm plan={plan.name.toLowerCase()} />
-              )}
+                  Launch Agent OS
+                </Link>
+                <p style={{ textAlign: 'center', fontSize: '11px', color: '#94a3b8', fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                  Coming soon
+                </p>
+              </div>
             </motion.div>
           ))}
         </div>
