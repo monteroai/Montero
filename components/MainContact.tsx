@@ -42,10 +42,16 @@ export function MainContact() {
           <h2 style={{ fontFamily: 'var(--font-cinzel)', fontSize: 'clamp(26px, 4vw, 38px)', fontWeight: 600, color: '#FFFFFF', marginBottom: '12px' }}>
             Start a conversation.
           </h2>
-          <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.45)', lineHeight: 1.7 }}>
+          <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.45)', lineHeight: 1.7, marginBottom: '16px' }}>
             Whether you have a specific problem or just want to see what automation could look like for your business —{' '}
             <a href="mailto:ai@montero.cool" style={{ color: '#ffa600', textDecoration: 'none' }}>ai@montero.cool</a>
           </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }}>
+            <a href="tel:+14759771707" style={{ fontSize: '13px', color: 'rgba(255,166,0,0.7)', textDecoration: 'none' }}>
+              +1 (475) 977-1707
+            </a>
+            <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.30)' }}>Greenwich, CT</span>
+          </div>
         </div>
 
         {status === 'done' ? (
