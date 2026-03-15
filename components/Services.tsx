@@ -1,95 +1,67 @@
 'use client'
-import { useEffect, useState } from 'react'
+
 import { motion } from 'framer-motion'
 
 const SERVICES = [
   {
     label: 'AI Automation',
-    body: 'We map your repetitive workflows — intake forms, follow-ups, data entry, reporting — and replace them with AI-driven pipelines that run without supervision. The result is fewer errors, faster turnaround, and hours back every week.',
+    body: 'We map your repetitive workflows and replace them with AI-driven pipelines that run without supervision. Fewer errors, faster turnaround, hours back every week.',
   },
   {
     label: 'Custom Workflows',
-    body: 'Not every process fits a SaaS template. We build n8n and custom API workflows tailored to your exact operation: CRM sync, document generation, conditional logic, multi-step approvals. If it can be automated, we automate it.',
+    body: 'n8n and custom API workflows tailored to your operation: CRM sync, document generation, conditional logic, multi-step approvals.',
   },
   {
     label: 'Market Intelligence',
-    body: 'Raw data does not make decisions — interpreted data does. We build dashboards and automated reports that pull from MLS feeds, public records, and business data to give your team a clear, current view of what the market is doing.',
+    body: 'Dashboards and automated reports that pull from MLS feeds, public records, and business data to give your team a clear, current view of the market.',
   },
   {
     label: 'Content Generation',
-    body: 'AI-written copy in your voice, not a generic template. MLS remarks, email campaigns, social captions, and listing presentations generated in seconds from property data and photos. Consistent, professional, and ready to publish.',
+    body: 'AI-written copy in your voice. MLS remarks, email campaigns, social captions, and listing presentations generated in seconds.',
   },
 ]
 
 export function Services() {
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768)
-    check()
-    window.addEventListener('resize', check)
-    return () => window.removeEventListener('resize', check)
-  }, [])
-
   return (
-    <section id="services" style={{ padding: '100px 24px', background: '#0a0a0a' }}>
+    <section id="services" style={{ padding: '120px 24px' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-
-        <div style={{ marginBottom: '60px' }}>
-          <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#ffa600', marginBottom: '16px' }}>
+        <div style={{ marginBottom: '64px' }}>
+          <p style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: '14px' }}>
             What we build
-          </div>
-          <h2 style={{ fontFamily: 'var(--font-cinzel)', fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 600, color: '#FFFFFF', maxWidth: '520px' }}>
+          </p>
+          <h2 style={{ fontFamily: 'var(--font-cinzel)', fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 600, maxWidth: '480px' }}>
             Purpose-built tools for every industry.
           </h2>
         </div>
 
-        <div style={
-          isMobile
-            ? { display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory', gap: '12px', paddingBottom: '16px' }
-            : { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', border: '1px solid rgba(255,166,0,0.10)', borderRadius: '16px', overflow: 'hidden' }
-        }>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: '1px',
+          background: 'var(--border)',
+          borderRadius: 'var(--radius)',
+          overflow: 'hidden',
+        }}>
           {SERVICES.map((s, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.55, delay: i * 0.15, ease: [0.16, 1, 0.3, 1] }}
-              whileHover={{
-                background: i % 2 === 0 ? '#131313' : '#161616',
-                boxShadow: 'inset 0 1px 0 rgba(255,166,0,0.14), 0 24px 64px rgba(0,0,0,0.5)',
-              }}
+              transition={{ duration: 0.5, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
               style={{
-                padding: '36px 30px',
-                background: i % 2 === 0 ? '#0e0e0e' : '#111111',
-                borderRight: '1px solid rgba(255,166,0,0.07)',
-                position: 'relative', overflow: 'hidden',
-                transition: 'background 0.3s ease, box-shadow 0.3s ease',
-                cursor: 'default',
-                ...(isMobile ? { flexShrink: 0, width: '80vw', scrollSnapAlign: 'start', borderRadius: '12px', border: '1px solid rgba(255,166,0,0.10)' } : {}),
+                padding: '32px 28px',
+                background: 'var(--bg)',
+                transition: 'background 0.25s',
               }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-raised)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg)')}
             >
-              {/* Ghost number */}
-              <div style={{
-                position: 'absolute', bottom: '-12px', right: '10px',
-                fontFamily: 'var(--font-cinzel)', fontSize: '88px', fontWeight: 700, lineHeight: 1,
-                color: 'rgba(255,166,0,0.045)', userSelect: 'none', pointerEvents: 'none',
-              }}>
-                {String(i + 1).padStart(2, '0')}
-              </div>
-
-              <motion.div
-                initial={{ width: 0 }}
-                whileInView={{ width: 32 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.4, delay: i * 0.15 + 0.3 }}
-                style={{ height: '2px', background: '#ffa600', marginBottom: '14px', borderRadius: '1px' }}
-              />
-              <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#ffa600', marginBottom: '14px' }}>
+              <div style={{ width: '28px', height: '2px', background: 'var(--gold)', marginBottom: '16px', borderRadius: '1px' }} />
+              <h3 style={{ fontSize: '13px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: '12px' }}>
                 {s.label}
-              </div>
-              <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.75 }}>
+              </h3>
+              <p style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.75 }}>
                 {s.body}
               </p>
             </motion.div>

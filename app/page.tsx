@@ -1,6 +1,5 @@
 import { Nav } from '@/components/Nav'
 import { MainHero } from '@/components/MainHero'
-import { TickerStrip } from '@/components/TickerStrip'
 import { Services } from '@/components/Services'
 import { CaseStudies } from '@/components/CaseStudies'
 import { Testimonials } from '@/components/Testimonials'
@@ -13,7 +12,6 @@ export default function HomePage() {
       <Nav variant="main" />
       <main>
         <MainHero />
-        <TickerStrip />
         <Services />
         <CaseStudies />
         <Testimonials />
