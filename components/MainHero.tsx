@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { ElectricalGrid } from './ElectricalGrid'
 
 const ROTATING = [
@@ -14,6 +15,8 @@ const ROTATING = [
 export function MainHero() {
   const [idx, setIdx] = useState(0)
   const [visible, setVisible] = useState(true)
+  const { scrollY } = useScroll()
+  const gridY = useTransform(scrollY, [0, 500], [0, -150])
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -28,20 +31,41 @@ export function MainHero() {
 
   return (
     <section style={{ position: 'relative', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-      <ElectricalGrid />
+      <motion.div style={{ position: 'absolute', inset: 0, y: gridY }}>
+        <ElectricalGrid />
+      </motion.div>
 
       {/* Center logo watermark */}
       <div style={{
         position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
         pointerEvents: 'none', zIndex: 1,
       }}>
-        <span style={{
-          fontFamily: 'var(--font-cinzel)', fontSize: 'clamp(100px, 20vw, 220px)',
-          fontWeight: 700, color: 'rgba(255,166,0,0.04)', letterSpacing: '0.05em',
-          userSelect: 'none',
-        }}>
-          montero.
-        </span>
+        <div style={{ position: 'relative' }}>
+          {/* Radial glow behind wordmark */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.8 }}
+            transition={{ duration: 1.5, ease: 'easeOut' }}
+            style={{
+              position: 'absolute',
+              width: '400px',
+              height: '400px',
+              background: 'radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%)',
+              borderRadius: '50%',
+              pointerEvents: 'none',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+            }}
+          />
+          <span style={{
+            fontFamily: 'var(--font-cinzel)', fontSize: 'clamp(100px, 20vw, 220px)',
+            fontWeight: 700, color: 'rgba(255,166,0,0.04)', letterSpacing: '0.05em',
+            userSelect: 'none', position: 'relative',
+          }}>
+            montero.
+          </span>
+        </div>
       </div>
 
       {/* Main content */}

@@ -1,6 +1,19 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
-body { background: #0a0a0a; color: #FFFFFF; }
+body { background: #0F1117; color: #FFFFFF; }
+
+@keyframes goldPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(201, 168, 76, 0.2); }
+  50% { box-shadow: 0 0 40px rgba(201, 168, 76, 0.5), 0 0 60px rgba(201, 168, 76, 0.2); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .hide-on-mobile { display: none !important; }
+}
 
 /* ── Electrical grid animation ─────────────────────────────── */
 .electrical-current {

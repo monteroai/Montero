@@ -1,3 +1,7 @@
+'use client'
+import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
+
 const SERVICES = [
   {
     label: 'AI Automation',
@@ -18,6 +22,15 @@ const SERVICES = [
 ]
 
 export function Services() {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
   return (
     <section id="services" style={{ padding: '100px 24px', background: '#0a0a0a' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
@@ -31,20 +44,39 @@ export function Services() {
           </h2>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1px', border: '1px solid rgba(255,166,0,0.10)', borderRadius: '16px', overflow: 'hidden' }}>
+        <div style={
+          isMobile
+            ? { display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory', gap: '12px', paddingBottom: '16px' }
+            : { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', border: '1px solid rgba(255,166,0,0.10)', borderRadius: '16px', overflow: 'hidden' }
+        }>
           {SERVICES.map((s, i) => (
-            <div key={i} style={{
-              padding: '36px 30px',
-              background: i % 2 === 0 ? '#0e0e0e' : '#111111',
-              borderRight: '1px solid rgba(255,166,0,0.07)',
-            }}>
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.5, delay: i * 0.15 }}
+              style={{
+                padding: '36px 30px',
+                background: i % 2 === 0 ? '#0e0e0e' : '#111111',
+                borderRight: '1px solid rgba(255,166,0,0.07)',
+                ...(isMobile ? { flexShrink: 0, width: '80vw', scrollSnapAlign: 'start', borderRadius: '12px', border: '1px solid rgba(255,166,0,0.10)' } : {}),
+              }}
+            >
+              <motion.div
+                initial={{ width: 0 }}
+                whileInView={{ width: 32 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.4, delay: i * 0.15 + 0.3 }}
+                style={{ height: '2px', background: '#ffa600', marginBottom: '14px', borderRadius: '1px' }}
+              />
               <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#ffa600', marginBottom: '14px' }}>
                 {s.label}
               </div>
               <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.75 }}>
                 {s.body}
               </p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

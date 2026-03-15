@@ -1,4 +1,5 @@
 'use client'
+import { motion } from 'framer-motion'
 
 const CASES = [
   {
@@ -14,6 +15,8 @@ const CASES = [
     link: 'https://themagyarreport.com',
     linkLabel: 'themagyarreport.com →',
     tag: 'Live',
+    // TODO: NanoBanana — luxury Greenwich CT waterfront home
+    background: 'linear-gradient(135deg, #0a1628 0%, #1B2B5E 60%, #0e2040 100%)',
   },
   {
     client: 'CT Restaurant Location Analysis',
@@ -28,6 +31,8 @@ const CASES = [
     link: null,
     linkLabel: null,
     tag: 'Completed',
+    // TODO: NanoBanana — aerial Stamford CT
+    background: 'linear-gradient(135deg, #0a0f0a 0%, #1a2e1a 60%, #0f1a0f 100%)',
   },
 ]
 
@@ -47,15 +52,22 @@ export function CaseStudies() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
           {CASES.map((c, i) => (
-            <div key={i} style={{
-              background: '#0e0e0e',
-              border: '1px solid rgba(255,166,0,0.12)',
-              borderRadius: '16px',
-              padding: '36px 30px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '20px',
-            }}>
+            <motion.div
+              key={i}
+              whileHover={{ scale: 1.03 }}
+              transition={{ duration: 0.4 }}
+              style={{
+                background: c.background,
+                border: '1px solid rgba(255,166,0,0.12)',
+                borderRadius: '16px',
+                padding: '36px 30px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '20px',
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+            >
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
                 <div>
                   <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,166,0,0.7)', marginBottom: '6px' }}>
@@ -100,7 +112,7 @@ export function CaseStudies() {
                   {c.linkLabel}
                 </a>
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
