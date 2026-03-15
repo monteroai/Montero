@@ -55,12 +55,18 @@ export function Services() {
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.5, delay: i * 0.15 }}
+              transition={{ duration: 0.55, delay: i * 0.15, ease: [0.16, 1, 0.3, 1] }}
+              whileHover={{
+                background: i % 2 === 0 ? '#131313' : '#161616',
+                boxShadow: 'inset 0 1px 0 rgba(255,166,0,0.14), 0 24px 64px rgba(0,0,0,0.5)',
+              }}
               style={{
                 padding: '36px 30px',
                 background: i % 2 === 0 ? '#0e0e0e' : '#111111',
                 borderRight: '1px solid rgba(255,166,0,0.07)',
                 position: 'relative', overflow: 'hidden',
+                transition: 'background 0.3s ease, box-shadow 0.3s ease',
+                cursor: 'default',
                 ...(isMobile ? { flexShrink: 0, width: '80vw', scrollSnapAlign: 'start', borderRadius: '12px', border: '1px solid rgba(255,166,0,0.10)' } : {}),
               }}
             >
