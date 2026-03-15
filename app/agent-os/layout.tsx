@@ -6,6 +6,7 @@ const navItems = [
   { href: '/agent-os', label: 'Dashboard' },
   { href: '/agent-os/remarks', label: 'Agent Remarks' },
   { href: '/agent-os/content', label: 'Content Pack' },
+  { href: '/agent-os/context', label: 'Context' },
   { href: '/agent-os/settings', label: 'Settings' },
 ]
 
