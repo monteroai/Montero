@@ -45,19 +45,19 @@ const I = {
   mail: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>,
 }
 
-/* ── Quick command chips ── */
-const chips = [
-  { label: '/write remarks', href: '/agent-os/remarks' },
-  { label: '/generate CMA', href: '/agent-os/content' },
-  { label: 'market update', href: '/agent-os/content' },
-  { label: 'outreach email', href: '/agent-os/remarks' },
-  { label: 'listing alert', href: '/agent-os/photos' },
+/* ── Tool buttons (replaces chat bar) ── */
+const tools = [
+  { icon: 'doc', label: 'Write Remarks', desc: 'MLS-ready copy', href: '/agent-os/remarks', color: '#7c3aed', bg: 'rgba(124,58,237,0.06)' },
+  { icon: 'camera', label: 'Stage Photos', desc: 'Virtual staging', href: '/agent-os/photos', color: '#2563eb', bg: 'rgba(37,99,235,0.06)' },
+  { icon: 'megaphone', label: 'Content Pack', desc: 'Social + email + SMS', href: '/agent-os/content', color: '#059669', bg: 'rgba(5,150,105,0.06)' },
+  { icon: 'mail', label: 'Intro Letter', desc: 'Seller outreach', href: '/agent-os/remarks', color: '#d97706', bg: 'rgba(217,119,6,0.06)' },
+  { icon: 'users', label: 'Get Intel', desc: 'Collaborator context', href: '/agent-os/context', color: '#ec4899', bg: 'rgba(236,72,153,0.06)' },
+  { icon: 'settings', label: 'My DNA', desc: 'Voice & style', href: '/agent-os/settings', color: '#64748b', bg: 'rgba(100,116,139,0.06)' },
 ]
 
 export default function CommandCenter() {
   const [greeting, setGreeting] = useState('')
   const [actTab, setActTab] = useState<'progress' | 'done'>('progress')
-  const [ask, setAsk] = useState('')
 
   useEffect(() => { setGreeting(getGreeting()) }, [])
 
@@ -172,73 +172,43 @@ export default function CommandCenter() {
           </Task>
         </div>
 
-        {/* Action buttons */}
-        <div style={{ display: 'flex', gap: '8px', padding: '0 4px', flexWrap: 'wrap' }}>
-          <Link href="/agent-os/content" style={{
-            padding: '11px 24px', borderRadius: '14px', fontSize: '14px', fontWeight: 600,
-            background: 'linear-gradient(135deg, #f472b6, #c084fc, #818cf8)',
-            color: '#ffffff', textDecoration: 'none',
-            boxShadow: '0 4px 14px rgba(196,132,252,0.3)',
-          }}>
-            Generate Outreach
-          </Link>
-          <Link href="/agent-os/remarks" style={{
-            padding: '11px 24px', borderRadius: '14px', fontSize: '14px', fontWeight: 600,
-            background: 'rgba(255,255,255,0.55)', color: textDark,
-            border: '1px solid rgba(255,255,255,0.5)', textDecoration: 'none',
-            backdropFilter: 'blur(10px)',
-          }}>
-            Write Offer
-          </Link>
-          <Link href="/agent-os/photos" style={{
-            display: 'inline-flex', alignItems: 'center', gap: '4px',
-            padding: '11px 24px', borderRadius: '14px', fontSize: '14px', fontWeight: 600,
-            background: 'rgba(255,255,255,0.55)', color: textDark,
-            border: '1px solid rgba(255,255,255,0.5)', textDecoration: 'none',
-            backdropFilter: 'blur(10px)',
-          }}>
-            Stage Photos {I.chevron}
-          </Link>
-        </div>
-
-        {/* ── Ask anything bar ── */}
-        <div style={{ ...glass, padding: '12px 16px' }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '10px',
-            padding: '4px 4px 4px 16px', borderRadius: '14px',
-            background: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.5)',
-            marginBottom: '10px',
-          }}>
-            <input
-              type="text"
-              value={ask}
-              onChange={e => setAsk(e.target.value)}
-              placeholder="Ask anything..."
-              style={{
-                flex: 1, border: 'none', outline: 'none', background: 'transparent',
-                fontSize: '14px', color: textDark, padding: '8px 0',
-              }}
-            />
-            <button style={{
-              width: '36px', height: '36px', borderRadius: '50%',
-              background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-              border: 'none', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
-              flexShrink: 0,
-            }}>
-              {I.send}
-            </button>
-          </div>
-
-          <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
-            {chips.map(c => (
-              <Link key={c.label} href={c.href} style={{
-                display: 'inline-flex', alignItems: 'center', gap: '4px',
-                padding: '6px 14px', borderRadius: '9999px', fontSize: '12px', fontWeight: 500,
-                background: 'rgba(255,255,255,0.5)', color: textMuted,
-                border: '1px solid rgba(255,255,255,0.4)', whiteSpace: 'nowrap', textDecoration: 'none',
-              }}>
-                <span style={{ color: '#cbd5e1' }}>·</span> {c.label}
+        {/* ── Tools toolbar ── */}
+        <div style={{ ...glass, padding: '16px 18px' }}>
+          <p style={{
+            fontSize: '10px', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.1em',
+            textTransform: 'uppercase', margin: '0 0 12px',
+          }}>Tools</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+            {tools.map(t => (
+              <Link
+                key={t.label}
+                href={t.href}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '10px',
+                  padding: '12px 14px', borderRadius: '12px',
+                  background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.45)',
+                  textDecoration: 'none', transition: 'all 0.15s', cursor: 'pointer',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.8)'
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.5)'
+                  e.currentTarget.style.boxShadow = 'none'
+                }}
+              >
+                <span style={{
+                  width: '36px', height: '36px', borderRadius: '10px',
+                  background: t.bg, display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', color: t.color, flexShrink: 0,
+                }}>
+                  {I[t.icon as keyof typeof I]}
+                </span>
+                <div>
+                  <p style={{ fontSize: '13px', fontWeight: 600, color: navy, margin: '0 0 1px' }}>{t.label}</p>
+                  <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>{t.desc}</p>
+                </div>
               </Link>
             ))}
           </div>
