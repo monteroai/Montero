@@ -1,13 +1,22 @@
 import { createClient } from '@/lib/supabase/server'
 
 export default async function SettingsPage() {
-  const supabase = await createClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let dna: any = null
 
-  const { data: dna } = await supabase
-    .from('agent_dna')
-    .select('*')
-    .eq('org_slug', 'magyar')
-    .single()
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    try {
+      const supabase = await createClient()
+      const { data } = await supabase
+        .from('agent_dna')
+        .select('*')
+        .eq('org_slug', 'magyar')
+        .single()
+      dna = data
+    } catch {
+      // Supabase not available
+    }
+  }
 
   const fields = dna
     ? [

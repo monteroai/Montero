@@ -14,11 +14,20 @@ export default async function AgentOsLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let userEmail: string | null = null
 
-  if (!user) {
-    redirect('/login')
+  // Only check auth if Supabase is configured
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    try {
+      const supabase = await createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        redirect('/login')
+      }
+      userEmail = user.email ?? null
+    } catch {
+      // If Supabase fails, continue without auth
+    }
   }
 
   return (
@@ -49,15 +58,17 @@ export default async function AgentOsLayout({
         </nav>
 
         <div style={{ padding: '16px 20px', borderTop: '1px solid #e2e8f0' }}>
-          <p style={{ fontSize: '12px', color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
-          <form action="/api/auth/signout" method="post">
-            <button
-              type="submit"
-              style={{ marginTop: '4px', fontSize: '12px', color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-            >
-              Sign out
-            </button>
-          </form>
+          <p style={{ fontSize: '12px', color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{userEmail || 'Demo mode'}</p>
+          {userEmail && (
+            <form action="/api/auth/signout" method="post">
+              <button
+                type="submit"
+                style={{ marginTop: '4px', fontSize: '12px', color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              >
+                Sign out
+              </button>
+            </form>
+          )}
         </div>
       </aside>
 
