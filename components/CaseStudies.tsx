@@ -117,18 +117,18 @@ const CASES = [
     Viz: DashboardViz,
   },
   {
-    client: 'CT Restaurant Analysis',
-    category: 'Market Intelligence',
-    headline: 'Data-driven site selection for a restaurant group entering Connecticut.',
+    client: 'Boutique Law Firm',
+    category: 'Workflow Automation',
+    headline: 'Replaced 12 hours of weekly admin with automated intake, billing, and follow-ups.',
     outcomes: [
-      'Foot traffic and demographic analysis across 12 candidate sites',
-      'Automated scoring model ranking locations by revenue potential',
-      'Executive summary report generated in under 2 hours',
-      'Final recommendation backed by verifiable data sources',
+      'Client intake forms auto-populate CRM and generate engagement letters',
+      'Automated follow-up sequences reduced missed consultations by 40%',
+      'Monthly billing reports compiled and sent without manual entry',
+      'Staff reclaimed 12+ hours per week previously spent on data entry',
     ],
     link: null,
     linkLabel: null,
-    tag: 'Completed',
+    tag: 'Active',
     Viz: HeatmapViz,
   },
 ]
@@ -177,9 +177,9 @@ function CaseCard({ c, i }: { c: typeof CASES[0]; i: number }) {
           </span>
           <span style={{
             fontSize: '11px', fontWeight: 600, padding: '3px 10px', borderRadius: '9999px',
-            background: c.tag === 'Live' ? 'rgba(34,197,94,0.12)' : 'var(--gold-dim)',
-            color: c.tag === 'Live' ? '#4ade80' : 'var(--gold)',
-            border: c.tag === 'Live' ? '1px solid rgba(34,197,94,0.25)' : '1px solid var(--gold-border)',
+            background: (c.tag === 'Live' || c.tag === 'Active') ? 'rgba(34,197,94,0.12)' : 'var(--gold-dim)',
+            color: (c.tag === 'Live' || c.tag === 'Active') ? '#4ade80' : 'var(--gold)',
+            border: (c.tag === 'Live' || c.tag === 'Active') ? '1px solid rgba(34,197,94,0.25)' : '1px solid var(--gold-border)',
           }}>
             {c.tag}
           </span>
