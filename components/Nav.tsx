@@ -10,11 +10,19 @@ interface NavProps {
 
 export function Nav({ variant = 'main' }: NavProps) {
   const [scrolled, setScrolled] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', fn)
     return () => window.removeEventListener('scroll', fn)
+  }, [])
+
+  // Close menu on route change or resize
+  useEffect(() => {
+    const close = () => setMenuOpen(false)
+    window.addEventListener('resize', close)
+    return () => window.removeEventListener('resize', close)
   }, [])
 
   const bar: React.CSSProperties = {
@@ -24,8 +32,8 @@ export function Nav({ variant = 'main' }: NavProps) {
     right: 0,
     zIndex: 100,
     padding: '0 24px',
-    background: scrolled ? 'rgba(9,9,11,0.92)' : 'transparent',
-    backdropFilter: scrolled ? 'blur(12px)' : 'none',
+    background: scrolled || menuOpen ? 'rgba(9,9,11,0.92)' : 'transparent',
+    backdropFilter: scrolled || menuOpen ? 'blur(12px)' : 'none',
     borderBottom: scrolled ? '1px solid var(--border)' : '1px solid transparent',
     transition: 'all 0.3s ease',
   }
@@ -66,6 +74,12 @@ export function Nav({ variant = 'main' }: NavProps) {
     )
   }
 
+  const NAV_LINKS = [
+    { label: 'Work', href: '#case-studies' },
+    { label: 'Services', href: '#services' },
+    { label: 'Contact', href: '#contact' },
+  ]
+
   return (
     <header style={bar}>
       <div style={inner}>
@@ -75,13 +89,15 @@ export function Nav({ variant = 'main' }: NavProps) {
             MONTERO
           </span>
         </Link>
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          {[['Work', '#case-studies'], ['Services', '#services'], ['Contact', '#contact']].map(([label, href]) => (
+
+        {/* Desktop nav */}
+        <nav className="hide-on-mobile" style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          {NAV_LINKS.map(({ label, href }) => (
             <a key={href} href={href} style={{ fontSize: '13px', color: 'var(--text-muted)', transition: 'color 0.2s' }}>
               {label}
             </a>
           ))}
-          <Link href="/real-estate" style={{
+          <Link href="/agent-os" style={{
             fontSize: '13px', fontWeight: 600, padding: '7px 16px',
             background: 'var(--gold-dim)', border: '1px solid var(--gold-border)',
             color: 'var(--gold)', borderRadius: '8px', transition: 'background 0.2s',
@@ -89,7 +105,80 @@ export function Nav({ variant = 'main' }: NavProps) {
             Agent OS →
           </Link>
         </nav>
+
+        {/* Mobile: Agent OS button + hamburger */}
+        <div className="show-on-mobile" style={{ display: 'none', alignItems: 'center', gap: '10px' }}>
+          <Link href="/agent-os" style={{
+            fontSize: '12px', fontWeight: 600, padding: '6px 14px',
+            background: 'var(--gold-dim)', border: '1px solid var(--gold-border)',
+            color: 'var(--gold)', borderRadius: '8px',
+          }}>
+            Agent OS
+          </Link>
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Menu"
+            style={{
+              width: '36px', height: '36px',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px',
+              background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+            }}
+          >
+            <span style={{
+              display: 'block', width: '20px', height: '2px', background: 'var(--gold)',
+              borderRadius: '1px', transition: 'all 0.3s ease',
+              transform: menuOpen ? 'rotate(45deg) translate(2.5px, 2.5px)' : 'none',
+            }} />
+            <span style={{
+              display: 'block', width: '20px', height: '2px', background: 'var(--gold)',
+              borderRadius: '1px', transition: 'all 0.3s ease',
+              opacity: menuOpen ? 0 : 1,
+            }} />
+            <span style={{
+              display: 'block', width: '20px', height: '2px', background: 'var(--gold)',
+              borderRadius: '1px', transition: 'all 0.3s ease',
+              transform: menuOpen ? 'rotate(-45deg) translate(2.5px, -2.5px)' : 'none',
+            }} />
+          </button>
+        </div>
       </div>
+
+      {/* Mobile dropdown */}
+      {menuOpen && (
+        <div style={{
+          maxWidth: '1100px', margin: '0 auto',
+          padding: '8px 0 20px',
+          display: 'flex', flexDirection: 'column', gap: '4px',
+          borderTop: '1px solid var(--border)',
+        }}>
+          <Link
+            href="/agent-os"
+            onClick={() => setMenuOpen(false)}
+            style={{
+              display: 'block', padding: '12px 16px', borderRadius: '8px',
+              background: 'var(--gold-dim)', border: '1px solid var(--gold-border)',
+              fontSize: '14px', fontWeight: 600, color: 'var(--gold)',
+              textAlign: 'center', marginBottom: '8px',
+            }}
+          >
+            Open Agent OS →
+          </Link>
+          {NAV_LINKS.map(({ label, href }) => (
+            <a
+              key={href}
+              href={href}
+              onClick={() => setMenuOpen(false)}
+              style={{
+                display: 'block', padding: '10px 16px', borderRadius: '8px',
+                fontSize: '14px', color: 'var(--text-muted)',
+                transition: 'background 0.2s',
+              }}
+            >
+              {label}
+            </a>
+          ))}
+        </div>
+      )}
     </header>
   )
 }
