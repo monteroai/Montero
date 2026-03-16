@@ -35,11 +35,14 @@ export async function middleware(request: NextRequest) {
       }
     )
 
+    // Use getSession() instead of getUser() — it reads the JWT from cookies
+    // locally without a network round-trip to Supabase, making it much faster.
+    // The layout does the full getUser() verification as a second layer.
     const {
-      data: { user },
-    } = await supabase.auth.getUser()
+      data: { session },
+    } = await supabase.auth.getSession()
 
-    if (!user && request.nextUrl.pathname.startsWith('/agent-os')) {
+    if (!session && request.nextUrl.pathname.startsWith('/agent-os')) {
       const loginUrl = new URL('/login', request.url)
       loginUrl.searchParams.set('next', request.nextUrl.pathname)
       return NextResponse.redirect(loginUrl)
