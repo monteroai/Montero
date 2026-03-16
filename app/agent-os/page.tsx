@@ -38,7 +38,7 @@ interface Listing {
   city: string
   price: string
   seller?: string
-  status: 'active' | 'prospecting' | 'won'
+  status: 'active' | 'prospecting' | 'won' | 'lost'
   remarks?: string
   contentPack?: { instagram?: string; email?: string; sms?: string }
   introLetter?: string
@@ -46,7 +46,7 @@ interface Listing {
   contextCount?: number
 }
 
-const listings: Listing[] = [
+const defaultListings: Listing[] = [
   {
     id: '25-west-elm-10',
     address: '25 West Elm St',
@@ -86,22 +86,46 @@ const Ico = {
   settings: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
 }
 
-const statusColors = {
+const statusColors: Record<Listing['status'], { bg: string; color: string; label: string }> = {
   active: { bg: '#dcfce7', color: '#16a34a', label: 'Active' },
   prospecting: { bg: '#dbeafe', color: '#2563eb', label: 'Prospecting' },
   won: { bg: '#fef3c7', color: '#d97706', label: 'Won' },
+  lost: { bg: '#fee2e2', color: '#dc2626', label: 'Lost' },
 }
 
 export default function ListingWorkspace() {
   const [greeting, setGreeting] = useState('')
+  const [listings, setListings] = useState<Listing[]>(defaultListings)
   const [activeId, setActiveId] = useState('25-west-elm-10')
   const [editingSection, setEditingSection] = useState<string | null>(null)
   const [editText, setEditText] = useState('')
   const [copied, setCopied] = useState<string | null>(null)
+  const [showNewListing, setShowNewListing] = useState(false)
+  const [showStatusMenu, setShowStatusMenu] = useState(false)
+  const [newListing, setNewListing] = useState({ address: '', unit: '', city: '', price: '', seller: '', status: 'prospecting' as Listing['status'] })
 
   useEffect(() => { setGreeting(getGreeting()) }, [])
 
   const active = listings.find(l => l.id === activeId) || listings[0]
+
+  function addListing() {
+    if (!newListing.address.trim() || !newListing.city.trim()) return
+    const id = newListing.address.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+    setListings(prev => [...prev, { ...newListing, id, unit: newListing.unit || undefined, seller: newListing.seller || undefined }])
+    setActiveId(id)
+    setShowNewListing(false)
+    setNewListing({ address: '', unit: '', city: '', price: '', seller: '', status: 'prospecting' })
+  }
+
+  function changeStatus(status: Listing['status']) {
+    setListings(prev => prev.map(l => l.id === active.id ? { ...l, status } : l))
+    setShowStatusMenu(false)
+  }
+
+  function deleteListing(id: string) {
+    setListings(prev => prev.filter(l => l.id !== id))
+    if (activeId === id) setActiveId(listings[0]?.id || '')
+  }
 
   function startEdit(section: string, text: string) {
     setEditingSection(section)
@@ -109,7 +133,11 @@ export default function ListingWorkspace() {
   }
 
   function saveEdit() {
-    // In production: save to Supabase
+    if (editingSection === 'remarks') {
+      setListings(prev => prev.map(l => l.id === active.id ? { ...l, remarks: editText } : l))
+    } else if (editingSection === 'intro') {
+      setListings(prev => prev.map(l => l.id === active.id ? { ...l, introLetter: editText } : l))
+    }
     setEditingSection(null)
   }
 
@@ -176,12 +204,15 @@ export default function ListingWorkspace() {
           )
         })}
 
-        <button style={{
-          display: 'flex', alignItems: 'center', gap: '8px',
-          padding: '10px 12px', borderRadius: '12px', cursor: 'pointer',
-          background: 'transparent', border: 'none', width: '100%',
-          fontSize: '13px', color: '#94a3b8', fontWeight: 500, marginTop: '4px',
-        }}>
+        <button
+          onClick={() => setShowNewListing(true)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '8px',
+            padding: '10px 12px', borderRadius: '12px', cursor: 'pointer',
+            background: 'transparent', border: 'none', width: '100%',
+            fontSize: '13px', color: '#94a3b8', fontWeight: 500, marginTop: '4px',
+          }}
+        >
           <span>{Ico.plus}</span> New Listing
         </button>
 
@@ -209,13 +240,46 @@ export default function ListingWorkspace() {
             <span style={{ fontSize: '14px', color: textMuted }}>{active.city}</span>
             <span style={{ fontSize: '14px', fontWeight: 600, color: navy }}>{active.price}</span>
             {active.seller && <span style={{ fontSize: '13px', color: '#94a3b8' }}>Seller: {active.seller}</span>}
-            <span style={{
-              fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '9999px',
-              background: statusColors[active.status].bg, color: statusColors[active.status].color,
-              letterSpacing: '0.04em', textTransform: 'uppercase',
-            }}>
-              {statusColors[active.status].label}
-            </span>
+            <div style={{ position: 'relative' }}>
+              <span
+                onClick={() => setShowStatusMenu(!showStatusMenu)}
+                style={{
+                  fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '9999px',
+                  background: statusColors[active.status].bg, color: statusColors[active.status].color,
+                  letterSpacing: '0.04em', textTransform: 'uppercase', cursor: 'pointer',
+                  display: 'inline-flex', alignItems: 'center', gap: '4px',
+                }}
+              >
+                {statusColors[active.status].label}
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              </span>
+              {showStatusMenu && (
+                <div style={{
+                  position: 'absolute', top: '100%', left: 0, marginTop: '4px', zIndex: 50,
+                  background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.12)', overflow: 'hidden', minWidth: '130px',
+                }}>
+                  {(Object.keys(statusColors) as Listing['status'][]).map(s => (
+                    <button
+                      key={s}
+                      onClick={() => changeStatus(s)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '8px', width: '100%',
+                        padding: '8px 14px', border: 'none', cursor: 'pointer', fontSize: '12px',
+                        background: active.status === s ? 'rgba(0,0,0,0.03)' : 'transparent',
+                        fontWeight: active.status === s ? 600 : 400, color: statusColors[s].color,
+                      }}
+                    >
+                      <span style={{
+                        width: '8px', height: '8px', borderRadius: '50%',
+                        background: statusColors[s].color, flexShrink: 0,
+                      }} />
+                      {statusColors[s].label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -399,6 +463,79 @@ export default function ListingWorkspace() {
 
         <div style={{ height: '20px' }} />
       </div>
+
+      {/* ═══ NEW LISTING MODAL ═══ */}
+      {showNewListing && (
+        <div
+          onClick={() => setShowNewListing(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 100,
+            background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: '#ffffff', borderRadius: '20px', padding: '28px 32px',
+              width: '420px', maxWidth: '90vw', boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+            }}
+          >
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: navy, margin: '0 0 20px' }}>Add New Listing</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <ModalInput label="Street Address *" value={newListing.address} onChange={v => setNewListing(p => ({ ...p, address: v }))} placeholder="123 Main Street" />
+              <ModalInput label="Unit (optional)" value={newListing.unit} onChange={v => setNewListing(p => ({ ...p, unit: v }))} placeholder="Apt 4B" />
+              <ModalInput label="City, State ZIP *" value={newListing.city} onChange={v => setNewListing(p => ({ ...p, city: v }))} placeholder="Greenwich, CT 06830" />
+              <ModalInput label="List Price" value={newListing.price} onChange={v => setNewListing(p => ({ ...p, price: v }))} placeholder="$1,250,000" />
+              <ModalInput label="Seller Name" value={newListing.seller} onChange={v => setNewListing(p => ({ ...p, seller: v }))} placeholder="Jane Smith" />
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', display: 'block', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Status</label>
+                <select
+                  value={newListing.status}
+                  onChange={e => setNewListing(p => ({ ...p, status: e.target.value as Listing['status'] }))}
+                  style={{
+                    width: '100%', padding: '10px 14px', borderRadius: '10px', fontSize: '14px',
+                    border: '1px solid #e2e8f0', color: textDark, background: '#f8fafc',
+                    outline: 'none',
+                  }}
+                >
+                  <option value="prospecting">Prospecting</option>
+                  <option value="active">Active</option>
+                  <option value="won">Won</option>
+                  <option value="lost">Lost</option>
+                </select>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '20px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setShowNewListing(false)}
+                style={{
+                  padding: '10px 20px', borderRadius: '10px', fontSize: '13px', fontWeight: 600,
+                  background: 'transparent', border: '1px solid #e2e8f0', color: textMuted, cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={addListing}
+                style={{
+                  padding: '10px 24px', borderRadius: '10px', fontSize: '13px', fontWeight: 600,
+                  background: 'linear-gradient(135deg, #1B2B5E, #2563eb)', color: '#ffffff',
+                  border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(37,99,235,0.2)',
+                  opacity: (!newListing.address.trim() || !newListing.city.trim()) ? 0.5 : 1,
+                }}
+              >
+                Add Listing
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Close status menu on any click */}
+      {showStatusMenu && (
+        <div onClick={() => setShowStatusMenu(false)} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
+      )}
     </>
   )
 }
@@ -451,6 +588,26 @@ function Btn({ icon, label, color, filled, small, onClick }: {
       {icon && <span style={{ display: 'flex' }}>{icon}</span>}
       {label}
     </button>
+  )
+}
+
+function ModalInput({ label, value, onChange, placeholder }: {
+  label: string; value: string; onChange: (v: string) => void; placeholder?: string
+}) {
+  return (
+    <div>
+      <label style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', display: 'block', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</label>
+      <input
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={{
+          width: '100%', padding: '10px 14px', borderRadius: '10px', fontSize: '14px',
+          border: '1px solid #e2e8f0', color: '#1e293b', background: '#f8fafc',
+          outline: 'none', boxSizing: 'border-box',
+        }}
+      />
+    </div>
   )
 }
 

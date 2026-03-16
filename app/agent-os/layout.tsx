@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import AiAssistant from './AiAssistant'
+import LogoutButton from './LogoutButton'
 
 export default async function AgentOsLayout({
   children,
@@ -7,6 +9,7 @@ export default async function AgentOsLayout({
   children: React.ReactNode
 }) {
   let userEmail: string | null = null
+  let firstName: string | null = null
 
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     try {
@@ -16,6 +19,8 @@ export default async function AgentOsLayout({
         redirect('/login')
       }
       userEmail = user.email ?? null
+      const fullName = user.user_metadata?.full_name as string | undefined
+      firstName = fullName ? fullName.split(' ')[0] : null
     } catch {
       // If Supabase fails, continue without auth
     }
@@ -56,11 +61,16 @@ export default async function AgentOsLayout({
           <span style={{ fontSize: '14px', color: '#94a3b8', fontWeight: 400 }}>How can we help you today?</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {/* Notification icons */}
+          {/* Notification icon */}
           <button style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.6)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           </button>
-          {/* Avatar */}
+          {/* Agent name + avatar */}
+          {firstName && (
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#1B2B5E' }}>
+              {firstName}
+            </span>
+          )}
           <div style={{
             width: '36px', height: '36px', borderRadius: '50%',
             background: 'linear-gradient(135deg, #1B2B5E, #2563eb)',
@@ -68,8 +78,10 @@ export default async function AgentOsLayout({
             color: '#ffffff', fontSize: '13px', fontWeight: 700, letterSpacing: '0.02em',
             border: '2px solid rgba(255,255,255,0.6)',
           }}>
-            {(userEmail ? userEmail[0] : 'A').toUpperCase()}
+            {(firstName ? firstName[0] : userEmail ? userEmail[0] : 'A').toUpperCase()}
           </div>
+          {/* Logout */}
+          <LogoutButton />
         </div>
       </header>
 
@@ -77,6 +89,9 @@ export default async function AgentOsLayout({
       <div style={{ flex: 1, display: 'flex', padding: '12px 16px 16px', gap: '12px', minHeight: 0 }}>
         {children}
       </div>
+
+      {/* Persistent AI Assistant */}
+      <AiAssistant />
     </div>
   )
 }
