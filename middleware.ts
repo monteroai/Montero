@@ -45,9 +45,9 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl)
     }
   } catch {
-    // If auth check fails, redirect to login
-    const loginUrl = new URL('/login', request.url)
-    return NextResponse.redirect(loginUrl)
+    // If auth check fails, let the request through — the layout has its own auth guard
+    // This prevents redirect loops when there's a transient Supabase error
+    return response
   }
 
   return response

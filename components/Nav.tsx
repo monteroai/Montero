@@ -97,7 +97,7 @@ export function Nav({ variant = 'main' }: NavProps) {
               {label}
             </a>
           ))}
-          <Link href="/agent-os" style={{
+          <Link href="/real-estate" style={{
             fontSize: '13px', fontWeight: 600, padding: '7px 16px',
             background: 'var(--gold-dim)', border: '1px solid var(--gold-border)',
             color: 'var(--gold)', borderRadius: '8px', transition: 'background 0.2s',
@@ -108,7 +108,7 @@ export function Nav({ variant = 'main' }: NavProps) {
 
         {/* Mobile: Agent OS button + hamburger */}
         <div className="show-on-mobile" style={{ display: 'none', alignItems: 'center', gap: '10px' }}>
-          <Link href="/agent-os" style={{
+          <Link href="/real-estate" style={{
             fontSize: '12px', fontWeight: 600, padding: '6px 14px',
             background: 'var(--gold-dim)', border: '1px solid var(--gold-border)',
             color: 'var(--gold)', borderRadius: '8px',
@@ -152,7 +152,7 @@ export function Nav({ variant = 'main' }: NavProps) {
           borderTop: '1px solid var(--border)',
         }}>
           <Link
-            href="/agent-os"
+            href="/real-estate"
             onClick={() => setMenuOpen(false)}
             style={{
               display: 'block', padding: '12px 16px', borderRadius: '8px',

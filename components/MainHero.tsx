@@ -18,7 +18,7 @@ export function MainHero() {
   const [mouse, setMouse] = useState({ x: 50, y: 50, active: false })
 
   useEffect(() => {
-    const t = setInterval(() => setIdx(i => (i + 1) % ROTATING.length), 2600)
+    const t = setInterval(() => setIdx(i => (i + 1) % ROTATING.length), 4000)
     return () => clearInterval(t)
   }, [])
 
@@ -121,7 +121,7 @@ export function MainHero() {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -14 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               style={{
                 fontSize: '13px',
                 fontWeight: 600,
