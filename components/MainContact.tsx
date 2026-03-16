@@ -38,7 +38,7 @@ export function MainContact() {
   }
 
   return (
-    <section id="contact" style={{ padding: '120px 24px 80px' }}>
+    <section id="contact" data-circuit-zone="5" style={{ padding: '120px 24px 80px' }}>
       <div style={{ maxWidth: '520px', margin: '0 auto' }}>
         <div style={{ marginBottom: '40px', textAlign: 'center' }}>
           <p style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: '14px' }}>

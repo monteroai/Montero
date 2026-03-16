@@ -224,7 +224,7 @@ function CaseCard({ c, i }: { c: typeof CASES[0]; i: number }) {
 
 export function CaseStudies() {
   return (
-    <section id="case-studies" style={{ padding: '120px 24px' }}>
+    <section id="case-studies" data-circuit-zone="3" style={{ padding: '120px 24px' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}

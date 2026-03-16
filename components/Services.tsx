@@ -108,7 +108,7 @@ function TiltCard({ children, i }: { children: React.ReactNode; i: number }) {
 
 export function Services() {
   return (
-    <section id="services" style={{ padding: '120px 24px' }}>
+    <section id="services" data-circuit-zone="2" style={{ padding: '120px 24px' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}

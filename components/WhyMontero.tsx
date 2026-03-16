@@ -64,7 +64,7 @@ export function WhyMontero() {
 
   return (
     <>
-      <section style={{ padding: '120px 24px' }}>
+      <section data-circuit-zone="4" style={{ padding: '120px 24px' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}

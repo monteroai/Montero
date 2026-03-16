@@ -33,6 +33,7 @@ export function MainHero() {
 
   return (
     <section
+      data-circuit-zone="1"
       onMouseMove={handleMouse}
       onMouseLeave={() => setMouse(s => ({ ...s, active: false }))}
       style={{
