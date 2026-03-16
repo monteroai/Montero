@@ -116,21 +116,6 @@ const CASES = [
     tag: 'Live',
     Viz: DashboardViz,
   },
-  {
-    client: 'Boutique Law Firm',
-    category: 'Workflow Automation',
-    headline: 'Replaced 12 hours of weekly admin with automated intake, billing, and follow-ups.',
-    outcomes: [
-      'Client intake forms auto-populate CRM and generate engagement letters',
-      'Automated follow-up sequences reduced missed consultations by 40%',
-      'Monthly billing reports compiled and sent without manual entry',
-      'Staff reclaimed 12+ hours per week previously spent on data entry',
-    ],
-    link: null,
-    linkLabel: null,
-    tag: 'Active',
-    Viz: HeatmapViz,
-  },
 ]
 
 function CaseCard({ c, i }: { c: typeof CASES[0]; i: number }) {
@@ -241,7 +226,7 @@ export function CaseStudies() {
           </h2>
         </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: CASES.length === 1 ? '1fr' : 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', maxWidth: CASES.length === 1 ? '560px' : 'none' }}>
           {CASES.map((c, i) => (
             <CaseCard key={i} c={c} i={i} />
           ))}
