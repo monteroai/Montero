@@ -31,26 +31,9 @@ function LoginForm() {
       return
     }
 
-    // If explicit redirect was requested, use it
-    if (redirectTo) {
-      router.push(redirectTo)
-      router.refresh()
-      return
-    }
-
-    // Check if agent has completed onboarding (has DNA profile)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      const { data: dna } = await supabase.from('agent_dna').select('id').eq('agent_id', user.id).maybeSingle()
-      if (!dna) {
-        router.push('/agent-os/onboarding')
-        router.refresh()
-        return
-      }
-    }
-
-    router.push('/agent-os')
-    router.refresh()
+    // Redirect — let the server-side layout handle onboarding check
+    const destination = redirectTo || '/agent-os'
+    window.location.href = destination
   }
 
   return (
