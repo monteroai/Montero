@@ -5,9 +5,10 @@ export async function middleware(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  // If Supabase isn't configured, skip auth and let the request through
+  // If Supabase isn't configured, block access to protected routes
   if (!supabaseUrl || !supabaseKey) {
-    return NextResponse.next({ request })
+    const loginUrl = new URL('/login', request.url)
+    return NextResponse.redirect(loginUrl)
   }
 
   let response = NextResponse.next({ request })
@@ -44,8 +45,9 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl)
     }
   } catch {
-    // If auth check fails, let the request through rather than crashing
-    return NextResponse.next({ request })
+    // If auth check fails, redirect to login
+    const loginUrl = new URL('/login', request.url)
+    return NextResponse.redirect(loginUrl)
   }
 
   return response

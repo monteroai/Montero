@@ -21,9 +21,15 @@ export default async function AgentOsLayout({
       userEmail = user.email ?? null
       const fullName = user.user_metadata?.full_name as string | undefined
       firstName = fullName ? fullName.split(' ')[0] : null
-    } catch {
-      // If Supabase fails, continue without auth
+    } catch (e) {
+      // redirect() throws a special NEXT_REDIRECT error — must re-throw it
+      if (e && typeof e === 'object' && 'digest' in e) throw e
+      // Other Supabase errors: redirect to login for safety
+      redirect('/login')
     }
+  } else {
+    // If Supabase isn't configured, block access
+    redirect('/login')
   }
 
   return (
