@@ -43,7 +43,8 @@ function LoginForm() {
       const destination = redirectTo || '/agent-os'
       window.location.href = destination
     } catch (err) {
-      setError('Something went wrong. Please check your connection and try again.')
+      const msg = err instanceof Error ? err.message : String(err)
+      setError(`Login failed: ${msg}`)
       setLoading(false)
     }
   }
