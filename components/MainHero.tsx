@@ -5,12 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { BullMark } from './BullMark'
 
 const ROTATING = [
-  'AI Automation',
-  'Custom Workflows',
-  'Market Intelligence',
-  'Content Generation',
-  'n8n Pipelines',
-  'Agent OS',
+  'Save 10+ Hours a Week',
+  'Close More Deals',
+  'Generate Leads on Autopilot',
+  'Cut Busywork in Half',
+  'Never Miss a Follow-Up',
+  'Scale Without Hiring',
 ]
 
 export function MainHero() {
@@ -102,7 +102,7 @@ export function MainHero() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
         >
-          <BullMark size={320} opacity={0.04} />
+          <BullMark size={480} opacity={0.05} />
         </motion.div>
       </div>
 

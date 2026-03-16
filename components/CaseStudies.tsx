@@ -188,7 +188,7 @@ function CaseCard({ c, i }: { c: typeof CASES[0]; i: number }) {
 
       {/* Bull corner mark */}
       <div style={{ position: 'absolute', bottom: 16, right: 16, opacity: 0.06, pointerEvents: 'none' }}>
-        <BullMark size={44} />
+        <BullMark size={64} />
       </div>
 
       {/* Content */}

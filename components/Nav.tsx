@@ -70,7 +70,7 @@ export function Nav({ variant = 'main' }: NavProps) {
     <header style={bar}>
       <div style={inner}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <BullMark size={26} />
+          <BullMark size={34} />
           <span style={{ fontFamily: 'var(--font-cinzel)', fontSize: '17px', fontWeight: 700, color: 'var(--gold)', letterSpacing: '0.06em' }}>
             MONTERO
           </span>
