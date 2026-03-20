@@ -16,7 +16,16 @@ interface DnaEditorProps {
   initialDna: any
 }
 
-const DNA_FIELDS = [
+interface DnaField {
+  key: string
+  label: string
+  placeholder: string
+  type: 'text' | 'textarea' | 'number'
+  hint?: string
+  isArray?: boolean
+}
+
+const DNA_FIELDS: DnaField[] = [
   { key: 'agent_name', label: 'Agent Name', placeholder: 'Charles Magyar', type: 'text' },
   { key: 'brokerage', label: 'Brokerage', placeholder: 'William Raveis Real Estate', type: 'text' },
   { key: 'market_area', label: 'Market Area', placeholder: 'Greenwich, CT', type: 'text' },
@@ -36,7 +45,7 @@ const DNA_FIELDS = [
     hint: 'Comma-separated. These will never appear in generated content.', isArray: true },
   { key: 'signature_phrases', label: 'Signature Phrases', placeholder: 'move-in ready, coveted location, sun-drenched', type: 'text',
     hint: 'Comma-separated. Phrases you like to use that make your writing yours.', isArray: true },
-] as const
+]
 
 export default function DnaEditor({ initialDna }: DnaEditorProps) {
   const [form, setForm] = useState(() => {
