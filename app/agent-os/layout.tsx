@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import AiAssistant from './AiAssistant'
 import LogoutButton from './LogoutButton'
@@ -53,19 +54,48 @@ export default async function AgentOsLayout({
           boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
         }}
       >
-        <img src="/logo.png" alt="MONTERO" width={32} height={32} style={{ objectFit: 'contain' }} />
-        <div
+        <Link href="/agent-os" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+          <img src="/logo.png" alt="MONTERO" width={32} height={32} style={{ objectFit: 'contain' }} />
+          <span style={{ fontSize: '15px', fontWeight: 700, color: '#1B2B5E', letterSpacing: '0.02em' }}>MONTERO</span>
+        </Link>
+        <nav
           style={{
-            flex: 1, display: 'flex', alignItems: 'center', gap: '10px',
-            background: 'rgba(255,255,255,0.5)', borderRadius: '12px',
-            padding: '10px 16px', border: '1px solid rgba(255,255,255,0.6)',
+            flex: 1, display: 'flex', alignItems: 'center', gap: '6px',
+            padding: '0 12px',
           }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
-          </svg>
-          <span style={{ fontSize: '14px', color: '#94a3b8', fontWeight: 400 }}>How can we help you today?</span>
-        </div>
+          <Link href="/agent-os" style={{
+            fontSize: '13px', fontWeight: 600, color: '#1B2B5E', textDecoration: 'none',
+            padding: '7px 14px', borderRadius: '10px',
+            background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.6)',
+          }}>
+            Dashboard
+          </Link>
+          <Link href="/agent-os/remarks" style={{
+            fontSize: '13px', fontWeight: 600, color: '#64748b', textDecoration: 'none',
+            padding: '7px 14px', borderRadius: '10px',
+          }}>
+            Remarks
+          </Link>
+          <Link href="/agent-os/content" style={{
+            fontSize: '13px', fontWeight: 600, color: '#64748b', textDecoration: 'none',
+            padding: '7px 14px', borderRadius: '10px',
+          }}>
+            Content
+          </Link>
+          <Link href="/agent-os/context" style={{
+            fontSize: '13px', fontWeight: 600, color: '#64748b', textDecoration: 'none',
+            padding: '7px 14px', borderRadius: '10px',
+          }}>
+            Context
+          </Link>
+          <Link href="/agent-os/settings" style={{
+            fontSize: '13px', fontWeight: 600, color: '#64748b', textDecoration: 'none',
+            padding: '7px 14px', borderRadius: '10px',
+          }}>
+            DNA
+          </Link>
+        </nav>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {/* Notification icon */}
           <button style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.6)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
