@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/client'
 import { Check, Save } from 'lucide-react'
 
 const navy = '#1B2B5E'
-const blue = '#2563eb'
 const textDark = '#1e293b'
 const textMuted = '#64748b'
 const borderColor = '#e2e8f0'
@@ -16,59 +15,23 @@ interface DnaEditorProps {
   initialDna: any
 }
 
-interface DnaField {
-  key: string
-  label: string
-  placeholder: string
-  type: 'text' | 'textarea' | 'number'
-  hint?: string
-  isArray?: boolean
-}
-
-const DNA_FIELDS: DnaField[] = [
-  { key: 'agent_name', label: 'Agent Name', placeholder: 'Charles Magyar', type: 'text' },
-  { key: 'brokerage', label: 'Brokerage', placeholder: 'William Raveis Real Estate', type: 'text' },
-  { key: 'market_area', label: 'Market Area', placeholder: 'Greenwich, CT', type: 'text' },
-  { key: 'specialty', label: 'Specialty', placeholder: 'Luxury residential, waterfront properties', type: 'text' },
-  { key: 'brand_voice', label: 'Brand Voice', placeholder: 'Professional and warm, luxury-focused, no cliches', type: 'textarea',
-    hint: 'Describe how your writing should sound. This directly shapes all AI-generated content.' },
-  { key: 'target_client', label: 'Target Client', placeholder: 'Affluent buyers relocating to Fairfield County', type: 'text' },
-  { key: 'neighborhoods', label: 'Neighborhoods', placeholder: 'Greenwich, Old Greenwich, Riverside, Cos Cob', type: 'text',
-    hint: 'Comma-separated list of areas you specialize in.', isArray: true },
-  { key: 'languages', label: 'Languages', placeholder: 'English, Spanish', type: 'text',
-    hint: 'Comma-separated.', isArray: true },
-  { key: 'price_range_min', label: 'Price Range Min ($)', placeholder: '500000', type: 'number' },
-  { key: 'price_range_max', label: 'Price Range Max ($)', placeholder: '5000000', type: 'number' },
-  { key: 'sample_remarks', label: 'Sample Remarks (paste 1-3 of your best)', placeholder: 'Paste your actual MLS remarks here so the AI can learn your writing style...', type: 'textarea',
-    hint: 'The AI uses these to mimic your tone, vocabulary, and sentence structure.' },
-  { key: 'words_to_avoid', label: 'Words / Phrases to Avoid', placeholder: 'nestled, boasts, stunning, turnkey', type: 'text',
-    hint: 'Comma-separated. These will never appear in generated content.', isArray: true },
-  { key: 'signature_phrases', label: 'Signature Phrases', placeholder: 'move-in ready, coveted location, sun-drenched', type: 'text',
-    hint: 'Comma-separated. Phrases you like to use that make your writing yours.', isArray: true },
-]
-
 export default function DnaEditor({ initialDna }: DnaEditorProps) {
-  const [form, setForm] = useState(() => {
-    const defaults: Record<string, string> = {}
-    for (const field of DNA_FIELDS) {
-      const val = initialDna?.[field.key]
-      if (field.isArray && Array.isArray(val)) {
-        defaults[field.key] = val.join(', ')
-      } else {
-        defaults[field.key] = val?.toString() ?? ''
-      }
-    }
-    return defaults
-  })
+  const d = initialDna ?? {}
+
+  const [agentName, setAgentName] = useState(d.agent_name ?? '')
+  const [brokerage, setBrokerage] = useState(d.brokerage ?? '')
+  const [brandVoice, setBrandVoice] = useState(d.brand_voice ?? '')
+  const [sampleRemarks, setSampleRemarks] = useState(d.sample_remarks ?? '')
+  const [wordsToAvoid, setWordsToAvoid] = useState(
+    Array.isArray(d.words_to_avoid) ? d.words_to_avoid.join(', ') : d.words_to_avoid ?? ''
+  )
+  const [signaturePhrases, setSignaturePhrases] = useState(
+    Array.isArray(d.signature_phrases) ? d.signature_phrases.join(', ') : d.signature_phrases ?? ''
+  )
 
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
-
-  function update(key: string, value: string) {
-    setForm(prev => ({ ...prev, [key]: value }))
-    setSaved(false)
-  }
 
   async function handleSave() {
     setSaving(true)
@@ -79,21 +42,21 @@ export default function DnaEditor({ initialDna }: DnaEditorProps) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setError('Not authenticated.'); setSaving(false); return }
 
-    // Build payload
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const payload: Record<string, any> = { updated_at: new Date().toISOString() }
-    for (const field of DNA_FIELDS) {
-      const raw = form[field.key]?.trim() ?? ''
-      if (field.isArray) {
-        payload[field.key] = raw ? raw.split(',').map(s => s.trim()).filter(Boolean) : []
-      } else if (field.type === 'number') {
-        payload[field.key] = raw ? Number(raw) : null
-      } else {
-        payload[field.key] = raw || null
-      }
+    const payload = {
+      agent_name: agentName.trim() || null,
+      brokerage: brokerage.trim() || null,
+      brand_voice: brandVoice.trim() || null,
+      sample_remarks: sampleRemarks.trim() || null,
+      words_to_avoid: wordsToAvoid.trim()
+        ? wordsToAvoid.split(',').map((s: string) => s.trim()).filter(Boolean)
+        : [],
+      signature_phrases: signaturePhrases.trim()
+        ? signaturePhrases.split(',').map((s: string) => s.trim()).filter(Boolean)
+        : [],
+      updated_at: new Date().toISOString(),
     }
 
-    // Try update first (by agent_id), then upsert if no row exists
+    // Try update by agent_id first
     const { data: existing } = await supabase
       .from('agent_dna')
       .select('id')
@@ -104,7 +67,7 @@ export default function DnaEditor({ initialDna }: DnaEditorProps) {
     if (existing) {
       result = await supabase.from('agent_dna').update(payload).eq('agent_id', user.id)
     } else {
-      // Fallback: try org_slug for legacy row
+      // Fallback: claim legacy magyar row
       const { data: legacyRow } = await supabase
         .from('agent_dna')
         .select('id')
@@ -133,53 +96,99 @@ export default function DnaEditor({ initialDna }: DnaEditorProps) {
   }
 
   const labelStyle: React.CSSProperties = {
-    display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '6px',
+    display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '6px',
+  }
+
+  const hintStyle: React.CSSProperties = {
+    fontSize: '12px', color: '#94a3b8', marginTop: '4px', display: 'block', lineHeight: 1.5,
   }
 
   return (
-    <div style={{ padding: '32px', maxWidth: '640px' }}>
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: 700, color: navy, marginBottom: '4px' }}>Agent DNA</h1>
+    <div style={{ padding: '32px', maxWidth: '580px' }}>
+      <div style={{ marginBottom: '28px' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: 700, color: navy, marginBottom: '4px' }}>Your Writing Voice</h1>
         <p style={{ fontSize: '14px', color: textMuted, lineHeight: 1.6 }}>
-          This profile powers all AI-generated content. The more detail you provide, the more your remarks, captions, and emails will sound like you.
+          Tell us how you write. Everything the AI generates — remarks, captions, emails — will match your style.
         </p>
       </div>
 
-      {initialDna?.dna_summary && (
-        <div style={{ background: '#ffffff', border: `1px solid ${borderColor}`, borderRadius: '12px', padding: '20px', marginBottom: '20px' }}>
-          <h2 style={{ fontSize: '11px', fontWeight: 600, color: blue, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>DNA Summary</h2>
-          <p style={{ fontSize: '14px', color: textDark, lineHeight: 1.7 }}>{initialDna.dna_summary}</p>
-        </div>
-      )}
+      <div style={{ background: '#ffffff', border: `1px solid ${borderColor}`, borderRadius: '14px', padding: '28px' }}>
 
-      <div style={{ background: '#ffffff', border: `1px solid ${borderColor}`, borderRadius: '14px', padding: '24px' }}>
-        {DNA_FIELDS.map(field => (
-          <div key={field.key} style={{ marginBottom: '18px' }}>
-            <label style={labelStyle}>{field.label}</label>
-            {field.type === 'textarea' ? (
-              <textarea
-                rows={field.key === 'sample_remarks' ? 6 : 3}
-                value={form[field.key]}
-                onChange={e => update(field.key, e.target.value)}
-                placeholder={field.placeholder}
-                style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6 }}
-              />
-            ) : (
-              <input
-                type={field.type === 'number' ? 'number' : 'text'}
-                value={form[field.key]}
-                onChange={e => update(field.key, e.target.value)}
-                placeholder={field.placeholder}
-                style={inputStyle}
-              />
-            )}
-            {'hint' in field && field.hint && (
-              <span style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px', display: 'block' }}>
-                {field.hint}
-              </span>
-            )}
+        {/* Identity row */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '22px' }}>
+          <div>
+            <label style={labelStyle}>Your Name</label>
+            <input
+              value={agentName}
+              onChange={e => { setAgentName(e.target.value); setSaved(false) }}
+              placeholder="Charles Magyar"
+              style={inputStyle}
+            />
           </div>
-        ))}
+          <div>
+            <label style={labelStyle}>Brokerage</label>
+            <input
+              value={brokerage}
+              onChange={e => { setBrokerage(e.target.value); setSaved(false) }}
+              placeholder="William Raveis"
+              style={inputStyle}
+            />
+          </div>
+        </div>
+
+        {/* Brand Voice */}
+        <div style={{ marginBottom: '22px' }}>
+          <label style={labelStyle}>How should your content sound?</label>
+          <textarea
+            rows={3}
+            value={brandVoice}
+            onChange={e => { setBrandVoice(e.target.value); setSaved(false) }}
+            placeholder="Professional and direct. Warm but not salesy. Emphasize neighborhood lifestyle over square footage. Avoid generic luxury cliches."
+            style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6 }}
+          />
+          <span style={hintStyle}>
+            Be specific. &quot;Professional and warm&quot; is fine, but &quot;confident without being pushy, always lead with lifestyle and location&quot; gives the AI much more to work with.
+          </span>
+        </div>
+
+        {/* Sample Remarks — the most important field */}
+        <div style={{ marginBottom: '22px' }}>
+          <label style={labelStyle}>Paste 1-3 of your best MLS remarks</label>
+          <textarea
+            rows={8}
+            value={sampleRemarks}
+            onChange={e => { setSampleRemarks(e.target.value); setSaved(false) }}
+            placeholder={"This sun-drenched colonial in the heart of Old Greenwich offers the rare combination of...\n\n---\n\nWelcome to 42 Riverside Avenue — a completely reimagined 4-bedroom..."}
+            style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.7, fontFamily: 'inherit' }}
+          />
+          <span style={hintStyle}>
+            This is the most powerful field. The AI reads your actual writing to learn your vocabulary, sentence rhythm, and how you describe properties. Separate multiple remarks with ---
+          </span>
+        </div>
+
+        {/* Avoid / Prefer row */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
+          <div>
+            <label style={labelStyle}>Never say</label>
+            <input
+              value={wordsToAvoid}
+              onChange={e => { setWordsToAvoid(e.target.value); setSaved(false) }}
+              placeholder="nestled, boasts, turnkey"
+              style={inputStyle}
+            />
+            <span style={hintStyle}>Comma-separated</span>
+          </div>
+          <div>
+            <label style={labelStyle}>Your go-to phrases</label>
+            <input
+              value={signaturePhrases}
+              onChange={e => { setSignaturePhrases(e.target.value); setSaved(false) }}
+              placeholder="move-in ready, sun-drenched"
+              style={inputStyle}
+            />
+            <span style={hintStyle}>Comma-separated</span>
+          </div>
+        </div>
 
         {error && (
           <p style={{
@@ -205,16 +214,9 @@ export default function DnaEditor({ initialDna }: DnaEditorProps) {
             transition: 'background 0.2s',
           }}
         >
-          {saved ? <><Check size={16} /> Saved</> : saving ? 'Saving...' : <><Save size={16} /> Save DNA Profile</>}
+          {saved ? <><Check size={16} /> Saved</> : saving ? 'Saving...' : <><Save size={16} /> Save</>}
         </button>
       </div>
-
-      {initialDna?.updated_at && (
-        <p style={{ marginTop: '16px', fontSize: '12px', color: '#94a3b8' }}>
-          Last updated: {new Date(initialDna.updated_at).toLocaleDateString()}
-          {initialDna.id && <>{' · '}DNA ID: <span style={{ fontFamily: 'monospace' }}>{initialDna.id.slice(0, 8)}...</span></>}
-        </p>
-      )}
     </div>
   )
 }
