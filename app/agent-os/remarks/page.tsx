@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Copy, Check } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 interface Landmark {
   name: string
@@ -30,6 +31,24 @@ const border = '#e2e8f0'
 const inputBg = '#f8fafc'
 
 export default function RemarksPage() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [agentDna, setAgentDna] = useState<any>(null)
+
+  useEffect(() => {
+    async function loadDna() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase
+        .from('agent_dna')
+        .select('*')
+        .eq('agent_id', user.id)
+        .single()
+      if (data) setAgentDna(data)
+    }
+    loadDna()
+  }, [])
+
   const [form, setForm] = useState<FormState>({
     address: '',
     property_type: 'Condo',
@@ -78,6 +97,18 @@ export default function RemarksPage() {
         .filter(lm => lm.name && lm.distance)
         .map(lm => ({ name: lm.name, distance: parseFloat(lm.distance) })),
       agent_slug: 'magyar',
+      // Agent DNA injected into n8n prompt for personalized output
+      agent_dna: agentDna ? {
+        agent_name: agentDna.agent_name,
+        brokerage: agentDna.brokerage,
+        brand_voice: agentDna.brand_voice,
+        market_area: agentDna.market_area,
+        specialty: agentDna.specialty,
+        target_client: agentDna.target_client,
+        sample_remarks: agentDna.sample_remarks,
+        words_to_avoid: agentDna.words_to_avoid,
+        signature_phrases: agentDna.signature_phrases,
+      } : undefined,
     }
 
     try {
