@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useState, useRef } from 'react'
 
 const ROOM_TYPES = [
   'Bedroom', 'Living Room', 'Kitchen', 'Dining Room', 'Bathroom',
@@ -33,25 +32,8 @@ export default function StagingPage() {
   const [stagedUrl, setStagedUrl] = useState<string | null>(null)
   const [staging, setStaging] = useState(false)
   const [error, setError] = useState('')
-  const [credits, setCredits] = useState<number | null>(null)
   const [dragging, setDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  // Fetch credits on mount
-  useEffect(() => {
-    async function loadCredits() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-      const { data } = await supabase
-        .from('agents')
-        .select('credits_remaining')
-        .eq('id', user.id)
-        .single()
-      if (data) setCredits(data.credits_remaining)
-    }
-    loadCredits()
-  }, [])
 
   function handleFile(f: File) {
     if (!f.type.startsWith('image/')) return
@@ -86,9 +68,6 @@ export default function StagingPage() {
       if (data.error) throw new Error(data.error)
 
       setStagedUrl(data.url)
-      if (data.credits_remaining !== undefined) {
-        setCredits(data.credits_remaining)
-      }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Staging failed.')
     } finally {
@@ -111,8 +90,6 @@ export default function StagingPage() {
     setError('')
   }
 
-  const noCredits = credits !== null && credits <= 0
-
   return (
     <div style={{ flex: 1, overflow: 'auto', background: '#ffffff', borderRadius: '16px', border: `1px solid ${border}` }}>
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px 24px 60px' }}>
@@ -130,17 +107,6 @@ export default function StagingPage() {
               Upload a photo, pick your style, get a professionally staged image in seconds.
             </p>
           </div>
-          {credits !== null && (
-            <div style={{
-              padding: '8px 16px', borderRadius: '10px',
-              background: noCredits ? '#fef2f2' : 'rgba(37,99,235,0.06)',
-              border: `1px solid ${noCredits ? '#fecaca' : 'rgba(37,99,235,0.2)'}`,
-            }}>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: noCredits ? '#dc2626' : navy }}>
-                {credits} credit{credits !== 1 ? 's' : ''} remaining
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Upload zone — only show when no file selected */}
@@ -157,7 +123,7 @@ export default function StagingPage() {
               }}
             />
             <div
-              onClick={() => !noCredits && fileInputRef.current?.click()}
+              onClick={() => fileInputRef.current?.click()}
               onDragOver={e => { e.preventDefault(); setDragging(true) }}
               onDragLeave={() => setDragging(false)}
               onDrop={onDrop}
@@ -166,9 +132,8 @@ export default function StagingPage() {
                 borderRadius: '16px',
                 padding: '64px 24px',
                 textAlign: 'center',
-                cursor: noCredits ? 'not-allowed' : 'pointer',
+                cursor: 'pointer',
                 background: dragging ? 'rgba(37,99,235,0.03)' : inputBg,
-                opacity: noCredits ? 0.5 : 1,
                 transition: 'all 0.2s',
               }}
             >
@@ -176,7 +141,7 @@ export default function StagingPage() {
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
               </svg>
               <p style={{ fontSize: '15px', fontWeight: 500, color: navy, marginBottom: '4px' }}>
-                {noCredits ? 'No credits remaining' : 'Drop a room photo here — or tap to upload'}
+                Drop a room photo here — or tap to upload
               </p>
               <p style={{ fontSize: '12px', color: '#94a3b8' }}>JPG, PNG, or WebP. One photo at a time.</p>
             </div>
@@ -225,14 +190,14 @@ export default function StagingPage() {
             {/* Stage button */}
             <button
               onClick={stageRoom}
-              disabled={staging || noCredits}
+              disabled={staging}
               style={{
                 width: '100%', padding: '14px',
-                background: staging || noCredits ? border : `linear-gradient(135deg, ${navy}, ${blue})`,
-                color: staging || noCredits ? '#94a3b8' : '#ffffff',
+                background: staging ? border : `linear-gradient(135deg, ${navy}, ${blue})`,
+                color: staging ? '#94a3b8' : '#ffffff',
                 border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: 600,
-                cursor: staging || noCredits ? 'not-allowed' : 'pointer',
-                boxShadow: staging || noCredits ? 'none' : '0 4px 14px rgba(37,99,235,0.2)',
+                cursor: staging ? 'not-allowed' : 'pointer',
+                boxShadow: staging ? 'none' : '0 4px 14px rgba(37,99,235,0.2)',
                 marginBottom: '20px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
               }}
@@ -244,7 +209,7 @@ export default function StagingPage() {
                   </svg>
                   Staging — this takes 15-30 seconds...
                 </>
-              ) : noCredits ? 'No Credits Remaining' : `Stage This ${roomType} (1 credit)`}
+              ) : `Stage This ${roomType}`}
             </button>
 
             {error && (
@@ -299,16 +264,16 @@ export default function StagingPage() {
                   </button>
                   <button
                     onClick={stageRoom}
-                    disabled={staging || noCredits}
+                    disabled={staging}
                     style={{
                       flex: 1, padding: '12px',
                       background: '#f3f4f6', color: '#374151', border: 'none',
                       borderRadius: '10px', fontSize: '14px', fontWeight: 600,
-                      cursor: staging || noCredits ? 'not-allowed' : 'pointer',
-                      opacity: staging || noCredits ? 0.5 : 1,
+                      cursor: staging ? 'not-allowed' : 'pointer',
+                      opacity: staging ? 0.5 : 1,
                     }}
                   >
-                    Regenerate (1 credit)
+                    Regenerate
                   </button>
                 </>
               )}

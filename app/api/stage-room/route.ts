@@ -28,21 +28,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'GOOGLE_API_KEY is not configured.' }, { status: 500 })
     }
 
-    // Auth check + credit check
+    // Auth check
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: 'Not authenticated.' }, { status: 401 })
-    }
-
-    const { data: agent } = await supabase
-      .from('agents')
-      .select('credits_remaining')
-      .eq('id', user.id)
-      .single()
-
-    if (!agent || agent.credits_remaining <= 0) {
-      return NextResponse.json({ error: 'No credits remaining. Contact your team lead for more credits.' }, { status: 403 })
     }
 
     const formData = await req.formData()
@@ -61,14 +51,18 @@ export async function POST(req: NextRequest) {
     const prompt = `You are a professional virtual staging assistant for real estate photography.
 
 STRICT PRESERVATION RULES — never violate these:
-1. Preserve the room's EXACT geometry, dimensions, camera angle, and perspective. Do not alter the viewpoint.
-2. Keep ALL walls exactly as-is: same color, same texture, same finish. Do not paint, repaint, or add texture.
-3. Keep ALL flooring exactly as-is: same material, color, and pattern.
+1. Preserve the room's EXACT geometry, dimensions, camera angle, and perspective. Do not alter the viewpoint. Do not change the room's shape, size, or proportions in any way.
+2. Keep ALL walls exactly as-is: same color, same texture, same finish. Do not paint, repaint, add texture, or remove any marks, stains, scuffs, or damage visible on walls.
+3. Keep ALL flooring exactly as-is: same material, color, and pattern. Do not hide, repair, or cover up any scratches, stains, wear, or damage on floors.
 4. Keep ALL fixed features fully visible and unobstructed: windows, doors, fireplace, baseboard heaters, radiators, AC units, PTAC units, kitchen appliances, kitchen cabinetry, outlets, and ceiling light fixtures.
 5. Add furniture and decor ONLY. Do not alter anything structural or architectural.
 6. Do NOT invent architectural details not present in the original photo (no crown molding, no chair rail, no wainscoting unless already visible).
 7. Do NOT place any artwork, picture frames, mirrors, or wall decor over or overlapping windows. Wall art must only hang on solid wall surfaces.
 8. Keep the ceiling exactly as-is. Do not add coffers, beams, or medallions.
+9. Do NOT hide, cover up, obscure, or digitally repair ANY defects, damage, cracks, water stains, peeling paint, holes, mold, discoloration, or wear visible in the original photo. All imperfections must remain fully visible. This is a legal requirement for real estate marketing.
+10. Do NOT change the lighting, brightness, color temperature, or exposure of the room. The ambient light must match the original photo exactly.
+11. Do NOT add or remove windows, doors, or any openings. Do NOT change window treatments unless adding simple curtains as decor.
+12. Furniture and decor must be the ONLY additions. Nothing may be removed, repaired, enhanced, or altered from the original photo.
 
 Room type: ${roomLabel}
 Furniture to add: ${roomFurniture}${style ? `\nStyle preference: ${style}` : ''}`
@@ -120,21 +114,7 @@ Furniture to add: ${roomFurniture}${style ? `\nStyle preference: ${style}` : ''}
     const outMime = imagePart.inlineData.mimeType || 'image/png'
     const dataUri = `data:${outMime};base64,${imagePart.inlineData.data}`
 
-    // Deduct credit
-    await supabase
-      .from('agents')
-      .update({ credits_remaining: agent.credits_remaining - 1 })
-      .eq('id', user.id)
-
-    // Log generation
-    await supabase.from('generations').insert({
-      agent_id: user.id,
-      room_type: roomType,
-      style,
-      output_url: 'generated', // don't store full data URI
-    })
-
-    return NextResponse.json({ url: dataUri, credits_remaining: agent.credits_remaining - 1 })
+    return NextResponse.json({ url: dataUri })
 
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : 'Staging failed'

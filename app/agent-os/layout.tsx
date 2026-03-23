@@ -71,6 +71,12 @@ export default async function AgentOsLayout({
           }}>
             Dashboard
           </Link>
+          <Link href="/agent-os/photos" style={{
+            fontSize: '13px', fontWeight: 600, color: '#64748b', textDecoration: 'none',
+            padding: '7px 14px', borderRadius: '10px',
+          }}>
+            Staging
+          </Link>
           <Link href="/agent-os/remarks" style={{
             fontSize: '13px', fontWeight: 600, color: '#64748b', textDecoration: 'none',
             padding: '7px 14px', borderRadius: '10px',

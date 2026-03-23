@@ -60,20 +60,7 @@ export async function GET(request: Request) {
         full_name: meta.full_name || null,
         brokerage: meta.brokerage || null,
         plan: 'free',
-        credits_remaining: 3,
-        total_generations: 0,
       })
-    }
-
-    // Check if agent has completed onboarding (has DNA profile)
-    const { data: dna } = await supabase
-      .from('agent_dna')
-      .select('id')
-      .eq('agent_id', user.id)
-      .maybeSingle()
-
-    if (!dna) {
-      return NextResponse.redirect(`${origin}/agent-os/onboarding`)
     }
   }
 
