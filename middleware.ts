@@ -42,7 +42,7 @@ export async function middleware(request: NextRequest) {
       data: { session },
     } = await supabase.auth.getSession()
 
-    if (!session && request.nextUrl.pathname.startsWith('/agent-os')) {
+    if (!session && (request.nextUrl.pathname.startsWith('/agent-os') || request.nextUrl.pathname.startsWith('/portal'))) {
       const loginUrl = new URL('/login', request.url)
       loginUrl.searchParams.set('next', request.nextUrl.pathname)
       return NextResponse.redirect(loginUrl)
@@ -57,5 +57,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/agent-os/:path*'],
+  matcher: ['/agent-os/:path*', '/portal/:path*'],
 }
