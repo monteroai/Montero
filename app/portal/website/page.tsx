@@ -5,9 +5,11 @@ import { card, colors, gradientButton, secondaryButton, inputStyle, labelStyle }
 import { ChangeRequestCard } from '@/components/portal/ChangeRequestCard'
 import { StatusBadge } from '@/components/portal/StatusBadge'
 import { WEBSITE_SECTIONS } from '@/lib/portal/constants'
+import { useBusiness } from '@/lib/portal/BusinessContext'
 import type { PortalWebsiteContent, PortalChangeRequest } from '@/lib/portal/types'
 
 export default function WebsitePage() {
+  const { activeBusinessId, activeBusiness } = useBusiness()
   const [sections, setSections] = useState<PortalWebsiteContent[]>([])
   const [changeRequests, setChangeRequests] = useState<PortalChangeRequest[]>([])
   const [editingSection, setEditingSection] = useState<string | null>(null)
@@ -16,14 +18,19 @@ export default function WebsitePage() {
   const [success, setSuccess] = useState('')
 
   useEffect(() => {
-    fetch('/api/portal/website')
+    if (!activeBusinessId) {
+      setSections([])
+      setChangeRequests([])
+      return
+    }
+    fetch(`/api/portal/website?business_id=${activeBusinessId}`)
       .then(r => r.json())
       .then(d => {
         setSections(d.sections || [])
         setChangeRequests(d.change_requests || [])
       })
       .catch(() => {})
-  }, [])
+  }, [activeBusinessId])
 
   function getContent(sectionName: string): string {
     const s = sections.find(s => s.section === sectionName)
@@ -35,12 +42,13 @@ export default function WebsitePage() {
   }
 
   async function submitChange(section: string) {
+    if (!activeBusinessId) return
     setSubmitting(true)
     setSuccess('')
     const res = await fetch('/api/portal/website', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ section, new_content: { text: editContent } }),
+      body: JSON.stringify({ business_id: activeBusinessId, section, new_content: { text: editContent } }),
     })
     if (res.ok) {
       const d = await res.json()
@@ -52,11 +60,22 @@ export default function WebsitePage() {
     setSubmitting(false)
   }
 
+  if (!activeBusinessId) {
+    return (
+      <>
+        <div style={{ padding: '8px 4px 0' }}>
+          <h1 style={{ fontSize: '22px', fontWeight: 700, color: colors.navy, fontFamily: 'var(--font-cinzel)' }}>Website</h1>
+          <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>Add a business first.</p>
+        </div>
+      </>
+    )
+  }
+
   return (
     <>
       <div style={{ padding: '8px 4px 0' }}>
         <h1 style={{ fontSize: '22px', fontWeight: 700, color: colors.navy, fontFamily: 'var(--font-cinzel)' }}>
-          Website
+          Website {activeBusiness && <span style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, color: colors.textMuted }}>· {activeBusiness.business_name}</span>}
         </h1>
         <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>
           Edit your website content. Changes require approval before going live.
@@ -70,7 +89,6 @@ export default function WebsitePage() {
       )}
 
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-        {/* Content sections */}
         <div style={{ flex: 2, minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {WEBSITE_SECTIONS.map(sectionName => {
             const content = getContent(sectionName)
@@ -130,7 +148,6 @@ export default function WebsitePage() {
           })}
         </div>
 
-        {/* Change request history */}
         <div style={{ flex: 1, minWidth: '260px' }}>
           <h2 style={{ fontSize: '15px', fontWeight: 700, color: colors.textDark, marginBottom: '8px', padding: '0 4px' }}>
             Change History

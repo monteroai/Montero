@@ -4,8 +4,6 @@ import { PortalShell } from './PortalShell'
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   let clientName = 'Client'
-  let businessName = 'Business'
-  let onboardingComplete = true
 
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     try {
@@ -13,19 +11,15 @@ export default async function PortalLayout({ children }: { children: React.React
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) redirect('/login')
 
-      // Try to get portal_clients row
       const { data: client } = await supabase
         .from('portal_clients')
-        .select('owner_name, business_name, onboarding_complete')
+        .select('owner_name')
         .eq('user_id', user.id)
         .single()
 
-      if (client) {
-        clientName = client.owner_name || 'Client'
-        businessName = client.business_name || 'Business'
-        onboardingComplete = client.onboarding_complete ?? false
+      if (client?.owner_name) {
+        clientName = client.owner_name
       } else {
-        // No portal_clients row — use user metadata as fallback
         const fullName = user.user_metadata?.full_name as string | undefined
         clientName = fullName ? fullName.split(' ')[0] : user.email?.split('@')[0] || 'Client'
       }
@@ -37,15 +31,8 @@ export default async function PortalLayout({ children }: { children: React.React
     redirect('/login')
   }
 
-  // Gate: redirect to onboarding if not complete (unless already on onboarding page)
-  if (!onboardingComplete) {
-    // We can't check pathname here easily in a server layout, so the onboarding page itself
-    // will handle the "already onboarding" case. The redirect is safe because /portal/onboarding
-    // is under this layout too.
-  }
-
   return (
-    <PortalShell clientName={clientName} businessName={businessName}>
+    <PortalShell clientName={clientName} businessName="">
       {children}
     </PortalShell>
   )

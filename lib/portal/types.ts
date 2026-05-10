@@ -1,11 +1,10 @@
+// Account-level (one per signed-in user)
 export interface PortalClient {
   id: string
   user_id: string
-  business_name: string
   owner_name: string
-  phone: string | null
-  email: string | null
-  industry: string | null
+  primary_email: string | null
+  primary_phone: string | null
   is_admin: boolean
   onboarding_step: number
   onboarding_complete: boolean
@@ -14,9 +13,37 @@ export interface PortalClient {
   updated_at: string
 }
 
-export interface PortalAutomation {
+// Each business under an account (one client → many businesses)
+export interface PortalBusiness {
   id: string
   client_id: string
+  business_name: string
+  industry: string | null
+  business_phone: string | null
+  business_email: string | null
+  website_url: string | null
+  brand_colors: BrandColors
+  brand_logo_url: string | null
+  brand_extracted: Record<string, unknown>
+  description: string | null
+  is_archived: boolean
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export interface BrandColors {
+  primary?: string
+  secondary?: string
+  accent?: string
+  background?: string
+  text?: string
+  [key: string]: string | undefined
+}
+
+export interface PortalAutomation {
+  id: string
+  business_id: string
   n8n_workflow_id: string
   friendly_name: string
   description: string | null
@@ -29,7 +56,7 @@ export interface PortalAutomation {
 
 export interface PortalInteraction {
   id: string
-  client_id: string
+  business_id: string
   type: 'call' | 'form' | 'email' | 'chat'
   summary: string
   detail: string | null
@@ -41,7 +68,7 @@ export interface PortalInteraction {
 
 export interface PortalWebsiteContent {
   id: string
-  client_id: string
+  business_id: string
   section: string
   content: Record<string, unknown>
   is_live: boolean
@@ -51,7 +78,7 @@ export interface PortalWebsiteContent {
 
 export interface PortalChangeRequest {
   id: string
-  client_id: string
+  business_id: string
   section: string
   old_content: Record<string, unknown> | null
   new_content: Record<string, unknown>
@@ -65,6 +92,7 @@ export interface PortalChangeRequest {
 export interface PortalDocument {
   id: string
   client_id: string
+  business_id: string | null
   type: 'contract' | 'invoice' | 'onboarding' | 'upload' | 'automation-guide'
   title: string
   file_url: string | null

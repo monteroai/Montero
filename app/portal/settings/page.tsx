@@ -1,19 +1,19 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { card, colors, gradientButton, inputStyle, labelStyle } from '@/lib/portal/styles'
-import { SystemStatusDot } from '@/components/portal/SystemStatusDot'
+import { useBusiness } from '@/lib/portal/BusinessContext'
 
-interface ClientInfo {
-  business_name: string
+interface AccountInfo {
   owner_name: string
-  phone: string
-  email: string
-  industry: string
+  primary_email: string
+  primary_phone: string
 }
 
 export default function SettingsPage() {
-  const [info, setInfo] = useState<ClientInfo>({ business_name: '', owner_name: '', phone: '', email: '', industry: '' })
+  const { businesses } = useBusiness()
+  const [info, setInfo] = useState<AccountInfo>({ owner_name: '', primary_email: '', primary_phone: '' })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [notifications, setNotifications] = useState({
@@ -26,14 +26,14 @@ export default function SettingsPage() {
     fetch('/api/portal/onboarding')
       .then(r => r.json())
       .then(d => {
+        const account = d.account || {}
         const data = d.data || {}
         setInfo({
-          business_name: (data.business_name as string) || '',
-          owner_name: (data.owner_name as string) || '',
-          phone: (data.phone as string) || '',
-          email: (data.email as string) || '',
-          industry: (data.industry as string) || '',
+          owner_name: (account.owner_name as string) || '',
+          primary_email: (account.primary_email as string) || '',
+          primary_phone: (account.primary_phone as string) || '',
         })
+        if (data.notification_prefs) setNotifications(data.notification_prefs)
       })
       .catch(() => {})
   }, [])
@@ -47,69 +47,45 @@ export default function SettingsPage() {
     })
     setSaving(false)
     setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
+    setTimeout(() => setSaved(false), 2400)
   }
 
   return (
     <>
       <div style={{ padding: '8px 4px 0' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: 700, color: colors.navy, fontFamily: 'var(--font-cinzel)' }}>
-          Settings
-        </h1>
+        <h1 style={{ fontSize: '22px', fontWeight: 700, color: colors.navy, fontFamily: 'var(--font-cinzel)' }}>Settings</h1>
         <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>
-          Manage your account and preferences.
+          Manage your account. To edit business-specific details (name, brand, logo), go to <Link href="/portal/businesses" style={{ color: colors.blue }}>Businesses</Link>.
         </p>
       </div>
 
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-        {/* Account info */}
         <div style={{ flex: 1, minWidth: '300px' }}>
           <div style={{ ...card, padding: '24px' }}>
-            <h2 style={{ fontSize: '16px', fontWeight: 700, color: colors.textDark, marginBottom: '20px' }}>Account Information</h2>
+            <h2 style={{ fontSize: '15px', fontWeight: 700, color: colors.textDark, marginBottom: '16px' }}>Account</h2>
 
-            {[
-              { key: 'business_name', label: 'Business Name' },
-              { key: 'owner_name', label: 'Your Name' },
-              { key: 'phone', label: 'Phone' },
-              { key: 'email', label: 'Email' },
-            ].map(f => (
-              <div key={f.key} style={{ marginBottom: '16px' }}>
-                <label style={labelStyle}>{f.label}</label>
-                <input
-                  style={inputStyle}
-                  value={info[f.key as keyof ClientInfo]}
-                  onChange={e => setInfo(prev => ({ ...prev, [f.key]: e.target.value }))}
-                />
-              </div>
-            ))}
-
-            <div style={{ marginBottom: '16px' }}>
-              <label style={labelStyle}>Industry</label>
-              <select
-                style={{ ...inputStyle, cursor: 'pointer' }}
-                value={info.industry}
-                onChange={e => setInfo(prev => ({ ...prev, industry: e.target.value }))}
-              >
-                <option value="">Select</option>
-                <option value="dental-staffing">Dental Staffing</option>
-                <option value="dental-practice">Dental Practice</option>
-                <option value="real-estate">Real Estate</option>
-                <option value="restaurant">Restaurant</option>
-                <option value="other">Other</option>
-              </select>
+            <div style={{ marginBottom: '14px' }}>
+              <label style={labelStyle}>Your name</label>
+              <input style={inputStyle} value={info.owner_name} onChange={e => setInfo(p => ({ ...p, owner_name: e.target.value }))} />
+            </div>
+            <div style={{ marginBottom: '14px' }}>
+              <label style={labelStyle}>Email</label>
+              <input style={inputStyle} type="email" value={info.primary_email} onChange={e => setInfo(p => ({ ...p, primary_email: e.target.value }))} />
+            </div>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={labelStyle}>Phone</label>
+              <input style={inputStyle} value={info.primary_phone} onChange={e => setInfo(p => ({ ...p, primary_phone: e.target.value }))} />
             </div>
 
-            <button onClick={handleSave} disabled={saving} style={{ ...gradientButton, opacity: saving ? 0.5 : 1 }}>
-              {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
+            <button onClick={handleSave} disabled={saving} style={{ ...gradientButton, fontFamily: 'inherit', opacity: saving ? 0.5 : 1 }}>
+              {saving ? 'Saving…' : saved ? 'Saved ✓' : 'Save changes'}
             </button>
           </div>
         </div>
 
-        {/* Right column */}
         <div style={{ flex: 1, minWidth: '280px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {/* Notifications */}
           <div style={{ ...card, padding: '24px' }}>
-            <h2 style={{ fontSize: '16px', fontWeight: 700, color: colors.textDark, marginBottom: '16px' }}>Notifications</h2>
+            <h2 style={{ fontSize: '15px', fontWeight: 700, color: colors.textDark, marginBottom: '14px' }}>Notifications</h2>
             {[
               { key: 'flagged_issues', label: 'Flagged Issues', desc: 'Get notified when the AI flags a bad call or error' },
               { key: 'daily_digest', label: 'Daily Digest', desc: 'Summary of all activity from the past 24 hours' },
@@ -130,26 +106,18 @@ export default function SettingsPage() {
             ))}
           </div>
 
-          {/* API Connections */}
           <div style={{ ...card, padding: '24px' }}>
-            <h2 style={{ fontSize: '16px', fontWeight: 700, color: colors.textDark, marginBottom: '16px' }}>Connections</h2>
-            {[
-              { name: 'n8n Automations', status: 'active' },
-              { name: 'VAPI Voice Agent', status: 'active' },
-              { name: 'Airtable CRM', status: 'active' },
-              { name: 'Website (Netlify)', status: 'active' },
-            ].map(c => (
-              <div key={c.name} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                <SystemStatusDot status={c.status} />
-                <span style={{ fontSize: '13px', color: colors.textDark, flex: 1 }}>{c.name}</span>
-                <span style={{ fontSize: '12px', color: colors.success, fontWeight: 500 }}>Connected</span>
-              </div>
-            ))}
+            <h2 style={{ fontSize: '15px', fontWeight: 700, color: colors.textDark, marginBottom: '14px' }}>Your businesses</h2>
+            <p style={{ fontSize: '13px', color: colors.textMuted, marginBottom: '12px' }}>
+              You currently manage {businesses.length} business{businesses.length === 1 ? '' : 'es'}.
+            </p>
+            <Link href="/portal/businesses" style={{ display: 'inline-block', fontSize: '13px', color: colors.blue, textDecoration: 'none', fontWeight: 500 }}>
+              Manage businesses →
+            </Link>
           </div>
 
-          {/* Support */}
           <div style={{ ...card, padding: '24px' }}>
-            <h2 style={{ fontSize: '16px', fontWeight: 700, color: colors.textDark, marginBottom: '12px' }}>Support</h2>
+            <h2 style={{ fontSize: '15px', fontWeight: 700, color: colors.textDark, marginBottom: '12px' }}>Support</h2>
             <p style={{ fontSize: '13px', color: colors.textMuted, lineHeight: '1.6' }}>
               Need help? Contact your account manager directly.
             </p>

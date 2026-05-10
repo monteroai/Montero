@@ -1,22 +1,19 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-export async function GET() {
+// GET /api/portal/website?business_id=xxx → website sections + change requests for a business
+export async function GET(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: client } = await supabase
-    .from('portal_clients')
-    .select('id')
-    .eq('user_id', user.id)
-    .single()
-
-  if (!client) return NextResponse.json({ sections: [], change_requests: [] })
+  const url = new URL(request.url)
+  const businessId = url.searchParams.get('business_id')
+  if (!businessId) return NextResponse.json({ sections: [], change_requests: [] })
 
   const [{ data: sections }, { data: changeRequests }] = await Promise.all([
-    supabase.from('portal_website_content').select('*').eq('client_id', client.id).order('section'),
-    supabase.from('portal_change_requests').select('*').eq('client_id', client.id).order('requested_at', { ascending: false }).limit(20),
+    supabase.from('portal_website_content').select('*').eq('business_id', businessId).order('section'),
+    supabase.from('portal_change_requests').select('*').eq('business_id', businessId).order('requested_at', { ascending: false }).limit(20),
   ])
 
   return NextResponse.json({
@@ -25,38 +22,35 @@ export async function GET() {
   })
 }
 
+// POST /api/portal/website → submit a content change request for a business section
 export async function POST(request: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: client } = await supabase
-    .from('portal_clients')
-    .select('id')
-    .eq('user_id', user.id)
-    .single()
-
-  if (!client) return NextResponse.json({ error: 'Client not found' }, { status: 404 })
-
   const body = await request.json()
-  const { section, new_content } = body as { section: string; new_content: Record<string, unknown> }
-
-  if (!section || !new_content) {
-    return NextResponse.json({ error: 'section and new_content required' }, { status: 400 })
+  const { business_id, section, new_content } = body as {
+    business_id: string
+    section: string
+    new_content: Record<string, unknown>
   }
 
-  // Get current content for the old_content snapshot
+  if (!business_id || !section || !new_content) {
+    return NextResponse.json({ error: 'business_id, section, and new_content required' }, { status: 400 })
+  }
+
+  // RLS will block if business doesn't belong to user
   const { data: current } = await supabase
     .from('portal_website_content')
     .select('content')
-    .eq('client_id', client.id)
+    .eq('business_id', business_id)
     .eq('section', section)
     .single()
 
   const { data: cr, error } = await supabase
     .from('portal_change_requests')
     .insert({
-      client_id: client.id,
+      business_id,
       section,
       old_content: current?.content || null,
       new_content,
@@ -66,6 +60,5 @@ export async function POST(request: Request) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
   return NextResponse.json({ change_request: cr })
 }

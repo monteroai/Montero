@@ -1,0 +1,163 @@
+import Anthropic from '@anthropic-ai/sdk'
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+
+interface ChatMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+const SYSTEM_PROMPT_BASE = `You are the in-portal AI assistant for MONTERO, a managed-service AI automation platform for small businesses.
+
+You help the signed-in account owner understand and operate their portal. They are not technical — speak in plain English. Avoid jargon (no "API", "webhook", "n8n workflow ID", "RLS"). When you reference an automation, use its friendly name. When the account owner runs multiple businesses, scope your answer to the business currently selected unless they explicitly ask about another one.
+
+You have access to:
+- Their account profile (owner name, email, admin status)
+- All businesses they manage (only the currently active one is detailed)
+- Every automation set up for the active business, with status (running, off, error)
+- Recent activity for the active business: calls answered, forms submitted, emails received, chat messages
+- Any flagged items the system thinks need their attention
+
+When asked about something you don't know, say so plainly and tell them how to find it (e.g. "Check the Activity tab" or "Your account manager Emilio can confirm — emilio@montero.cool").
+
+Style:
+- Warm, direct, brief. 1-3 short paragraphs max unless they ask for detail.
+- No marketing fluff. No exclamation points. No "Great question!"
+- If they ask you to do something the portal can't do yet, say so and offer the closest available action.
+- Never invent automations, statuses, or activity. Only reference what's in the context block below.
+- Never reveal API keys, internal IDs, raw database rows, or implementation details.`
+
+export async function POST(req: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await req.json()
+    const messages: ChatMessage[] = Array.isArray(body.messages) ? body.messages : []
+    const activeBusinessId: string | undefined = body.active_business_id || undefined
+    if (messages.length === 0) {
+      return NextResponse.json({ error: 'No messages provided' }, { status: 400 })
+    }
+
+    // Get account
+    const { data: client } = await supabase
+      .from('portal_clients')
+      .select('id, owner_name, primary_email, is_admin, onboarding_complete')
+      .eq('user_id', user.id)
+      .single()
+
+    // Get all businesses
+    let businesses: Array<Record<string, unknown>> = []
+    if (client) {
+      const { data } = await supabase
+        .from('portal_businesses')
+        .select('id, business_name, industry, business_phone, business_email, description')
+        .eq('client_id', client.id)
+        .eq('is_archived', false)
+        .order('sort_order')
+      businesses = data || []
+    }
+
+    const activeBusiness = businesses.find(b => b.id === activeBusinessId) || businesses[0] || null
+
+    // For active business: fetch automations + recent activity
+    let automations: Array<Record<string, unknown>> = []
+    let interactions: Array<Record<string, unknown>> = []
+    if (activeBusiness) {
+      const [{ data: a }, { data: i }] = await Promise.all([
+        supabase
+          .from('portal_automations')
+          .select('friendly_name, description, category, active, last_status, last_run')
+          .eq('business_id', activeBusiness.id)
+          .order('sort_order'),
+        supabase
+          .from('portal_interactions')
+          .select('type, summary, flagged, flag_reason, created_at')
+          .eq('business_id', activeBusiness.id)
+          .order('created_at', { ascending: false })
+          .limit(15),
+      ])
+      automations = a || []
+      interactions = i || []
+    }
+
+    // Build context block
+    const ctx: string[] = []
+    if (client) {
+      ctx.push(`<account>`)
+      ctx.push(`Owner: ${client.owner_name}`)
+      if (client.primary_email) ctx.push(`Email: ${client.primary_email}`)
+      ctx.push(`Onboarding complete: ${client.onboarding_complete ? 'yes' : 'no'}`)
+      if (client.is_admin) ctx.push(`Role: ADMIN (Montero internal)`)
+      ctx.push(`</account>`)
+    }
+
+    if (businesses.length > 0) {
+      ctx.push(`<businesses_count>${businesses.length}</businesses_count>`)
+      ctx.push(`<all_businesses>`)
+      for (const b of businesses) {
+        const tag = b.id === activeBusiness?.id ? ' [ACTIVE]' : ''
+        ctx.push(`- ${b.business_name}${tag}${b.industry ? ` (${b.industry})` : ''}`)
+      }
+      ctx.push(`</all_businesses>`)
+    } else {
+      ctx.push(`<businesses>No businesses set up yet.</businesses>`)
+    }
+
+    if (activeBusiness) {
+      ctx.push(`<active_business>`)
+      ctx.push(`Name: ${activeBusiness.business_name}`)
+      if (activeBusiness.industry) ctx.push(`Industry: ${activeBusiness.industry}`)
+      if (activeBusiness.business_phone) ctx.push(`Phone: ${activeBusiness.business_phone}`)
+      if (activeBusiness.business_email) ctx.push(`Email: ${activeBusiness.business_email}`)
+      if (activeBusiness.description) ctx.push(`Description: ${activeBusiness.description}`)
+      ctx.push(`</active_business>`)
+
+      if (automations.length > 0) {
+        ctx.push(`<automations_for_active_business>`)
+        for (const a of automations) {
+          const status = a.active ? (a.last_status === 'error' ? 'ERROR' : 'running') : 'off'
+          ctx.push(`- ${a.friendly_name} [${status}] — ${a.description || ''}`)
+        }
+        ctx.push(`</automations_for_active_business>`)
+      } else {
+        ctx.push(`<automations_for_active_business>None configured yet.</automations_for_active_business>`)
+      }
+
+      if (interactions.length > 0) {
+        const flaggedFirst = [...interactions].sort((a, b) => Number(b.flagged) - Number(a.flagged))
+        ctx.push(`<recent_activity_for_active_business>`)
+        for (const i of flaggedFirst.slice(0, 10)) {
+          const flag = i.flagged ? ` [FLAGGED: ${i.flag_reason || 'review'}]` : ''
+          ctx.push(`- [${i.type}] ${i.summary}${flag}`)
+        }
+        ctx.push(`</recent_activity_for_active_business>`)
+      } else {
+        ctx.push(`<recent_activity_for_active_business>No activity yet.</recent_activity_for_active_business>`)
+      }
+    }
+
+    const systemBlocks: Anthropic.TextBlockParam[] = [
+      { type: 'text', text: SYSTEM_PROMPT_BASE, cache_control: { type: 'ephemeral' } },
+      { type: 'text', text: `Current portal context:\n${ctx.join('\n')}` },
+    ]
+
+    const anthropic = new Anthropic()
+    const reply = await anthropic.messages.create({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 800,
+      system: systemBlocks,
+      messages: messages.slice(-12).map(m => ({ role: m.role, content: m.content })),
+    })
+
+    const text = reply.content[0]?.type === 'text' ? reply.content[0].text : ''
+    return NextResponse.json({ reply: text })
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : 'Chat failed'
+    console.error('[portal/chat]', msg)
+    return NextResponse.json({ error: msg }, { status: 500 })
+  }
+}

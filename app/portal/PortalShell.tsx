@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { PortalHeader } from '@/components/portal/PortalHeader'
 import { PortalSidebar } from '@/components/portal/PortalSidebar'
 import { mainBg } from '@/lib/portal/styles'
+import { BusinessProvider } from '@/lib/portal/BusinessContext'
+import AiAssistant from './AiAssistant'
 
 interface PortalShellProps {
   clientName: string
@@ -15,34 +17,38 @@ export function PortalShell({ clientName, businessName, children }: PortalShellP
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: mainBg,
-      backgroundAttachment: 'fixed',
-      display: 'flex',
-      flexDirection: 'column',
-    }}>
-      <PortalHeader
-        clientName={clientName}
-        businessName={businessName}
-        onToggleSidebar={() => setSidebarOpen(prev => !prev)}
-      />
-
+    <BusinessProvider>
       <div style={{
-        flex: 1, display: 'flex',
-        padding: '12px 16px 16px', gap: '12px',
-        minHeight: 0,
+        minHeight: '100vh',
+        background: mainBg,
+        backgroundAttachment: 'fixed',
+        display: 'flex',
+        flexDirection: 'column',
       }}>
-        <PortalSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <PortalHeader
+          clientName={clientName}
+          businessName={businessName}
+          onToggleSidebar={() => setSidebarOpen(prev => !prev)}
+        />
 
-        <main style={{
-          flex: 1, minWidth: 0,
-          overflowY: 'auto',
-          display: 'flex', flexDirection: 'column', gap: '12px',
+        <div style={{
+          flex: 1, display: 'flex',
+          padding: '12px 16px 16px', gap: '12px',
+          minHeight: 0,
         }}>
-          {children}
-        </main>
+          <PortalSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+          <main style={{
+            flex: 1, minWidth: 0,
+            overflowY: 'auto',
+            display: 'flex', flexDirection: 'column', gap: '12px',
+          }}>
+            {children}
+          </main>
+        </div>
+
+        <AiAssistant />
       </div>
-    </div>
+    </BusinessProvider>
   )
 }
