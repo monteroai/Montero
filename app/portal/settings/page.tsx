@@ -16,6 +16,7 @@ export default function SettingsPage() {
   const [info, setInfo] = useState<AccountInfo>({ owner_name: '', primary_email: '', primary_phone: '' })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [notifications, setNotifications] = useState({
     flagged_issues: true,
     daily_digest: false,
@@ -40,14 +41,34 @@ export default function SettingsPage() {
 
   async function handleSave() {
     setSaving(true)
-    await fetch('/api/portal/onboarding', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data: { ...info, notification_prefs: notifications } }),
-    })
-    setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2400)
+    setSaveError(null)
+    try {
+      const res = await fetch('/api/portal/onboarding', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: { ...info, notification_prefs: notifications } }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(body.error || `Save failed (${res.status})`)
+
+      // Refetch to confirm what's actually in the DB
+      const fresh = await fetch('/api/portal/onboarding').then(r => r.json()).catch(() => null)
+      if (fresh?.account) {
+        setInfo({
+          owner_name: fresh.account.owner_name || '',
+          primary_email: fresh.account.primary_email || '',
+          primary_phone: fresh.account.primary_phone || '',
+        })
+      }
+      if (fresh?.data?.notification_prefs) setNotifications(fresh.data.notification_prefs)
+
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2400)
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : String(e))
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -80,6 +101,11 @@ export default function SettingsPage() {
             <button onClick={handleSave} disabled={saving} style={{ ...gradientButton, fontFamily: 'inherit', opacity: saving ? 0.5 : 1 }}>
               {saving ? 'Saving…' : saved ? 'Saved ✓' : 'Save changes'}
             </button>
+            {saveError && (
+              <p style={{ marginTop: '10px', fontSize: '12px', color: colors.error }}>
+                {saveError}
+              </p>
+            )}
           </div>
         </div>
 
@@ -119,14 +145,14 @@ export default function SettingsPage() {
           <div style={{ ...card, padding: '24px' }}>
             <h2 style={{ fontSize: '15px', fontWeight: 700, color: colors.textDark, marginBottom: '12px' }}>Support</h2>
             <p style={{ fontSize: '13px', color: colors.textMuted, lineHeight: '1.6' }}>
-              Need help? Contact your account manager directly.
+              Need help? Reply to your most recent Montero email, or reach out anytime.
             </p>
-            <div style={{ marginTop: '12px', fontSize: '14px', color: colors.textDark }}>
-              <strong>Emilio Montero</strong>
-            </div>
-            <div style={{ fontSize: '13px', color: colors.blue, marginTop: '4px' }}>
-              emilio@montero.cool
-            </div>
+            <a
+              href="mailto:ai@montero.cool"
+              style={{ display: 'inline-block', marginTop: '12px', fontSize: '14px', color: colors.blue, textDecoration: 'none', fontWeight: 500 }}
+            >
+              ai@montero.cool
+            </a>
           </div>
         </div>
       </div>

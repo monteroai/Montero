@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { colors } from '@/lib/portal/styles'
+import { colors, themeGradient } from '@/lib/portal/styles'
 import { useBusiness } from '@/lib/portal/BusinessContext'
 
 interface Message {
@@ -64,7 +64,7 @@ export default function AiAssistant() {
         ...prev,
         {
           role: 'assistant',
-          content: `Sorry — I couldn't reach the assistant just now. (${msg}) Try again in a moment, or contact emilio@montero.cool if it keeps failing.`,
+          content: `Sorry — I couldn't reach the assistant just now. (${msg}) Try again in a moment, or email ai@montero.cool if it keeps failing.`,
         },
       ])
     } finally {
@@ -88,7 +88,7 @@ export default function AiAssistant() {
             width: '54px',
             height: '54px',
             borderRadius: '50%',
-            background: `linear-gradient(135deg, ${colors.navy}, ${colors.blue})`,
+            background: themeGradient,
             border: 'none',
             cursor: 'pointer',
             boxShadow: '0 6px 24px rgba(37,99,235,0.32)',
@@ -130,7 +130,7 @@ export default function AiAssistant() {
               display: 'flex',
               alignItems: 'center',
               gap: '10px',
-              background: `linear-gradient(135deg, ${colors.navy}, ${colors.blue})`,
+              background: themeGradient,
             }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -189,7 +189,7 @@ export default function AiAssistant() {
                   borderRadius: '14px',
                   fontSize: '13.5px',
                   lineHeight: 1.55,
-                  background: m.role === 'user' ? `linear-gradient(135deg, ${colors.navy}, ${colors.blue})` : '#f1f5f9',
+                  background: m.role === 'user' ? themeGradient : '#f1f5f9',
                   color: m.role === 'user' ? '#fff' : '#1e293b',
                   whiteSpace: 'pre-wrap',
                 }}
@@ -279,7 +279,7 @@ export default function AiAssistant() {
                 width: '38px',
                 height: '38px',
                 borderRadius: '10px',
-                background: input.trim() && !loading ? `linear-gradient(135deg, ${colors.navy}, ${colors.blue})` : '#e2e8f0',
+                background: input.trim() && !loading ? themeGradient : '#e2e8f0',
                 border: 'none',
                 cursor: input.trim() && !loading ? 'pointer' : 'default',
                 display: 'flex',

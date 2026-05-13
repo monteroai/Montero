@@ -36,8 +36,10 @@ export const card: CSSProperties = {
   boxShadow: '0 2px 12px rgba(0,0,0,0.03)',
 }
 
+// Themed gradient — reads from --mb-primary / --mb-secondary CSS vars set by
+// BusinessContext when the active business changes. Falls back to Montero navy/blue.
 export const gradientButton: CSSProperties = {
-  background: 'linear-gradient(135deg, #1B2B5E, #2563eb)',
+  background: 'linear-gradient(135deg, var(--mb-primary, #1B2B5E), var(--mb-secondary, #2563eb))',
   color: '#ffffff',
   border: 'none',
   borderRadius: '12px',
@@ -45,9 +47,12 @@ export const gradientButton: CSSProperties = {
   fontSize: '14px',
   fontWeight: 600,
   cursor: 'pointer',
-  boxShadow: '0 4px 14px rgba(37,99,235,0.2)',
+  boxShadow: '0 4px 14px rgba(0,0,0,0.12)',
   transition: 'opacity 0.2s',
 }
+
+// Same gradient as a raw string for inline use (sparkle button, headers, etc.)
+export const themeGradient = 'linear-gradient(135deg, var(--mb-primary, #1B2B5E), var(--mb-secondary, #2563eb))'
 
 export const secondaryButton: CSSProperties = {
   background: 'rgba(255,255,255,0.5)',
