@@ -4,7 +4,7 @@ const deliverables = [
     description: 'Automatic contract data, price trends, and days-on-market stats published every Monday.',
   },
   {
-    title: 'Agent OS remarks generator',
+    title: 'AI remarks generator',
     description: 'AI-written MLS remarks generated from listing photos in the agent\'s voice.',
   },
   {

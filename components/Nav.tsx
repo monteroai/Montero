@@ -97,23 +97,23 @@ export function Nav({ variant = 'main' }: NavProps) {
               {label}
             </a>
           ))}
-          <Link href="/real-estate" style={{
+          <Link href="/portal" style={{
             fontSize: '13px', fontWeight: 600, padding: '7px 16px',
             background: 'var(--gold-dim)', border: '1px solid var(--gold-border)',
             color: 'var(--gold)', borderRadius: '8px', transition: 'background 0.2s',
           }}>
-            Agent OS →
+            Client Portal →
           </Link>
         </nav>
 
         {/* Mobile: Agent OS button + hamburger */}
         <div className="show-on-mobile" style={{ display: 'none', alignItems: 'center', gap: '10px' }}>
-          <Link href="/real-estate" style={{
+          <Link href="/portal" style={{
             fontSize: '12px', fontWeight: 600, padding: '6px 14px',
             background: 'var(--gold-dim)', border: '1px solid var(--gold-border)',
             color: 'var(--gold)', borderRadius: '8px',
           }}>
-            Agent OS
+            Portal
           </Link>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
@@ -152,7 +152,7 @@ export function Nav({ variant = 'main' }: NavProps) {
           borderTop: '1px solid var(--border)',
         }}>
           <Link
-            href="/real-estate"
+            href="/portal"
             onClick={() => setMenuOpen(false)}
             style={{
               display: 'block', padding: '12px 16px', borderRadius: '8px',
@@ -161,7 +161,7 @@ export function Nav({ variant = 'main' }: NavProps) {
               textAlign: 'center', marginBottom: '8px',
             }}
           >
-            Open Agent OS →
+            Open Client Portal →
           </Link>
           {NAV_LINKS.map(({ label, href }) => (
             <a

@@ -56,7 +56,7 @@ export function ContactSection() {
             Get in touch
           </h2>
           <p style={{ fontSize: '15px', color: '#8B95A9', lineHeight: 1.6 }}>
-            Questions about Agent OS, custom builds, or pricing —{' '}
+            Questions about our work, custom builds, or pricing —{' '}
             <a
               href="mailto:ai@montero.cool"
               style={{ color: '#4F6EF7', textDecoration: 'none' }}
