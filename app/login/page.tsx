@@ -40,7 +40,7 @@ function LoginForm() {
       }
 
       // Redirect — let the server-side layout handle onboarding check
-      const destination = redirectTo || '/agent-os'
+      const destination = redirectTo || '/portal'
       window.location.href = destination
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
@@ -64,7 +64,7 @@ function LoginForm() {
 
         <div style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #e2e8f0', padding: '32px', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
           <h1 style={{ fontSize: '22px', fontWeight: 700, color: navy, marginBottom: '4px' }}>Welcome back</h1>
-          <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '24px' }}>Sign in to access your Agent OS tools.</p>
+          <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '24px' }}>Sign in to your Montero client dashboard.</p>
 
           <form onSubmit={handleLogin}>
             <div style={{ marginBottom: '16px' }}>

@@ -109,7 +109,7 @@ export default function ContextFormPage() {
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: blue }} />
-            <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: blue }}>MONTERO Agent OS</span>
+            <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: blue }}>MONTERO</span>
           </div>
           <h1 style={{ fontSize: '24px', fontWeight: 700, color: navy, marginBottom: '8px' }}>Share listing context</h1>
           <p style={{ fontSize: '14px', color: textMuted, lineHeight: 1.6 }}>
@@ -210,7 +210,7 @@ export default function ContextFormPage() {
         </form>
 
         <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '11px', color: '#94a3b8' }}>
-          Powered by MONTERO Agent OS
+          Powered by MONTERO
         </p>
       </div>
     </main>

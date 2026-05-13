@@ -45,24 +45,24 @@ export async function GET(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (user) {
-    // Ensure agents row exists (created on first email confirmation)
-    const { data: existingAgent } = await supabase
-      .from('agents')
+    // Ensure a portal_clients row exists for this user on first email confirmation.
+    // (Agents table was the old Agent OS path; we now provision into portal_clients.)
+    const { data: existingClient } = await supabase
+      .from('portal_clients')
       .select('id')
-      .eq('id', user.id)
+      .eq('user_id', user.id)
       .maybeSingle()
 
-    if (!existingAgent) {
+    if (!existingClient) {
       const meta = user.user_metadata || {}
-      await supabase.from('agents').insert({
-        id: user.id,
-        email: user.email,
-        full_name: meta.full_name || null,
-        brokerage: meta.brokerage || null,
-        plan: 'free',
+      await supabase.from('portal_clients').insert({
+        user_id: user.id,
+        owner_name: meta.full_name || user.email?.split('@')[0] || null,
+        primary_email: user.email,
+        onboarding_complete: false,
       })
     }
   }
 
-  return NextResponse.redirect(`${origin}/agent-os`)
+  return NextResponse.redirect(`${origin}/portal`)
 }

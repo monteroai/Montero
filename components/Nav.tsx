@@ -5,10 +5,10 @@ import Link from 'next/link'
 import { BullMark } from './BullMark'
 
 interface NavProps {
-  variant?: 'main' | 'real-estate'
+  variant?: 'main'
 }
 
-export function Nav({ variant = 'main' }: NavProps) {
+export function Nav({ variant: _variant = 'main' }: NavProps) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -45,33 +45,6 @@ export function Nav({ variant = 'main' }: NavProps) {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-  }
-
-  if (variant === 'real-estate') {
-    return (
-      <header style={{
-        ...bar,
-        background: scrolled ? 'rgba(15,23,42,0.95)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(12px)' : 'none',
-        borderBottom: scrolled ? '1px solid rgba(255,255,255,0.08)' : '1px solid transparent',
-      }}>
-        <div style={inner}>
-          <Link href="/" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', transition: 'color 0.2s' }}>
-            ← montero.cool
-          </Link>
-          <span style={{ fontFamily: 'var(--font-cinzel)', fontSize: '15px', color: '#ffffff', letterSpacing: '0.06em' }}>
-            Agent OS
-          </span>
-          <Link href="/agent-os" style={{
-            fontSize: '13px', fontWeight: 600, padding: '7px 16px',
-            background: '#2563eb', border: '1px solid rgba(37,99,235,0.5)',
-            color: '#ffffff', borderRadius: '8px',
-          }}>
-            Open Agent OS
-          </Link>
-        </div>
-      </header>
-    )
   }
 
   const NAV_LINKS = [
