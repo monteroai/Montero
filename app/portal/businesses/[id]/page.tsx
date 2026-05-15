@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, use } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { card, colors, gradientButton, secondaryButton, inputStyle, labelStyle } from '@/lib/portal/styles'
@@ -13,8 +13,8 @@ const INDUSTRIES = [
   'restaurant', 'professional-services', 'medical', 'retail', 'other',
 ]
 
-export default function EditBusinessPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
+export default function EditBusinessPage({ params }: { params: { id: string } }) {
+  const { id } = params
   const router = useRouter()
   const { businesses, refreshBusinesses } = useBusiness()
   const fileInputRef = useRef<HTMLInputElement>(null)
