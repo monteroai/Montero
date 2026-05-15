@@ -2,9 +2,9 @@
 
 import { useEffect } from 'react'
 
-// Top-level error boundary — replaces Next.js's minified "client-side exception"
-// screen with the actual error message + stack. Strip back to a generic message
-// once the underlying bug is fixed.
+// Top-level error boundary. Logs the full error to the console for debugging
+// but only shows a friendly message + Try Again / Email Emilio buttons to the
+// user. Replace this with something fancier once we have proper telemetry.
 export default function GlobalError({
   error,
   reset,
@@ -13,6 +13,7 @@ export default function GlobalError({
   reset: () => void
 }) {
   useEffect(() => {
+    // Surface in console so Emilio can debug if it happens to him
     console.error('[GlobalError]', error)
   }, [error])
 
@@ -20,64 +21,33 @@ export default function GlobalError({
     <html>
       <body style={{
         fontFamily: 'ui-sans-serif, system-ui, sans-serif',
-        background: '#0a0908',
-        color: '#E8E0D0',
         margin: 0,
-        padding: '40px 24px',
+        padding: '60px 24px',
         minHeight: '100vh',
+        background: 'linear-gradient(135deg, #e8eaf6 0%, #e3e9f7 20%, #f0e6f6 40%, #fce4ec 60%, #e8eaf6 80%, #dbeafe 100%)',
+        color: '#1e293b',
       }}>
-        <div style={{ maxWidth: 720, margin: '0 auto' }}>
-          <h1 style={{ fontSize: 22, color: '#C9A84C', marginBottom: 8 }}>Something broke</h1>
-          <p style={{ fontSize: 13, color: '#8A8070', marginBottom: 20 }}>
-            Full error below so Emilio can see what went wrong. Try reload — if it sticks, paste this in chat.
+        <div style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center' }}>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1B2B5E', marginBottom: 10 }}>
+            Something went wrong on this page
+          </h1>
+          <p style={{ fontSize: 14, color: '#64748b', marginBottom: 28, lineHeight: 1.6 }}>
+            Try reloading. If it sticks, email <a href="mailto:ai@montero.cool" style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 600 }}>ai@montero.cool</a> and let us know what you were doing.
           </p>
 
-          <div style={{
-            background: '#141210',
-            border: '1px solid #2a2520',
-            borderRadius: 12,
-            padding: 16,
-            marginBottom: 16,
-          }}>
-            <div style={{ fontSize: 11, color: '#5C544A', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Message</div>
-            <pre style={{ margin: 0, fontSize: 13, color: '#E8E0D0', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-              {error.message || '(no message)'}
-            </pre>
-            {error.digest && (
-              <>
-                <div style={{ fontSize: 11, color: '#5C544A', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 14, marginBottom: 6 }}>Digest</div>
-                <pre style={{ margin: 0, fontSize: 12, color: '#8A8070', fontFamily: 'ui-monospace, Menlo, monospace' }}>{error.digest}</pre>
-              </>
-            )}
-          </div>
-
-          {error.stack && (
-            <div style={{
-              background: '#141210',
-              border: '1px solid #2a2520',
-              borderRadius: 12,
-              padding: 16,
-              marginBottom: 16,
-            }}>
-              <div style={{ fontSize: 11, color: '#5C544A', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Stack</div>
-              <pre style={{ margin: 0, fontSize: 11, color: '#8A8070', whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'ui-monospace, Menlo, monospace' }}>
-                {error.stack}
-              </pre>
-            </div>
-          )}
-
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
             <button
               onClick={reset}
               style={{
-                background: '#C9A84C',
-                color: '#0a0908',
+                background: 'linear-gradient(135deg, #1B2B5E, #2563eb)',
+                color: '#fff',
                 border: 'none',
-                borderRadius: 10,
-                padding: '10px 18px',
-                fontSize: 13,
+                borderRadius: 12,
+                padding: '11px 22px',
+                fontSize: 14,
                 fontWeight: 600,
                 cursor: 'pointer',
+                fontFamily: 'inherit',
               }}
             >
               Try again
@@ -85,19 +55,26 @@ export default function GlobalError({
             <a
               href="/"
               style={{
-                background: 'transparent',
-                color: '#8A8070',
-                border: '1px solid #2a2520',
-                borderRadius: 10,
-                padding: '10px 18px',
-                fontSize: 13,
+                background: 'rgba(255,255,255,0.7)',
+                color: '#1e293b',
+                border: '1px solid rgba(255,255,255,0.6)',
+                borderRadius: 12,
+                padding: '11px 22px',
+                fontSize: 14,
                 fontWeight: 500,
                 textDecoration: 'none',
+                fontFamily: 'inherit',
               }}
             >
               Home
             </a>
           </div>
+
+          {error.digest && (
+            <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 32, fontFamily: 'ui-monospace, Menlo, monospace' }}>
+              Reference: {error.digest}
+            </p>
+          )}
         </div>
       </body>
     </html>

@@ -24,6 +24,8 @@ export default function AiAssistant() {
     : "Hi — I'm your Montero assistant. Once you add your first business, I'll be able to see what's running, what's happened recently, and what needs attention."
   const [messages, setMessages] = useState<Message[]>([{ role: 'assistant', content: greeting }])
   const [loading, setLoading] = useState(false)
+  const [escalating, setEscalating] = useState(false)
+  const [escalated, setEscalated] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -73,6 +75,39 @@ export default function AiAssistant() {
   }
 
   const showStarters = messages.length === 1 && !loading
+  const canEscalate = messages.filter(m => m.role === 'user').length >= 1 && !escalated
+
+  async function escalate() {
+    if (escalating || escalated) return
+    setEscalating(true)
+    try {
+      const res = await fetch('/api/portal/chat/escalate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages, active_business_id: activeBusinessId }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.ok) {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: `Couldn't send your message to Emilio just now (${data.error || res.status}). Try again, or email ai@montero.cool directly.`,
+        }])
+      } else {
+        setEscalated(true)
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: "Got it — Emilio's been notified with the conversation so far. He'll reach out via email. In the meantime feel free to keep chatting here.",
+        }])
+      }
+    } catch {
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: "Couldn't reach the server. Try again in a moment, or email ai@montero.cool directly.",
+      }])
+    } finally {
+      setEscalating(false)
+    }
+  }
 
   return (
     <>
@@ -238,6 +273,30 @@ export default function AiAssistant() {
               </div>
             )}
           </div>
+
+          {/* Escalation strip — only after the client has actually said something */}
+          {(canEscalate || escalated) && (
+            <div style={{ padding: '8px 18px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', background: escalated ? '#f0fdf4' : '#fafbfc' }}>
+              <span style={{ fontSize: '11.5px', color: escalated ? colors.success : colors.textMuted }}>
+                {escalated
+                  ? "✓ Emilio's been notified — he'll reach out via email."
+                  : 'Not getting what you need?'}
+              </span>
+              {!escalated && (
+                <button
+                  onClick={escalate}
+                  disabled={escalating}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                    fontSize: '11.5px', fontWeight: 600, color: colors.blue, padding: '2px 4px',
+                    opacity: escalating ? 0.5 : 1,
+                  }}
+                >
+                  {escalating ? 'Sending…' : 'Talk to Emilio →'}
+                </button>
+              )}
+            </div>
+          )}
 
           <div
             style={{
