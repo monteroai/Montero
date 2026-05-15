@@ -86,6 +86,7 @@ function IntegrationCard({
   const [error, setError] = useState<string | null>(null)
   const [showInstructions, setShowInstructions] = useState(!verified)
   const [confirmingDisconnect, setConfirmingDisconnect] = useState(false)
+  const [justVerified, setJustVerified] = useState<{ synced?: number; total?: number; sync_error?: string } | null>(null)
 
   async function save() {
     if (!value || value.trim().length < 4) {
@@ -106,6 +107,7 @@ function IntegrationCard({
       } else {
         setValue('')
         setShowInstructions(false)
+        setJustVerified({ synced: d.synced, total: d.total, sync_error: d.sync_error })
         onChanged()
       }
     } catch (e) {
@@ -177,6 +179,31 @@ function IntegrationCard({
         </summary>
         <p style={{ fontSize: '12.5px', color: colors.textMuted, margin: '8px 0 0', lineHeight: 1.6 }}>{def.purpose}</p>
       </details>
+
+      {/* What's next — only after a fresh verify in this session */}
+      {verified && justVerified && (
+        <div style={{
+          background: colors.infoBg, padding: '14px 16px', borderRadius: '10px',
+          border: `1px solid rgba(37,99,235,0.2)`, fontSize: '12.5px', color: colors.textDark, lineHeight: 1.6,
+        }}>
+          <div style={{ fontWeight: 600, color: colors.navy, marginBottom: '6px', fontSize: '13px' }}>
+            ✓ Connected. Here&apos;s what happens now:
+          </div>
+          <ol style={{ margin: 0, paddingLeft: '20px' }}>
+            <li>Your key is encrypted in our vault — you can rotate it any time from this page.</li>
+            {def.service === 'n8n' && justVerified.synced !== undefined && (
+              justVerified.synced > 0
+                ? <li>We pulled in <strong>{justVerified.synced} workflow{justVerified.synced === 1 ? '' : 's'}</strong> from your n8n account. Find them under <Link href="/portal/automations" style={{ color: colors.blue, fontWeight: 600, textDecoration: 'none' }}>Automations</Link>.</li>
+                : <li>Your n8n account doesn&apos;t have any workflows yet — that&apos;s fine. Emilio will build them for you.</li>
+            )}
+            {def.service === 'n8n' && justVerified.sync_error && (
+              <li style={{ color: colors.warning }}>We couldn&apos;t auto-pull workflows: {justVerified.sync_error}. Don&apos;t worry — Emilio will sync them manually.</li>
+            )}
+            <li>Emilio will build the automations you discussed in the next 24-48 hours. You&apos;ll see each one appear under Automations as it goes live.</li>
+            <li>When an automation is ready, you&apos;ll get an email. Open the dashboard, flip the toggle, you&apos;re running.</li>
+          </ol>
+        </div>
+      )}
 
       {/* Verified state — show masked + rotate/disconnect */}
       {verified && (

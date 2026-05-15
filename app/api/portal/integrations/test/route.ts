@@ -12,6 +12,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { syncN8nWorkflowsForClient } from '@/lib/portal/n8nSync'
 
 const N8N_BASE_URL = process.env.N8N_API_URL || 'https://montero-cool.app.n8n.cloud'
 
@@ -82,7 +83,25 @@ export async function POST(req: NextRequest) {
     p_error: null,
   })
 
-  return NextResponse.json({ ok: true, verified_at: new Date().toISOString() })
+  // Side-effect: when n8n is verified, immediately pull the client's workflows
+  // into portal_automations so the dashboard "comes alive" without an extra step.
+  // We use the just-verified plaintext directly (no extra Vault round-trip)
+  // and don't fail the verify response if sync hits an error.
+  let postVerify: { synced?: number; total?: number; sync_error?: string } = {}
+  if (service === 'n8n') {
+    try {
+      const result = await syncN8nWorkflowsForClient(supabase, client.id, value.trim())
+      if (result.ok) {
+        postVerify = { synced: result.synced, total: result.total }
+      } else {
+        postVerify = { sync_error: result.error }
+      }
+    } catch (e) {
+      postVerify = { sync_error: (e as Error).message || 'sync failed' }
+    }
+  }
+
+  return NextResponse.json({ ok: true, verified_at: new Date().toISOString(), ...postVerify })
 }
 
 // =============================================================================
