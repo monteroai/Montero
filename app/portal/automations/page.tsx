@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { colors, secondaryButton } from '@/lib/portal/styles'
+import { colors, secondaryButton, gradientButton } from '@/lib/portal/styles'
 import { AutomationRow } from '@/components/portal/AutomationRow'
 import { useBusiness } from '@/lib/portal/BusinessContext'
 import { createClient } from '@/lib/supabase/client'
+import { TEMPLATES } from '@/lib/portal/templates'
 import type { PortalAutomation } from '@/lib/portal/types'
 
 export default function AutomationsPage() {
@@ -14,6 +15,10 @@ export default function AutomationsPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [syncMessage, setSyncMessage] = useState<string | null>(null)
+  const [deployOpen, setDeployOpen] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState<string>(TEMPLATES[0]?.key || '')
+  const [deploying, setDeploying] = useState(false)
+  const [deployMessage, setDeployMessage] = useState<string | null>(null)
 
   // Check admin flag once for this user (drives visibility of the Sync button)
   useEffect(() => {
@@ -69,6 +74,29 @@ export default function AutomationsPage() {
     }
   }
 
+  async function deployTemplate() {
+    if (!selectedTemplate) return
+    setDeploying(true)
+    setDeployMessage(null)
+    try {
+      const r = await fetch('/api/admin/deploy-template', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ template_key: selectedTemplate }),
+      })
+      const d = await r.json()
+      if (!r.ok || d.error) {
+        setDeployMessage(d.error || `Deploy failed (${r.status})`)
+      } else {
+        setDeployMessage(`✓ Deployed "${d.workflow_name}" — open n8n.cloud to confirm, then click Sync to pull it into your dashboard.`)
+      }
+    } catch (e) {
+      setDeployMessage(e instanceof Error ? e.message : 'Deploy failed')
+    } finally {
+      setDeploying(false)
+    }
+  }
+
   const activeCount = automations.filter(a => a.active).length
 
   return (
@@ -85,16 +113,72 @@ export default function AutomationsPage() {
           </p>
         </div>
         {isAdmin && activeBusinessId && (
-          <button
-            onClick={syncFromN8n}
-            disabled={syncing}
-            style={{ ...secondaryButton, fontFamily: 'inherit', fontSize: '12px', padding: '8px 14px', opacity: syncing ? 0.5 : 1 }}
-            title="Admin only — pulls workflows from this client's n8n account into the dashboard"
-          >
-            {syncing ? 'Syncing…' : '⟳ Sync from n8n'}
-          </button>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setDeployOpen(o => !o)}
+              style={{ ...secondaryButton, fontFamily: 'inherit', fontSize: '12px', padding: '8px 14px' }}
+              title="Admin only — push a workflow template into the active client's n8n"
+            >
+              ＋ Deploy workflow
+            </button>
+            <button
+              onClick={syncFromN8n}
+              disabled={syncing}
+              style={{ ...secondaryButton, fontFamily: 'inherit', fontSize: '12px', padding: '8px 14px', opacity: syncing ? 0.5 : 1 }}
+              title="Admin only — pulls workflows from this client's n8n account into the dashboard"
+            >
+              {syncing ? 'Syncing…' : '⟳ Sync from n8n'}
+            </button>
+          </div>
         )}
       </div>
+
+      {/* Deploy panel — collapses inline below the header */}
+      {isAdmin && deployOpen && (
+        <div style={{
+          padding: '14px 16px', background: 'rgba(255,255,255,0.85)', borderRadius: '12px',
+          border: `1px solid ${colors.border}`, display: 'flex', flexDirection: 'column', gap: '10px',
+          margin: '6px 4px 0',
+        }}>
+          <div style={{ fontSize: '13px', fontWeight: 600, color: colors.navy }}>Deploy a workflow into the active client&apos;s n8n</div>
+          <div style={{ display: 'grid', gap: '6px' }}>
+            {TEMPLATES.map(t => (
+              <label key={t.key} style={{ display: 'flex', gap: '10px', padding: '10px 12px', borderRadius: '10px', border: `1px solid ${selectedTemplate === t.key ? colors.blue : colors.border}`, background: selectedTemplate === t.key ? 'rgba(37,99,235,0.06)' : '#fff', cursor: 'pointer' }}>
+                <input
+                  type="radio"
+                  checked={selectedTemplate === t.key}
+                  onChange={() => setSelectedTemplate(t.key)}
+                  style={{ marginTop: '4px' }}
+                />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: colors.textDark }}>{t.name}</div>
+                  <div style={{ fontSize: '11.5px', color: colors.textMuted, marginTop: '2px', lineHeight: 1.4 }}>{t.description}</div>
+                </div>
+              </label>
+            ))}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+            <button
+              onClick={() => { setDeployOpen(false); setDeployMessage(null) }}
+              style={{ ...secondaryButton, fontFamily: 'inherit', fontSize: '12px', padding: '8px 14px' }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={deployTemplate}
+              disabled={deploying || !selectedTemplate}
+              style={{ ...gradientButton, fontFamily: 'inherit', fontSize: '12px', padding: '8px 16px', opacity: deploying ? 0.5 : 1 }}
+            >
+              {deploying ? 'Deploying…' : 'Deploy to active client'}
+            </button>
+          </div>
+          {deployMessage && (
+            <div style={{ fontSize: '12px', color: deployMessage.startsWith('✓') ? colors.success : colors.error, padding: '4px 2px 0' }}>
+              {deployMessage}
+            </div>
+          )}
+        </div>
+      )}
 
       {isAdmin && syncMessage && (
         <div style={{ fontSize: '12px', color: syncMessage.includes('Synced') ? colors.success : colors.error, padding: '6px 4px 0' }}>
