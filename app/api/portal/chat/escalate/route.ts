@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { error } = await admin.from('portal_interactions').insert({
+    client_id: client.id,  // legacy column, kept populated until we drop it
     business_id: businessId,
     type: 'chat',
     summary,
