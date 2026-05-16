@@ -133,7 +133,7 @@ export default function NewBusinessPage() {
 
             <div style={{ marginBottom: '14px' }}>
               <label style={labelStyle}>Business name <span style={{ color: colors.error }}>*</span></label>
-              <input style={inputStyle} value={name} onChange={e => setName(e.target.value)} placeholder="Smile Dental Temps LLC" required />
+              <input style={inputStyle} value={name} onChange={e => setName(e.target.value)} placeholder="Acme Inc." required />
             </div>
 
             <div style={{ marginBottom: '14px' }}>
