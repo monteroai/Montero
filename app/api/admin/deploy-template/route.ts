@@ -28,15 +28,31 @@ export async function POST(req: NextRequest) {
   if (!caller.is_admin) return NextResponse.json({ error: 'Admins only' }, { status: 403 })
 
   // Body
-  let body: { template_key?: string; target_client_id?: string }
+  let body: { template_key?: string; target_business_id?: string; target_client_id?: string }
   try {
     body = await req.json()
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
   const { template_key } = body
-  const targetClientId = body.target_client_id || caller.id
   if (!template_key) return NextResponse.json({ error: 'template_key is required' }, { status: 400 })
+
+  // Resolve target client. Priority:
+  //   1) target_business_id from the UI's active business → look up its client_id
+  //   2) explicit target_client_id
+  //   3) caller's own client_id (fallback for single-tenant testing)
+  let targetClientId: string = caller.id
+  if (body.target_business_id) {
+    const { data: biz } = await supabase
+      .from('portal_businesses')
+      .select('client_id')
+      .eq('id', body.target_business_id)
+      .maybeSingle()
+    if (!biz) return NextResponse.json({ error: 'target_business_id not found (or RLS blocked the read)' }, { status: 404 })
+    targetClientId = biz.client_id
+  } else if (body.target_client_id) {
+    targetClientId = body.target_client_id
+  }
 
   const template = getTemplateByKey(template_key)
   if (!template) return NextResponse.json({ error: `Unknown template: ${template_key}` }, { status: 404 })

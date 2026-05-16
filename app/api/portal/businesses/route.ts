@@ -1,32 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-// GET /api/portal/businesses → list all businesses for the signed-in user's account
+// GET /api/portal/businesses → list businesses
+//   - Regular users: only their own businesses
+//   - Admins: every business across every client (with owner_name attached so
+//     the header switcher can group/label them by client)
 export async function GET() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Find or auto-create the client row
-  const { data: client } = await supabase
+  const { data: caller } = await supabase
     .from('portal_clients')
-    .select('id')
+    .select('id, is_admin')
     .eq('user_id', user.id)
-    .single()
+    .maybeSingle()
 
-  if (!client) {
-    return NextResponse.json({ businesses: [] })
+  // Admin path — read every business + owner name via the join.
+  // RLS admin_portal_businesses_select_all permits this.
+  if (caller?.is_admin) {
+    const { data: businesses, error } = await supabase
+      .from('portal_businesses')
+      .select('*, portal_clients!inner(id, owner_name, primary_email, is_admin)')
+      .eq('is_archived', false)
+      .order('sort_order', { ascending: true })
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    // Flatten the join so the existing PortalBusiness shape gets `owner_name` etc.
+    const flattened = (businesses || []).map(b => {
+      const pc = (b as Record<string, unknown>).portal_clients as { owner_name?: string; primary_email?: string } | undefined
+      const { portal_clients: _drop, ...rest } = b as Record<string, unknown>
+      return {
+        ...rest,
+        _client_owner_name: pc?.owner_name || null,
+        _client_email: pc?.primary_email || null,
+      }
+    })
+    return NextResponse.json({ businesses: flattened, _admin_view: true })
   }
 
+  // Regular user path
+  if (!caller) return NextResponse.json({ businesses: [] })
   const { data: businesses, error } = await supabase
     .from('portal_businesses')
     .select('*')
-    .eq('client_id', client.id)
+    .eq('client_id', caller.id)
     .eq('is_archived', false)
     .order('sort_order', { ascending: true })
-
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
   return NextResponse.json({ businesses: businesses || [] })
 }
 

@@ -10,6 +10,9 @@ interface BusinessContextValue {
   setActiveBusinessId: (id: string) => void
   refreshBusinesses: () => Promise<void>
   loading: boolean
+  // True when the caller is an admin and `businesses` includes every client's
+  // businesses (the header switcher uses this to group/label by owner).
+  isAdminView: boolean
   // brand theme derived from active business
   theme: BrandColors
 }
@@ -30,12 +33,14 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
   const [businesses, setBusinesses] = useState<PortalBusiness[]>([])
   const [activeBusinessId, setActiveBusinessIdState] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isAdminView, setIsAdminView] = useState(false)
 
   const refreshBusinesses = useCallback(async () => {
     try {
       const res = await fetch('/api/portal/businesses')
       const data = await res.json()
       const list: PortalBusiness[] = data.businesses || []
+      setIsAdminView(Boolean(data._admin_view))
       setBusinesses(list)
 
       // Decide active business
@@ -92,6 +97,7 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
         setActiveBusinessId,
         refreshBusinesses,
         loading,
+        isAdminView,
         theme,
       }}
     >

@@ -59,7 +59,11 @@ export default function AutomationsPage() {
     setSyncing(true)
     setSyncMessage(null)
     try {
-      const r = await fetch('/api/admin/sync-n8n', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+      const r = await fetch('/api/admin/sync-n8n', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target_business_id: activeBusinessId }),
+      })
       const d = await r.json()
       if (!r.ok || d.error) {
         setSyncMessage(d.error || `Sync failed (${r.status})`)
@@ -82,7 +86,7 @@ export default function AutomationsPage() {
       const r = await fetch('/api/admin/deploy-template', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ template_key: selectedTemplate }),
+        body: JSON.stringify({ template_key: selectedTemplate, target_business_id: activeBusinessId }),
       })
       const d = await r.json()
       if (!r.ok || d.error) {

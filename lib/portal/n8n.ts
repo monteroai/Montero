@@ -20,11 +20,30 @@ async function n8nFetch(path: string, options?: RequestInit) {
 }
 
 export async function toggleWorkflow(workflowId: string, active: boolean): Promise<boolean> {
-  const data = await n8nFetch(`/workflows/${workflowId}`, {
-    method: 'PATCH',
-    body: JSON.stringify({ active }),
+  // n8n cloud rejects PATCH on /workflows/{id} for the active field — use the
+  // dedicated /activate and /deactivate POST endpoints instead.
+  const action = active ? 'activate' : 'deactivate'
+  await n8nFetch(`/workflows/${workflowId}/${action}`, { method: 'POST' })
+  return true
+}
+
+// Same as toggleWorkflow but uses a provided API key (per-client vault) instead
+// of the global env var. Called by the automations PATCH route once we've
+// decrypted the owning client's n8n key.
+export async function toggleWorkflowWithKey(workflowId: string, active: boolean, apiKey: string): Promise<boolean> {
+  const action = active ? 'activate' : 'deactivate'
+  const res = await fetch(`${N8N_API_URL}/api/v1/workflows/${workflowId}/${action}`, {
+    method: 'POST',
+    headers: {
+      'X-N8N-API-KEY': apiKey,
+      'Content-Type': 'application/json',
+    },
   })
-  return data.active === active
+  if (!res.ok) {
+    const text = await res.text().catch(() => 'unknown error')
+    throw new Error(`n8n API error ${res.status}: ${text}`)
+  }
+  return true
 }
 
 export async function getWorkflowStatus(workflowId: string): Promise<N8nWorkflowStatus> {

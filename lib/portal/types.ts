@@ -30,6 +30,10 @@ export interface PortalBusiness {
   sort_order: number
   created_at: string
   updated_at: string
+  // Admin-only fields — only populated when the request was made by an admin user.
+  // Lets the header switcher group businesses by client / show owner names.
+  _client_owner_name?: string | null
+  _client_email?: string | null
 }
 
 export interface BrandColors {

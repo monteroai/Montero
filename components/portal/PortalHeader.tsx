@@ -13,7 +13,7 @@ interface PortalHeaderProps {
 
 export function PortalHeader({ clientName, onToggleSidebar }: PortalHeaderProps) {
   const initial = (clientName ? clientName[0] : 'C').toUpperCase()
-  const { businesses, activeBusiness, setActiveBusinessId } = useBusiness()
+  const { businesses, activeBusiness, setActiveBusinessId, isAdminView } = useBusiness()
   const [switcherOpen, setSwitcherOpen] = useState(false)
   const switcherRef = useRef<HTMLDivElement>(null)
 
@@ -98,6 +98,11 @@ export function PortalHeader({ clientName, onToggleSidebar }: PortalHeaderProps)
             )}
             <span style={{ fontSize: '13px', fontWeight: 600, color: colors.navy }}>
               {activeBusiness.business_name}
+              {isAdminView && activeBusiness._client_owner_name && (
+                <span style={{ marginLeft: '6px', fontSize: '11px', fontWeight: 500, color: colors.textMuted }}>
+                  · {activeBusiness._client_owner_name}
+                </span>
+              )}
             </span>
             {businesses.length > 1 && (
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={colors.textMuted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -160,9 +165,16 @@ export function PortalHeader({ clientName, onToggleSidebar }: PortalHeaderProps)
                     <div style={{ fontSize: '13px', fontWeight: isActive ? 600 : 500, color: colors.textDark, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {b.business_name}
                     </div>
-                    {b.industry && (
-                      <div style={{ fontSize: '11px', color: colors.textLight }}>{b.industry}</div>
-                    )}
+                    <div style={{ fontSize: '11px', color: colors.textLight }}>
+                      {isAdminView && b._client_owner_name ? (
+                        <>
+                          <span style={{ fontWeight: 600 }}>{b._client_owner_name}</span>
+                          {b.industry && <span> · {b.industry}</span>}
+                        </>
+                      ) : (
+                        b.industry || null
+                      )}
+                    </div>
                   </div>
                   {isActive && (
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={colors.blue} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

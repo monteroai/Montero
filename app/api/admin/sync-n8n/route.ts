@@ -25,14 +25,29 @@ export async function POST(req: NextRequest) {
   if (!caller) return NextResponse.json({ error: 'No client account' }, { status: 404 })
   if (!caller.is_admin) return NextResponse.json({ error: 'Admins only' }, { status: 403 })
 
-  // Target client — defaults to the admin's own client
-  let body: { client_id?: string } = {}
+  // Resolve target client:
+  //   1) target_business_id (preferred — matches the UI's active business)
+  //   2) client_id (explicit override)
+  //   3) caller's own client_id (fallback)
+  let body: { target_business_id?: string; client_id?: string } = {}
   try {
     body = await req.json()
   } catch {
-    // empty body is fine; we'll default
+    // empty body is fine
   }
-  const targetClientId = body.client_id || caller.id
+
+  let targetClientId: string = caller.id
+  if (body.target_business_id) {
+    const { data: biz } = await supabase
+      .from('portal_businesses')
+      .select('client_id')
+      .eq('id', body.target_business_id)
+      .maybeSingle()
+    if (!biz) return NextResponse.json({ error: 'target_business_id not found' }, { status: 404 })
+    targetClientId = biz.client_id
+  } else if (body.client_id) {
+    targetClientId = body.client_id
+  }
 
   // Read the n8n key out of Vault using a service-role client.
   // get_client_secret_plaintext is locked to service_role specifically so the
