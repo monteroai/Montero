@@ -172,15 +172,42 @@ export async function POST(req: NextRequest) {
 
   // Best-effort email notification — never blocks the response. The DB row is
   // the source of truth; email is a notification on top.
+  //
+  // We respect admin preferences: if the admin recipient has unchecked
+  // Settings → Notifications → Flagged Issues, skip the email but still log
+  // the row in portal_interactions. (Find recipient + check pref via service
+  // role so it works even before RLS admin policies are set up.)
   const businessName = businessId ? await fetchBusinessName(supabase, businessId) : null
-  const emailResult = await sendEscalationEmail({
-    clientName: client.owner_name || client.primary_email || user.email || 'Client',
-    clientEmail: client.primary_email || user.email || null,
-    businessName,
-    lastMessage: lastUserMsg,
-    conversation: messages,
-    noteFromClient: note || null,
-  })
+
+  let emailResult: { sent: boolean; reason?: string } = { sent: false, reason: 'skipped' }
+  try {
+    const a = adminClient()
+    const { data: adminRow } = await a
+      .from('portal_clients')
+      .select('user_id, onboarding_data')
+      .eq('is_admin', true)
+      .limit(1)
+      .maybeSingle()
+    const adminPrefs = (adminRow?.onboarding_data as Record<string, unknown> | null)?.notification_prefs as Record<string, unknown> | undefined
+    // Default to ON if the pref hasn't been set yet
+    const flaggedIssuesEnabled = adminPrefs?.flagged_issues !== false
+
+    if (!flaggedIssuesEnabled) {
+      emailResult = { sent: false, reason: 'admin disabled Flagged Issues notifications' }
+    } else {
+      emailResult = await sendEscalationEmail({
+        clientName: client.owner_name || client.primary_email || user.email || 'Client',
+        clientEmail: client.primary_email || user.email || null,
+        businessName,
+        lastMessage: lastUserMsg,
+        conversation: messages,
+        noteFromClient: note || null,
+      })
+    }
+  } catch (e) {
+    console.error('[escalate] notification pipeline error:', (e as Error).message)
+    emailResult = { sent: false, reason: 'pipeline error' }
+  }
 
   return NextResponse.json({ ok: true, email_sent: emailResult.sent, email_reason: emailResult.reason })
 }
