@@ -60,6 +60,18 @@ export async function PATCH(request: Request) {
 
     const { error } = await supabase.from('portal_clients').update(updates).eq('id', existing.id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // Mirror the display name into Supabase Auth user_metadata so it's
+    // consistent in the Auth dashboard, in raw_user_meta_data, and in any
+    // future flows that pull from user.user_metadata. Best-effort — don't
+    // fail the save if this hiccups.
+    if (data?.owner_name) {
+      const newName = String(data.owner_name)
+      const { error: authErr } = await supabase.auth.updateUser({
+        data: { full_name: newName, display_name: newName },
+      })
+      if (authErr) console.error('[settings] auth.updateUser failed:', authErr.message)
+    }
   } else {
     const { error } = await supabase.from('portal_clients').insert({
       user_id: user.id,
