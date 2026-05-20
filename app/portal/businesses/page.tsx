@@ -7,7 +7,7 @@ import { useBusiness } from '@/lib/portal/BusinessContext'
 import type { PortalBusiness } from '@/lib/portal/types'
 
 export default function BusinessesPage() {
-  const { businesses, loading, refreshBusinesses, setActiveBusinessId } = useBusiness()
+  const { businesses, loading, refreshBusinesses, setActiveBusinessId, activeBusinessId } = useBusiness()
   const [archiving, setArchiving] = useState<string | null>(null)
   const [confirmingArchive, setConfirmingArchive] = useState<string | null>(null)
 
@@ -92,12 +92,29 @@ export default function BusinessesPage() {
                 )}
 
                 <div style={{ display: 'flex', gap: '6px', marginTop: 'auto', paddingTop: '8px' }}>
-                  <button
-                    onClick={() => setActiveBusinessId(b.id)}
-                    style={{ ...secondaryButton, fontSize: '12px', padding: '7px 12px', flex: 1 }}
-                  >
-                    Switch to
-                  </button>
+                  {b.id === activeBusinessId ? (
+                    <button
+                      disabled
+                      style={{
+                        ...secondaryButton,
+                        fontSize: '12px', padding: '7px 12px', flex: 1,
+                        cursor: 'default',
+                        background: colors.successBg,
+                        color: colors.success,
+                        border: `1px solid ${colors.success}33`,
+                        fontWeight: 600,
+                      }}
+                    >
+                      ✓ Current
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setActiveBusinessId(b.id)}
+                      style={{ ...secondaryButton, fontSize: '12px', padding: '7px 12px', flex: 1 }}
+                    >
+                      Switch to
+                    </button>
+                  )}
                   <Link href={`/portal/businesses/${b.id}`} style={{ ...secondaryButton, fontSize: '12px', padding: '7px 12px', textDecoration: 'none', textAlign: 'center', flex: 1 }}>
                     Edit
                   </Link>
