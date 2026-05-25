@@ -13,6 +13,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { syncN8nWorkflowsForClient } from '@/lib/portal/n8nSync'
+import { notifyAdminOfCredentialVerified } from '@/lib/portal/notifications'
+import { getIntegrationByService } from '@/lib/portal/integrations'
 
 const N8N_BASE_URL = process.env.N8N_API_URL || 'https://montero-cool.app.n8n.cloud'
 
@@ -38,7 +40,7 @@ export async function POST(req: NextRequest) {
   // Confirm the user has a portal_clients row (the RPC needs client_id)
   const { data: client } = await supabase
     .from('portal_clients')
-    .select('id')
+    .select('id, owner_name, primary_email')
     .eq('user_id', user.id)
     .maybeSingle()
   if (!client) {
@@ -99,6 +101,30 @@ export async function POST(req: NextRequest) {
     } catch (e) {
       postVerify = { sync_error: (e as Error).message || 'sync failed' }
     }
+  }
+
+  // Best-effort admin notification — Emilio gets pinged so he knows to start
+  // building this client's automations. Doesn't block the response.
+  try {
+    const integration = getIntegrationByService(service)
+    // Look up business name for context, if any
+    const { data: biz } = await supabase
+      .from('portal_businesses')
+      .select('business_name')
+      .eq('client_id', client.id)
+      .eq('is_archived', false)
+      .order('sort_order')
+      .limit(1)
+      .maybeSingle()
+    notifyAdminOfCredentialVerified({
+      clientName: client.owner_name || client.primary_email || user.email || 'Client',
+      clientEmail: client.primary_email || user.email || null,
+      service,
+      serviceLabel: integration?.name || service,
+      businessName: biz?.business_name || null,
+    }).catch(e => console.error('[test-credential] admin notify failed:', (e as Error).message))
+  } catch (e) {
+    console.error('[test-credential] admin notify pipeline error:', (e as Error).message)
   }
 
   return NextResponse.json({ ok: true, verified_at: new Date().toISOString(), ...postVerify })
