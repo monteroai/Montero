@@ -16,22 +16,35 @@ import { syncN8nWorkflowsForClient } from '@/lib/portal/n8nSync'
 import { notifyAdminOfCredentialVerified } from '@/lib/portal/notifications'
 import { getIntegrationByService } from '@/lib/portal/integrations'
 
-const N8N_BASE_URL = process.env.N8N_API_URL || 'https://montero-cool.app.n8n.cloud'
+const DEFAULT_N8N_BASE_URL = process.env.N8N_API_URL || 'https://montero-cool.app.n8n.cloud'
+
+// Per-client n8n URLs can be passed in the request body. Accept either a bare
+// host ("yourname.app.n8n.cloud") or full URL ("https://yourname.app.n8n.cloud").
+function normalizeN8nUrl(input?: string | null): string {
+  if (!input) return DEFAULT_N8N_BASE_URL
+  let s = input.trim()
+  if (!s) return DEFAULT_N8N_BASE_URL
+  if (!s.startsWith('http://') && !s.startsWith('https://')) s = 'https://' + s
+  return s.replace(/\/+$/, '')  // strip trailing slash
+}
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 })
 
-  let body: { service?: string; value?: string; label?: string; extras?: Record<string, string> }
+  let body: { service?: string; value?: string; label?: string; base_url?: string; extras?: Record<string, string> }
   try {
     body = await req.json()
   } catch {
     return NextResponse.json({ ok: false, error: 'Invalid JSON body' }, { status: 400 })
   }
-  const { service, value, label } = body
+  const { service, value, label, base_url } = body
   if (!service || !value) {
     return NextResponse.json({ ok: false, error: 'service and value are required' }, { status: 400 })
+  }
+  if (service === 'n8n' && !base_url) {
+    return NextResponse.json({ ok: false, error: 'Your n8n URL is required so we know which n8n instance to talk to.' })
   }
   if (typeof value !== 'string' || value.trim().length < 8) {
     return NextResponse.json({ ok: false, error: 'That value looks too short. Double-check what you pasted.' })
@@ -48,9 +61,10 @@ export async function POST(req: NextRequest) {
   }
 
   // Verify the credential against the provider
+  const n8nUrl = normalizeN8nUrl(base_url)
   let probe: { ok: boolean; error?: string }
   try {
-    probe = await probeProvider(service, value.trim())
+    probe = await probeProvider(service, value.trim(), { n8nUrl })
   } catch (e) {
     probe = { ok: false, error: e instanceof Error ? e.message : 'Probe failed' }
   }
@@ -85,6 +99,23 @@ export async function POST(req: NextRequest) {
     p_error: null,
   })
 
+  // Persist n8n instance URL alongside the key so future sync/deploy/toggle
+  // routes know which n8n to talk to (it's per-client, not a global env var).
+  // We store it on portal_clients.onboarding_data — not in Vault, since it's
+  // not secret, just config.
+  if (service === 'n8n' && base_url) {
+    const { data: cRow } = await supabase
+      .from('portal_clients')
+      .select('onboarding_data')
+      .eq('id', client.id)
+      .maybeSingle()
+    const od = (cRow?.onboarding_data as Record<string, unknown> | null) || {}
+    await supabase
+      .from('portal_clients')
+      .update({ onboarding_data: { ...od, n8n_base_url: n8nUrl } })
+      .eq('id', client.id)
+  }
+
   // Side-effect: when n8n is verified, immediately pull the client's workflows
   // into portal_automations so the dashboard "comes alive" without an extra step.
   // We use the just-verified plaintext directly (no extra Vault round-trip)
@@ -92,7 +123,7 @@ export async function POST(req: NextRequest) {
   let postVerify: { synced?: number; total?: number; sync_error?: string } = {}
   if (service === 'n8n') {
     try {
-      const result = await syncN8nWorkflowsForClient(supabase, client.id, value.trim())
+      const result = await syncN8nWorkflowsForClient(supabase, client.id, value.trim(), n8nUrl)
       if (result.ok) {
         postVerify = { synced: result.synced, total: result.total }
       } else {
@@ -134,16 +165,18 @@ export async function POST(req: NextRequest) {
 // Provider probes
 // =============================================================================
 
-async function probeProvider(service: string, value: string): Promise<{ ok: boolean; error?: string }> {
-  if (service === 'n8n') return probeN8n(value)
+interface ProbeOpts { n8nUrl?: string }
+
+async function probeProvider(service: string, value: string, opts: ProbeOpts = {}): Promise<{ ok: boolean; error?: string }> {
+  if (service === 'n8n') return probeN8n(value, opts.n8nUrl || DEFAULT_N8N_BASE_URL)
   if (service === 'vapi') return probeVapi(value)
   if (service === 'twilio') return probeTwilio(value)
   if (service === 'enginehire') return probeEnginehire(value)
   return { ok: false, error: `No probe defined for ${service}` }
 }
 
-async function probeN8n(apiKey: string) {
-  const url = `${N8N_BASE_URL}/api/v1/workflows?limit=1`
+async function probeN8n(apiKey: string, baseUrl: string) {
+  const url = `${baseUrl}/api/v1/workflows?limit=1`
   try {
     const r = await fetch(url, { headers: { 'X-N8N-API-KEY': apiKey, Accept: 'application/json' } })
     if (r.ok) return { ok: true }

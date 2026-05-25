@@ -80,7 +80,15 @@ function IntegrationCard({
   const verified = status?.verification_status === 'verified'
   const failed = status?.verification_status === 'failed'
 
-  const [value, setValue] = useState('')
+  // Generic field state — keyed by IntegrationDef.fields[*].key. Includes
+  // every field, not just the secret `value` (e.g. n8n needs base_url too).
+  const [fieldValues, setFieldValues] = useState<Record<string, string>>(() =>
+    Object.fromEntries(def.fields.map(f => [f.key, '']))
+  )
+  const valueField = def.fields.find(f => f.key === 'value') || def.fields[0]
+  const otherFields = def.fields.filter(f => f.key !== valueField.key)
+  const value = fieldValues[valueField.key] || ''
+  const setValue = (v: string) => setFieldValues(p => ({ ...p, [valueField.key]: v }))
   const [showValue, setShowValue] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -93,13 +101,29 @@ function IntegrationCard({
       setError('Looks too short — make sure you pasted the full value.')
       return
     }
+    // Check required non-secret fields
+    for (const f of otherFields) {
+      if (f.required && !fieldValues[f.key]?.trim()) {
+        setError(`${f.label} is required.`)
+        return
+      }
+    }
     setSaving(true)
     setError(null)
     try {
+      const payload: Record<string, unknown> = {
+        service: def.service,
+        value: value.trim(),
+        label: def.name,
+      }
+      // Send all non-secret fields by their key (server reads base_url etc.)
+      for (const f of otherFields) {
+        if (fieldValues[f.key]?.trim()) payload[f.key] = fieldValues[f.key].trim()
+      }
       const r = await fetch('/api/portal/integrations/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ service: def.service, value: value.trim(), label: def.name }),
+        body: JSON.stringify(payload),
       })
       const d = await r.json()
       if (!d.ok) {
@@ -256,14 +280,29 @@ function IntegrationCard({
             </div>
           )}
 
+          {/* Render non-secret extras (e.g. n8n base_url) first, plain text inputs */}
+          {otherFields.map(f => (
+            <div key={f.key}>
+              <label style={labelStyle}>{f.label}{f.required && <span style={{ color: colors.error }}> *</span>}</label>
+              <input
+                type={f.type === 'password' ? 'password' : 'text'}
+                value={fieldValues[f.key] || ''}
+                onChange={(e) => { setFieldValues(p => ({ ...p, [f.key]: e.target.value })); if (error) setError(null) }}
+                placeholder={f.placeholder}
+                disabled={saving}
+                style={{ ...inputStyle, fontFamily: f.type === 'password' ? 'ui-monospace, Menlo, monospace' : 'inherit' }}
+              />
+            </div>
+          ))}
+
           <div>
-            <label style={labelStyle}>{def.fields[0].label}</label>
+            <label style={labelStyle}>{valueField.label}{valueField.required && <span style={{ color: colors.error }}> *</span>}</label>
             <div style={{ position: 'relative' }}>
               <input
                 type={showValue ? 'text' : 'password'}
                 value={value}
                 onChange={e => { setValue(e.target.value); if (error) setError(null) }}
-                placeholder={def.fields[0].placeholder}
+                placeholder={valueField.placeholder}
                 disabled={saving}
                 style={{
                   ...inputStyle,

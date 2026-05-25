@@ -35,14 +35,15 @@ export const INTEGRATIONS: IntegrationDef[] = [
       "We connect to your n8n account to deploy and monitor the automations we build for your business. " +
       "You don't need to log in to n8n yourself — we handle everything, you'll see results in your dashboard.",
     fields: [
+      { key: 'base_url', label: 'Your n8n URL', placeholder: 'yourname.app.n8n.cloud', type: 'text', required: true },
       { key: 'value', label: 'n8n API key', placeholder: 'n8n_api_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', type: 'password', required: true },
     ],
     instructions: [
-      'Open your n8n cloud dashboard (n8n.cloud or your custom URL).',
-      'Click your avatar (top right) → "Settings".',
-      'Open the "API" tab in the left sidebar.',
-      'Click "Create an API Key", give it a name like "Montero", and copy the value.',
-      'Paste it here and press Test & Save.',
+      'Sign in to your n8n cloud account. Copy your full URL from the browser bar (looks like `yourname.app.n8n.cloud`) and paste it into the first field above.',
+      'Inside n8n, click your avatar (top-right) → Settings → Personal → API.',
+      'Click "Create an API Key", name it "Montero", copy the value.',
+      'Paste it into the second field above and press Test & Save.',
+      'If the API tab is missing under Personal, you need to upgrade to the Starter plan ($24/mo) — the trial sometimes hides the API option.',
     ],
     docsUrl: 'https://docs.n8n.io/api/authentication/',
     category: 'automation',

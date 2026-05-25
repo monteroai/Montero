@@ -4,7 +4,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-const N8N_BASE_URL = process.env.N8N_API_URL || 'https://montero-cool.app.n8n.cloud'
+const DEFAULT_N8N_BASE_URL = process.env.N8N_API_URL || 'https://montero-cool.app.n8n.cloud'
 
 interface N8nWorkflowSummary {
   id: string
@@ -34,7 +34,9 @@ export async function syncN8nWorkflowsForClient(
   supabase: SupabaseClient,
   clientId: string,
   apiKey: string,
+  baseUrl?: string,
 ): Promise<SyncResult> {
+  const N8N_BASE_URL = baseUrl || DEFAULT_N8N_BASE_URL
   if (!apiKey) return { ok: false, synced: 0, total: 0, error: 'No n8n API key provided' }
 
   // Find the client's primary business (first by sort_order, not archived)
