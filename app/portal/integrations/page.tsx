@@ -337,15 +337,14 @@ function IntegrationCard({
             )}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-            {showInstructions && (
-              <button
-                onClick={() => setShowInstructions(false)}
-                style={{ background: 'none', border: 'none', color: colors.textMuted, fontSize: '12px', cursor: 'pointer', padding: '8px 4px', fontFamily: 'inherit' }}
-              >
-                Hide instructions
-              </button>
-            )}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', alignItems: 'center' }}>
+            <button
+              onClick={() => setShowInstructions(s => !s)}
+              style={{ background: 'none', border: 'none', color: colors.textMuted, fontSize: '12px', cursor: 'pointer', padding: '8px 4px', fontFamily: 'inherit' }}
+            >
+              {showInstructions ? 'Hide instructions' : 'Show instructions'}
+            </button>
+            <div style={{ flex: 1 }} />
             <button
               onClick={save}
               disabled={saving || !value}
