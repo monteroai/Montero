@@ -1,26 +1,34 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { card, colors, gradientButton, secondaryButton, inputStyle, labelStyle } from '@/lib/portal/styles'
+import { useState, useEffect, useCallback } from 'react'
+import { card, colors, gradientButton, secondaryButton, inputStyle, labelStyle, themeGradient } from '@/lib/portal/styles'
 import { ChangeRequestCard } from '@/components/portal/ChangeRequestCard'
 import { StatusBadge } from '@/components/portal/StatusBadge'
 import { WEBSITE_SECTIONS } from '@/lib/portal/constants'
 import { useBusiness } from '@/lib/portal/BusinessContext'
 import type { PortalWebsiteContent, PortalChangeRequest } from '@/lib/portal/types'
 
+type EditMode = { section: string; type: 'manual' | 'ai' } | null
+type Proposal = { section: string; text: string; summary: string } | null
+type Usage = { used: number; limit: number; exempt: boolean }
+
 export default function WebsitePage() {
   const { activeBusinessId, activeBusiness } = useBusiness()
   const [sections, setSections] = useState<PortalWebsiteContent[]>([])
   const [changeRequests, setChangeRequests] = useState<PortalChangeRequest[]>([])
-  const [editingSection, setEditingSection] = useState<string | null>(null)
-  const [editContent, setEditContent] = useState('')
-  const [submitting, setSubmitting] = useState(false)
+  const [mode, setMode] = useState<EditMode>(null)
+  const [draft, setDraft] = useState('') // manual edit text OR AI instruction
+  const [proposal, setProposal] = useState<Proposal>(null)
+  const [busy, setBusy] = useState(false)
   const [success, setSuccess] = useState('')
+  const [aiError, setAiError] = useState('')
+  const [usage, setUsage] = useState<Usage | null>(null)
 
-  useEffect(() => {
+  const load = useCallback(() => {
     if (!activeBusinessId) {
       setSections([])
       setChangeRequests([])
+      setUsage(null)
       return
     }
     fetch(`/api/portal/website?business_id=${activeBusinessId}`)
@@ -30,7 +38,13 @@ export default function WebsitePage() {
         setChangeRequests(d.change_requests || [])
       })
       .catch(() => {})
+    fetch(`/api/portal/website/ai?business_id=${activeBusinessId}`)
+      .then(r => r.json())
+      .then(d => { if (d.usage) setUsage(d.usage) })
+      .catch(() => {})
   }, [activeBusinessId])
+
+  useEffect(() => { load(); setMode(null); setProposal(null) }, [load])
 
   function getContent(sectionName: string): string {
     const s = sections.find(s => s.section === sectionName)
@@ -41,23 +55,58 @@ export default function WebsitePage() {
     return changeRequests.some(cr => cr.section === sectionName && cr.status === 'pending')
   }
 
-  async function submitChange(section: string) {
+  function openMode(section: string, type: 'manual' | 'ai') {
+    setAiError('')
+    setProposal(null)
+    setMode({ section, type })
+    setDraft(type === 'manual' ? getContent(section) : '')
+  }
+
+  function closeMode() {
+    setMode(null)
+    setDraft('')
+    setProposal(null)
+    setAiError('')
+  }
+
+  async function runAi() {
+    if (!activeBusinessId || !mode || !draft.trim()) return
+    setBusy(true)
+    setAiError('')
+    try {
+      const res = await fetch('/api/portal/website/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ business_id: activeBusinessId, section: mode.section, instruction: draft }),
+      })
+      const d = await res.json()
+      if (!res.ok) { setAiError(d.error || 'Something went wrong.'); return }
+      setProposal({ section: mode.section, text: d.proposed.text, summary: d.summary })
+      if (d.usage) setUsage(d.usage)
+    } catch {
+      setAiError('Could not reach the AI editor. Check your connection and try again.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function submitChange(section: string, text: string, source: 'manual' | 'ai') {
     if (!activeBusinessId) return
-    setSubmitting(true)
+    setBusy(true)
     setSuccess('')
     const res = await fetch('/api/portal/website', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ business_id: activeBusinessId, section, new_content: { text: editContent } }),
+      body: JSON.stringify({ business_id: activeBusinessId, section, new_content: { text, source } }),
     })
     if (res.ok) {
       const d = await res.json()
       setChangeRequests(prev => [d.change_request, ...prev])
-      setEditingSection(null)
-      setSuccess(`Change request submitted for ${section}. Awaiting approval.`)
+      closeMode()
+      setSuccess(`Change request submitted for ${section}. It goes live once approved.`)
       setTimeout(() => setSuccess(''), 5000)
     }
-    setSubmitting(false)
+    setBusy(false)
   }
 
   if (!activeBusinessId) {
@@ -73,13 +122,25 @@ export default function WebsitePage() {
 
   return (
     <>
-      <div style={{ padding: '8px 4px 0' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: 700, color: colors.navy, fontFamily: 'var(--font-cinzel)' }}>
-          Website {activeBusiness && <span style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, color: colors.textMuted }}>· {activeBusiness.business_name}</span>}
-        </h1>
-        <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>
-          Edit your website content. Changes require approval before going live.
-        </p>
+      <div style={{ padding: '8px 4px 0', display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', gap: '12px' }}>
+        <div style={{ flex: 1, minWidth: '240px' }}>
+          <h1 style={{ fontSize: '22px', fontWeight: 700, color: colors.navy, fontFamily: 'var(--font-cinzel)' }}>
+            Website {activeBusiness && <span style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, color: colors.textMuted }}>· {activeBusiness.business_name}</span>}
+          </h1>
+          <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>
+            Edit your website in plain English — describe the change, AI writes it, you approve it, it goes live.
+          </p>
+        </div>
+        {usage && (
+          <div style={{ ...card, padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span aria-hidden style={{ background: themeGradient, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '13px' }}>✦</span>
+            {usage.exempt ? (
+              <span style={{ fontSize: '12px', color: colors.textMuted }}>AI edits: <strong style={{ color: colors.success }}>Unlimited</strong></span>
+            ) : (
+              <span style={{ fontSize: '12px', color: colors.textMuted }}>AI edits this month: <strong style={{ color: colors.textDark }}>{usage.used} / {usage.limit}</strong></span>
+            )}
+          </div>
+        )}
       </div>
 
       {success && (
@@ -93,7 +154,8 @@ export default function WebsitePage() {
           {WEBSITE_SECTIONS.map(sectionName => {
             const content = getContent(sectionName)
             const pending = hasPending(sectionName)
-            const editing = editingSection === sectionName
+            const active = mode?.section === sectionName
+            const activeProposal = proposal?.section === sectionName ? proposal : null
 
             return (
               <div key={sectionName} style={{ ...card, padding: '18px 20px' }}>
@@ -106,41 +168,110 @@ export default function WebsitePage() {
                   ) : (
                     <StatusBadge status="live" />
                   )}
-                  {!editing && (
-                    <button
-                      onClick={() => { setEditingSection(sectionName); setEditContent(content) }}
-                      style={{ marginLeft: 'auto', ...secondaryButton, padding: '6px 12px', fontSize: '12px' }}
-                    >
-                      Edit
-                    </button>
+                  {!active && (
+                    <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
+                      <button
+                        onClick={() => openMode(sectionName, 'ai')}
+                        style={{ ...gradientButton, padding: '6px 12px', fontSize: '12px' }}
+                      >
+                        ✦ AI edit
+                      </button>
+                      <button
+                        onClick={() => openMode(sectionName, 'manual')}
+                        style={{ ...secondaryButton, padding: '6px 12px', fontSize: '12px' }}
+                      >
+                        Edit
+                      </button>
+                    </div>
                   )}
                 </div>
 
-                {editing ? (
+                {!active && (
+                  <div style={{ fontSize: '13px', color: colors.textMuted, lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+                    {content || <span style={{ fontStyle: 'italic' }}>No content yet. Try ✦ AI edit to write it from scratch.</span>}
+                  </div>
+                )}
+
+                {active && mode?.type === 'manual' && (
                   <div>
                     <label style={labelStyle}>Content</label>
                     <textarea
-                      value={editContent}
-                      onChange={e => setEditContent(e.target.value)}
+                      value={draft}
+                      onChange={e => setDraft(e.target.value)}
                       rows={6}
                       style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }}
                     />
                     <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                       <button
-                        onClick={() => submitChange(sectionName)}
-                        disabled={submitting}
-                        style={{ ...gradientButton, fontSize: '13px', padding: '8px 16px', opacity: submitting ? 0.5 : 1 }}
+                        onClick={() => submitChange(sectionName, draft, 'manual')}
+                        disabled={busy}
+                        style={{ ...gradientButton, fontSize: '13px', padding: '8px 16px', opacity: busy ? 0.5 : 1 }}
                       >
-                        {submitting ? 'Submitting...' : 'Request Change'}
+                        {busy ? 'Submitting...' : 'Request Change'}
                       </button>
-                      <button onClick={() => setEditingSection(null)} style={{ ...secondaryButton, fontSize: '13px', padding: '8px 16px' }}>
+                      <button onClick={closeMode} style={{ ...secondaryButton, fontSize: '13px', padding: '8px 16px' }}>
                         Cancel
                       </button>
                     </div>
                   </div>
-                ) : (
-                  <div style={{ fontSize: '13px', color: colors.textMuted, lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
-                    {content || <span style={{ fontStyle: 'italic' }}>No content yet. Click Edit to add.</span>}
+                )}
+
+                {active && mode?.type === 'ai' && !activeProposal && (
+                  <div>
+                    <label style={labelStyle}>What should change?</label>
+                    <textarea
+                      value={draft}
+                      onChange={e => setDraft(e.target.value)}
+                      rows={2}
+                      placeholder={`e.g. "make this sound more premium" or "mention that we now open Saturdays"`}
+                      style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }}
+                    />
+                    {aiError && <p style={{ fontSize: '12px', color: colors.error, marginTop: '8px' }}>{aiError}</p>}
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                      <button
+                        onClick={runAi}
+                        disabled={busy || !draft.trim()}
+                        style={{ ...gradientButton, fontSize: '13px', padding: '8px 16px', opacity: busy || !draft.trim() ? 0.5 : 1 }}
+                      >
+                        {busy ? 'Writing…' : '✦ Generate'}
+                      </button>
+                      <button onClick={closeMode} style={{ ...secondaryButton, fontSize: '13px', padding: '8px 16px' }}>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {active && mode?.type === 'ai' && activeProposal && (
+                  <div>
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                      <div style={{ flex: 1, minWidth: '220px', background: colors.inputBg, border: `1px solid ${colors.border}`, borderRadius: '12px', padding: '12px 14px' }}>
+                        <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: colors.textLight, marginBottom: '6px' }}>Current</div>
+                        <div style={{ fontSize: '12.5px', color: colors.textMuted, lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{content || <em>empty</em>}</div>
+                      </div>
+                      <div style={{ flex: 1, minWidth: '220px', background: colors.successBg, border: `1px solid ${colors.success}33`, borderRadius: '12px', padding: '12px 14px' }}>
+                        <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: colors.success, marginBottom: '6px' }}>Proposed</div>
+                        <div style={{ fontSize: '12.5px', color: colors.textDark, lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{activeProposal.text}</div>
+                      </div>
+                    </div>
+                    {activeProposal.summary && (
+                      <p style={{ fontSize: '12px', color: colors.textMuted, marginTop: '10px' }}>✦ {activeProposal.summary}</p>
+                    )}
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
+                      <button
+                        onClick={() => submitChange(sectionName, activeProposal.text, 'ai')}
+                        disabled={busy}
+                        style={{ ...gradientButton, fontSize: '13px', padding: '8px 16px', opacity: busy ? 0.5 : 1 }}
+                      >
+                        {busy ? 'Submitting...' : 'Use this — Request Change'}
+                      </button>
+                      <button onClick={() => { setProposal(null) }} style={{ ...secondaryButton, fontSize: '13px', padding: '8px 16px' }}>
+                        Try a different instruction
+                      </button>
+                      <button onClick={closeMode} style={{ ...secondaryButton, fontSize: '13px', padding: '8px 16px' }}>
+                        Discard
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
