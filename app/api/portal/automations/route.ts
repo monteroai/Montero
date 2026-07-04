@@ -13,8 +13,11 @@ export async function GET(request: NextRequest) {
   const businessId = url.searchParams.get('business_id')
   if (!businessId) return NextResponse.json({ automations: [] })
 
-  // RLS handles ownership check (joins portal_businesses → portal_clients → user_id)
-  const { data: automations, error } = await supabase
+  // RLS handles ownership for clients; admins read any business via service role
+  const { data: caller } = await supabase
+    .from('portal_clients').select('is_admin').eq('user_id', user.id).maybeSingle()
+  const db = caller?.is_admin ? adminClient() : supabase
+  const { data: automations, error } = await db
     .from('portal_automations')
     .select('*')
     .eq('business_id', businessId)

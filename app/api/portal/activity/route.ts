@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 
 // GET /api/portal/activity?business_id=xxx → interactions for a business
 export async function GET(request: NextRequest) {
@@ -16,7 +17,12 @@ export async function GET(request: NextRequest) {
 
   if (!businessId) return NextResponse.json({ interactions: [], total: 0 })
 
-  let query = supabase
+  // Admins read any client's business (service role); users stay RLS-scoped
+  const { data: caller } = await supabase
+    .from('portal_clients').select('is_admin').eq('user_id', user.id).maybeSingle()
+  const db = caller?.is_admin ? adminClient() : supabase
+
+  let query = db
     .from('portal_interactions')
     .select('*', { count: 'exact' })
     .eq('business_id', businessId)

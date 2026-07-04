@@ -1,5 +1,18 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+
+// Admins operate across every client's businesses; the admin RLS policies
+// were never applied in prod, so admin reads/writes go through the service
+// role after an is_admin check. Regular users stay on their RLS-scoped client.
+async function dbFor(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
+  const { data: caller } = await supabase
+    .from('portal_clients')
+    .select('id, is_admin')
+    .eq('user_id', userId)
+    .maybeSingle()
+  return caller?.is_admin ? adminClient() : supabase
+}
 
 // GET /api/portal/website?business_id=xxx → website sections + change requests for a business
 export async function GET(request: NextRequest) {
@@ -11,9 +24,10 @@ export async function GET(request: NextRequest) {
   const businessId = url.searchParams.get('business_id')
   if (!businessId) return NextResponse.json({ sections: [], change_requests: [] })
 
+  const db = await dbFor(supabase, user.id)
   const [{ data: sections }, { data: changeRequests }] = await Promise.all([
-    supabase.from('portal_website_content').select('*').eq('business_id', businessId).order('section'),
-    supabase.from('portal_change_requests').select('*').eq('business_id', businessId).order('requested_at', { ascending: false }).limit(20),
+    db.from('portal_website_content').select('*').eq('business_id', businessId).order('section'),
+    db.from('portal_change_requests').select('*').eq('business_id', businessId).order('requested_at', { ascending: false }).limit(20),
   ])
 
   return NextResponse.json({
@@ -39,15 +53,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'business_id, section, and new_content required' }, { status: 400 })
   }
 
-  // RLS will block if business doesn't belong to user
-  const { data: current } = await supabase
+  // RLS blocks non-owners; admins go through the service role
+  const db = await dbFor(supabase, user.id)
+  const { data: current } = await db
     .from('portal_website_content')
     .select('content')
     .eq('business_id', business_id)
     .eq('section', section)
     .single()
 
-  const { data: cr, error } = await supabase
+  const { data: cr, error } = await db
     .from('portal_change_requests')
     .insert({
       business_id,

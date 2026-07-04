@@ -34,16 +34,20 @@ async function resolveCaller(businessId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
 
-  // RLS scopes both queries to the signed-in user
-  const [{ data: client }, { data: business }] = await Promise.all([
-    supabase.from('portal_clients').select('*').eq('user_id', user.id).single(),
-    supabase.from('portal_businesses').select('id, business_name, industry, description').eq('id', businessId).single(),
-  ])
-  if (!client || !business) {
+  const { data: client } = await supabase.from('portal_clients').select('*').eq('user_id', user.id).single()
+  if (!client) return { error: NextResponse.json({ error: 'No account' }, { status: 403 }) }
+  // Admins operate on any client's business (service role); users are RLS-scoped
+  const db = client.is_admin ? adminClient() : supabase
+  const { data: business } = await db
+    .from('portal_businesses')
+    .select('id, business_name, industry, description')
+    .eq('id', businessId)
+    .single()
+  if (!business) {
     return { error: NextResponse.json({ error: 'Business not found' }, { status: 404 }) }
   }
   const exempt = (client as Record<string, unknown>).billing_exempt === true
-  return { supabase, user, client, business, exempt }
+  return { supabase: db, user, client, business, exempt }
 }
 
 export async function GET(request: NextRequest) {

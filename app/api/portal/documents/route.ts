@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 
 // GET /api/portal/documents → all docs for the account (optional ?business_id=xxx filter)
 export async function GET(request: NextRequest) {
@@ -9,7 +10,7 @@ export async function GET(request: NextRequest) {
 
   const { data: client } = await supabase
     .from('portal_clients')
-    .select('id')
+    .select('id, is_admin')
     .eq('user_id', user.id)
     .single()
 
@@ -19,11 +20,13 @@ export async function GET(request: NextRequest) {
   const type = url.searchParams.get('type')
   const businessId = url.searchParams.get('business_id')
 
-  let query = supabase
+  // Admins viewing a specific business see that business's docs across clients
+  const adminViewingBusiness = client.is_admin && businessId
+  let query = (adminViewingBusiness ? adminClient() : supabase)
     .from('portal_documents')
     .select('*')
-    .eq('client_id', client.id)
     .order('created_at', { ascending: false })
+  if (!adminViewingBusiness) query = query.eq('client_id', client.id)
 
   if (type) query = query.eq('type', type)
   if (businessId) query = query.eq('business_id', businessId)

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 
 // GET /api/portal/businesses → list businesses
 //   - Regular users: only their own businesses
@@ -17,9 +18,10 @@ export async function GET() {
     .maybeSingle()
 
   // Admin path — read every business + owner name via the join.
-  // RLS admin_portal_businesses_select_all permits this.
+  // Uses the service role: the admin RLS policies were never applied in prod,
+  // so a user-scoped query silently returns only the admin's own businesses.
   if (caller?.is_admin) {
-    const { data: businesses, error } = await supabase
+    const { data: businesses, error } = await adminClient()
       .from('portal_businesses')
       .select('*, portal_clients!inner(id, owner_name, primary_email, is_admin)')
       .eq('is_archived', false)

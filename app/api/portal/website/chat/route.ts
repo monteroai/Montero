@@ -88,12 +88,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'business_id and messages required' }, { status: 400 })
     }
 
-    // Ownership via RLS
-    const [{ data: client }, { data: business }] = await Promise.all([
-      supabase.from('portal_clients').select('*').eq('user_id', user.id).single(),
-      supabase.from('portal_businesses').select('id, business_name, industry, description, website_url').eq('id', businessId).single(),
-    ])
-    if (!client || !business) return NextResponse.json({ error: 'Business not found' }, { status: 404 })
+    // Ownership via RLS for clients; admins reach any business via service role
+    const { data: client } = await supabase.from('portal_clients').select('*').eq('user_id', user.id).single()
+    if (!client) return NextResponse.json({ error: 'No account' }, { status: 403 })
+    const db = client.is_admin ? adminClient() : supabase
+    const { data: business } = await db
+      .from('portal_businesses')
+      .select('id, business_name, industry, description, website_url')
+      .eq('id', businessId)
+      .single()
+    if (!business) return NextResponse.json({ error: 'Business not found' }, { status: 404 })
     const exempt = (client as Record<string, unknown>).billing_exempt === true
 
     // Monthly cap (skipped for exempt clients; degrades to unmetered pre-SQL)
@@ -118,7 +122,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Current section content for grounding
-    const { data: sections } = await supabase
+    const { data: sections } = await db
       .from('portal_website_content')
       .select('section, content')
       .eq('business_id', businessId)
