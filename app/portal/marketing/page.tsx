@@ -1,8 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { card, colors, gradientButton, secondaryButton } from '@/lib/portal/styles'
 import { useBusiness } from '@/lib/portal/BusinessContext'
+
+type StoryboardFrame = {
+  idx: number
+  image: string
+  story: string
+  duration?: string
+  image_prompt?: string
+  motion_prompt?: string
+}
+type Storyboard = {
+  id: string
+  title: string
+  concept: string
+  format: string
+  status: 'draft' | 'approved'
+  audio: { music?: string; voiceover?: string; sfx?: string }
+  frames: StoryboardFrame[]
+}
 
 // Marketing tab — placeholder home for everything social/content related.
 // Live wiring (Instagram OAuth, Meta Graph API for posting + DMs + insights,
@@ -61,9 +79,132 @@ const SECTIONS = [
   },
 ]
 
+function AudioRow({ label, value }: { label: string; value?: string }) {
+  if (!value) return null
+  return (
+    <div style={{ display: 'flex', gap: '8px', fontSize: '12.5px', lineHeight: 1.55 }}>
+      <span style={{ fontWeight: 700, color: colors.textDark, minWidth: '76px' }}>{label}</span>
+      <span style={{ color: colors.textMuted }}>{value}</span>
+    </div>
+  )
+}
+
+function StoryboardCard({ sb, isAdmin, onToggle, busy }: {
+  sb: Storyboard
+  isAdmin: boolean
+  onToggle: (sb: Storyboard) => void
+  busy: boolean
+}) {
+  return (
+    <div style={{ ...card, padding: '20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
+        <h3 style={{ fontSize: '17px', fontWeight: 700, color: colors.navy, margin: 0, fontFamily: 'var(--font-cinzel)' }}>{sb.title}</h3>
+        <span style={{ fontSize: '11px', fontWeight: 600, color: colors.textMuted, background: colors.inputBg, border: `1px solid ${colors.border}`, borderRadius: '999px', padding: '3px 10px' }}>{sb.format}</span>
+        {isAdmin && (
+          <span style={{
+            fontSize: '11px', fontWeight: 700, borderRadius: '999px', padding: '3px 10px',
+            background: sb.status === 'approved' ? colors.successBg : colors.warningBg,
+            color: sb.status === 'approved' ? colors.success : colors.warning,
+          }}>
+            {sb.status === 'approved' ? 'Approved — client can see this' : 'Draft — hidden from client'}
+          </span>
+        )}
+        {isAdmin && (
+          <button
+            onClick={() => onToggle(sb)}
+            disabled={busy}
+            style={{ ...(sb.status === 'approved' ? secondaryButton : gradientButton), marginLeft: 'auto', padding: '7px 14px', fontSize: '12px', opacity: busy ? 0.5 : 1 }}
+          >
+            {sb.status === 'approved' ? 'Pull back to draft' : 'Approve → show client'}
+          </button>
+        )}
+      </div>
+      <p style={{ fontSize: '13px', color: colors.textMuted, lineHeight: 1.6, margin: '0 0 14px', maxWidth: '720px' }}>{sb.concept}</p>
+
+      <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px' }}>
+        {sb.frames.map(f => (
+          <div key={f.idx} style={{ flex: '0 0 200px' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={f.image}
+              alt={`Frame ${f.idx}`}
+              style={{ width: '200px', aspectRatio: '2/3', objectFit: 'cover', borderRadius: '12px', border: `1px solid ${colors.border}`, display: 'block' }}
+            />
+            <div style={{ padding: '8px 2px 0' }}>
+              <div style={{ fontSize: '11px', fontWeight: 700, color: colors.navy }}>
+                {f.idx}{f.duration ? ` · ${f.duration}` : ''}
+              </div>
+              <p style={{ fontSize: '12px', color: colors.textMuted, lineHeight: 1.5, margin: '3px 0 0' }}>{f.story}</p>
+              {isAdmin && (f.image_prompt || f.motion_prompt) && (
+                <details style={{ marginTop: '6px' }}>
+                  <summary style={{ fontSize: '11px', fontWeight: 600, color: '#8b5cf6', cursor: 'pointer' }}>Prompts (admin)</summary>
+                  {f.image_prompt && (
+                    <p style={{ fontSize: '11px', color: colors.textMuted, lineHeight: 1.5, margin: '6px 0 0', background: colors.inputBg, borderRadius: '8px', padding: '8px' }}>
+                      <strong>Image:</strong> {f.image_prompt}
+                    </p>
+                  )}
+                  {f.motion_prompt && (
+                    <p style={{ fontSize: '11px', color: colors.textMuted, lineHeight: 1.5, margin: '6px 0 0', background: colors.inputBg, borderRadius: '8px', padding: '8px' }}>
+                      <strong>Animate:</strong> {f.motion_prompt}
+                    </p>
+                  )}
+                </details>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {(sb.audio?.music || sb.audio?.voiceover || sb.audio?.sfx) && (
+        <div style={{ marginTop: '10px', background: colors.inputBg, border: `1px solid ${colors.border}`, borderRadius: '12px', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: colors.textLight }}>Audio direction</div>
+          <AudioRow label="Music" value={sb.audio.music} />
+          <AudioRow label="Voiceover" value={sb.audio.voiceover} />
+          <AudioRow label="Sound FX" value={sb.audio.sfx} />
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function MarketingPage() {
-  const { activeBusiness } = useBusiness()
+  const { activeBusiness, activeBusinessId } = useBusiness()
   const [connecting, setConnecting] = useState(false)
+  const [storyboards, setStoryboards] = useState<Storyboard[]>([])
+  const [isAdminView, setIsAdminView] = useState(false)
+  const [toggling, setToggling] = useState(false)
+
+  const loadStoryboards = useCallback(() => {
+    if (!activeBusinessId) { setStoryboards([]); return }
+    fetch(`/api/portal/storyboards?business_id=${activeBusinessId}`)
+      .then(r => r.json())
+      .then(d => {
+        setStoryboards(d.storyboards || [])
+        setIsAdminView(Boolean(d._admin))
+      })
+      .catch(() => {})
+  }, [activeBusinessId])
+
+  useEffect(() => { loadStoryboards() }, [loadStoryboards])
+
+  async function toggleApproval(sb: Storyboard) {
+    if (!activeBusinessId) return
+    setToggling(true)
+    try {
+      const res = await fetch('/api/portal/storyboards', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          business_id: activeBusinessId,
+          storyboard_id: sb.id,
+          action: sb.status === 'approved' ? 'unapprove' : 'approve',
+        }),
+      })
+      if (res.ok) loadStoryboards()
+    } finally {
+      setToggling(false)
+    }
+  }
 
   // Placeholder — real OAuth flow lands when Meta App Review clears.
   async function handleConnectInstagram() {
