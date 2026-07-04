@@ -30,7 +30,17 @@ drop policy if exists "own ai edits read" on portal_ai_edits;
 create policy "own ai edits read" on portal_ai_edits for select
   using (client_id in (select id from portal_clients where user_id = auth.uid()));
 
--- 3) Janeth = everything free, forever (matches her by primary email; adjust if needed)
+-- 3) Deduplicate + enforce one content row per (business, section) — the
+--    portal's editors rely on this shape.
+delete from portal_website_content a
+using portal_website_content b
+where a.business_id = b.business_id
+  and a.section = b.section
+  and a.id > b.id;
+create unique index if not exists portal_website_content_biz_section
+  on portal_website_content (business_id, section);
+
+-- 4) Janeth = everything free, forever (matches her by primary email; adjust if needed)
 update portal_clients
 set billing_exempt = true
 where primary_email ilike '%janeth%'

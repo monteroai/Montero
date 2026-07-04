@@ -173,12 +173,20 @@ export async function POST(req: NextRequest) {
           const oldText = String((oldRow?.content as Record<string, unknown> | undefined)?.text || '')
 
           const admin = adminClient()
-          const { error: upErr } = await admin
+          // portal_website_content has no unique (business_id, section)
+          // constraint in prod, so upsert-on-conflict fails — check-then-write.
+          const { data: existingRow } = await admin
             .from('portal_website_content')
-            .upsert(
-              { business_id: businessId, section, content: { text: newText }, updated_at: new Date().toISOString() },
-              { onConflict: 'business_id,section' },
-            )
+            .select('id')
+            .eq('business_id', businessId)
+            .eq('section', section)
+            .maybeSingle()
+          const { error: upErr } = existingRow
+            ? await admin.from('portal_website_content')
+                .update({ content: { text: newText }, updated_at: new Date().toISOString() })
+                .eq('id', existingRow.id)
+            : await admin.from('portal_website_content')
+                .insert({ business_id: businessId, section, content: { text: newText }, is_live: true })
           if (upErr) {
             results.push({ type: 'tool_result', tool_use_id: tu.id, content: `Save failed: ${upErr.message}`, is_error: true })
             continue
