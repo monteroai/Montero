@@ -1,34 +1,41 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { card, colors, gradientButton, secondaryButton, inputStyle, labelStyle, themeGradient } from '@/lib/portal/styles'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { card, colors, gradientButton, secondaryButton, inputStyle, themeGradient } from '@/lib/portal/styles'
 import { ChangeRequestCard } from '@/components/portal/ChangeRequestCard'
 import { StatusBadge } from '@/components/portal/StatusBadge'
 import { WEBSITE_SECTIONS } from '@/lib/portal/constants'
 import { useBusiness } from '@/lib/portal/BusinessContext'
 import type { PortalWebsiteContent, PortalChangeRequest } from '@/lib/portal/types'
 
-type EditMode = { section: string; type: 'manual' | 'ai' } | null
-type Proposal = { section: string; text: string; summary: string } | null
+// Site Studio — bolt.new-style website editing. Chat on the left makes
+// text-only changes (anything bigger is auto-routed to the Montero team);
+// the live site is visible on the right.
+
+type ChatMsg = { role: 'user' | 'assistant'; content: string; meta?: string }
 type Usage = { used: number; limit: number; exempt: boolean }
+
+const WELCOME: ChatMsg = {
+  role: 'assistant',
+  content:
+    "Hi — I'm your website editor. Tell me what to change in plain English: \"make the headline punchier\", \"we're now open Saturdays\", \"fix the typo in the about section\". Text changes I make right away; photos, colors, or layout I send to the Montero team for you.",
+}
 
 export default function WebsitePage() {
   const { activeBusinessId, activeBusiness } = useBusiness()
   const [sections, setSections] = useState<PortalWebsiteContent[]>([])
   const [changeRequests, setChangeRequests] = useState<PortalChangeRequest[]>([])
-  const [mode, setMode] = useState<EditMode>(null)
-  const [draft, setDraft] = useState('') // manual edit text OR AI instruction
-  const [proposal, setProposal] = useState<Proposal>(null)
-  const [busy, setBusy] = useState(false)
-  const [success, setSuccess] = useState('')
-  const [aiError, setAiError] = useState('')
   const [usage, setUsage] = useState<Usage | null>(null)
+  const [messages, setMessages] = useState<ChatMsg[]>([WELCOME])
+  const [input, setInput] = useState('')
+  const [sending, setSending] = useState(false)
+  const [rightTab, setRightTab] = useState<'preview' | 'content'>('preview')
+  const [frameKey, setFrameKey] = useState(0)
+  const chatEndRef = useRef<HTMLDivElement>(null)
 
   const load = useCallback(() => {
     if (!activeBusinessId) {
-      setSections([])
-      setChangeRequests([])
-      setUsage(null)
+      setSections([]); setChangeRequests([]); setUsage(null)
       return
     }
     fetch(`/api/portal/website?business_id=${activeBusinessId}`)
@@ -44,81 +51,65 @@ export default function WebsitePage() {
       .catch(() => {})
   }, [activeBusinessId])
 
-  useEffect(() => { load(); setMode(null); setProposal(null) }, [load])
+  useEffect(() => {
+    load()
+    setMessages([WELCOME])
+  }, [load])
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, sending])
+
+  async function send() {
+    const text = input.trim()
+    if (!text || sending || !activeBusinessId) return
+    const nextMessages: ChatMsg[] = [...messages, { role: 'user', content: text }]
+    setMessages(nextMessages)
+    setInput('')
+    setSending(true)
+    try {
+      const res = await fetch('/api/portal/website/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          business_id: activeBusinessId,
+          // WELCOME is UI-only — don't send it as model history
+          messages: nextMessages.slice(1).map(m => ({ role: m.role, content: m.content })),
+        }),
+      })
+      const d = await res.json()
+      if (!res.ok) {
+        setMessages(m => [...m, { role: 'assistant', content: d.error || 'Something went wrong — try again.' }])
+        return
+      }
+      const meta: string[] = []
+      if (d.updates?.length) meta.push(`✦ Updated: ${d.updates.map((u: { section: string }) => u.section).join(', ')}`)
+      if (d.escalated) meta.push('→ Sent to the Montero team')
+      setMessages(m => [...m, { role: 'assistant', content: d.reply, meta: meta.join('  ·  ') || undefined }])
+      if (d.usage) setUsage(d.usage)
+      if (d.updates?.length) load()
+    } catch {
+      setMessages(m => [...m, { role: 'assistant', content: 'Connection hiccup — try that again.' }])
+    } finally {
+      setSending(false)
+    }
+  }
 
   function getContent(sectionName: string): string {
     const s = sections.find(s => s.section === sectionName)
-    return s ? (s.content.text as string || JSON.stringify(s.content, null, 2)) : ''
-  }
-
-  function hasPending(sectionName: string): boolean {
-    return changeRequests.some(cr => cr.section === sectionName && cr.status === 'pending')
-  }
-
-  function openMode(section: string, type: 'manual' | 'ai') {
-    setAiError('')
-    setProposal(null)
-    setMode({ section, type })
-    setDraft(type === 'manual' ? getContent(section) : '')
-  }
-
-  function closeMode() {
-    setMode(null)
-    setDraft('')
-    setProposal(null)
-    setAiError('')
-  }
-
-  async function runAi() {
-    if (!activeBusinessId || !mode || !draft.trim()) return
-    setBusy(true)
-    setAiError('')
-    try {
-      const res = await fetch('/api/portal/website/ai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ business_id: activeBusinessId, section: mode.section, instruction: draft }),
-      })
-      const d = await res.json()
-      if (!res.ok) { setAiError(d.error || 'Something went wrong.'); return }
-      setProposal({ section: mode.section, text: d.proposed.text, summary: d.summary })
-      if (d.usage) setUsage(d.usage)
-    } catch {
-      setAiError('Could not reach the AI editor. Check your connection and try again.')
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  async function submitChange(section: string, text: string, source: 'manual' | 'ai') {
-    if (!activeBusinessId) return
-    setBusy(true)
-    setSuccess('')
-    const res = await fetch('/api/portal/website', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ business_id: activeBusinessId, section, new_content: { text, source } }),
-    })
-    if (res.ok) {
-      const d = await res.json()
-      setChangeRequests(prev => [d.change_request, ...prev])
-      closeMode()
-      setSuccess(`Change request submitted for ${section}. It goes live once approved.`)
-      setTimeout(() => setSuccess(''), 5000)
-    }
-    setBusy(false)
+    return s ? ((s.content.text as string) || '') : ''
   }
 
   if (!activeBusinessId) {
     return (
-      <>
-        <div style={{ padding: '8px 4px 0' }}>
-          <h1 style={{ fontSize: '22px', fontWeight: 700, color: colors.navy, fontFamily: 'var(--font-cinzel)' }}>Website</h1>
-          <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>Add a business first.</p>
-        </div>
-      </>
+      <div style={{ padding: '8px 4px 0' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: 700, color: colors.navy, fontFamily: 'var(--font-cinzel)' }}>Website</h1>
+        <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>Add a business first.</p>
+      </div>
     )
   }
+
+  const siteUrl = activeBusiness?.website_url || null
 
   return (
     <>
@@ -128,7 +119,7 @@ export default function WebsitePage() {
             Website {activeBusiness && <span style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, color: colors.textMuted }}>· {activeBusiness.business_name}</span>}
           </h1>
           <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>
-            Edit your website in plain English — describe the change, AI writes it, you approve it, it goes live.
+            Chat to edit your site. Text changes happen right away; bigger changes go to our team.
           </p>
         </div>
         {usage && (
@@ -143,153 +134,125 @@ export default function WebsitePage() {
         )}
       </div>
 
-      {success && (
-        <div style={{ padding: '12px 16px', borderRadius: '12px', background: colors.successBg, color: colors.success, fontSize: '13px', fontWeight: 500 }}>
-          {success}
-        </div>
-      )}
-
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-        <div style={{ flex: 2, minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {WEBSITE_SECTIONS.map(sectionName => {
-            const content = getContent(sectionName)
-            const pending = hasPending(sectionName)
-            const active = mode?.section === sectionName
-            const activeProposal = proposal?.section === sectionName ? proposal : null
-
-            return (
-              <div key={sectionName} style={{ ...card, padding: '18px 20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                  <span style={{ fontSize: '15px', fontWeight: 600, color: colors.textDark, textTransform: 'capitalize' }}>
-                    {sectionName}
-                  </span>
-                  {pending ? (
-                    <StatusBadge status="pending" label="Changes Pending" />
-                  ) : (
-                    <StatusBadge status="live" />
-                  )}
-                  {!active && (
-                    <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
-                      <button
-                        onClick={() => openMode(sectionName, 'ai')}
-                        style={{ ...gradientButton, padding: '6px 12px', fontSize: '12px' }}
-                      >
-                        ✦ AI edit
-                      </button>
-                      <button
-                        onClick={() => openMode(sectionName, 'manual')}
-                        style={{ ...secondaryButton, padding: '6px 12px', fontSize: '12px' }}
-                      >
-                        Edit
-                      </button>
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'stretch' }}>
+        {/* ── Chat panel ── */}
+        <div style={{ ...card, flex: '1 1 340px', minWidth: '300px', display: 'flex', flexDirection: 'column', height: '72vh', minHeight: '480px', overflow: 'hidden' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {messages.map((m, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                <div style={{
+                  maxWidth: '85%',
+                  padding: '10px 14px',
+                  borderRadius: m.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                  background: m.role === 'user' ? themeGradient : '#f1f5f9',
+                  color: m.role === 'user' ? '#fff' : colors.textDark,
+                  fontSize: '13.5px',
+                  lineHeight: 1.55,
+                  whiteSpace: 'pre-wrap',
+                }}>
+                  {m.content}
+                  {m.meta && (
+                    <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(0,0,0,0.08)', fontSize: '11.5px', color: m.role === 'user' ? 'rgba(255,255,255,0.85)' : colors.textMuted, fontWeight: 600 }}>
+                      {m.meta}
                     </div>
                   )}
                 </div>
-
-                {!active && (
-                  <div style={{ fontSize: '13px', color: colors.textMuted, lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
-                    {content || <span style={{ fontStyle: 'italic' }}>No content yet. Try ✦ AI edit to write it from scratch.</span>}
-                  </div>
-                )}
-
-                {active && mode?.type === 'manual' && (
-                  <div>
-                    <label style={labelStyle}>Content</label>
-                    <textarea
-                      value={draft}
-                      onChange={e => setDraft(e.target.value)}
-                      rows={6}
-                      style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }}
-                    />
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                      <button
-                        onClick={() => submitChange(sectionName, draft, 'manual')}
-                        disabled={busy}
-                        style={{ ...gradientButton, fontSize: '13px', padding: '8px 16px', opacity: busy ? 0.5 : 1 }}
-                      >
-                        {busy ? 'Submitting...' : 'Request Change'}
-                      </button>
-                      <button onClick={closeMode} style={{ ...secondaryButton, fontSize: '13px', padding: '8px 16px' }}>
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {active && mode?.type === 'ai' && !activeProposal && (
-                  <div>
-                    <label style={labelStyle}>What should change?</label>
-                    <textarea
-                      value={draft}
-                      onChange={e => setDraft(e.target.value)}
-                      rows={2}
-                      placeholder={`e.g. "make this sound more premium" or "mention that we now open Saturdays"`}
-                      style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }}
-                    />
-                    {aiError && <p style={{ fontSize: '12px', color: colors.error, marginTop: '8px' }}>{aiError}</p>}
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                      <button
-                        onClick={runAi}
-                        disabled={busy || !draft.trim()}
-                        style={{ ...gradientButton, fontSize: '13px', padding: '8px 16px', opacity: busy || !draft.trim() ? 0.5 : 1 }}
-                      >
-                        {busy ? 'Writing…' : '✦ Generate'}
-                      </button>
-                      <button onClick={closeMode} style={{ ...secondaryButton, fontSize: '13px', padding: '8px 16px' }}>
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {active && mode?.type === 'ai' && activeProposal && (
-                  <div>
-                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                      <div style={{ flex: 1, minWidth: '220px', background: colors.inputBg, border: `1px solid ${colors.border}`, borderRadius: '12px', padding: '12px 14px' }}>
-                        <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: colors.textLight, marginBottom: '6px' }}>Current</div>
-                        <div style={{ fontSize: '12.5px', color: colors.textMuted, lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{content || <em>empty</em>}</div>
-                      </div>
-                      <div style={{ flex: 1, minWidth: '220px', background: colors.successBg, border: `1px solid ${colors.success}33`, borderRadius: '12px', padding: '12px 14px' }}>
-                        <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: colors.success, marginBottom: '6px' }}>Proposed</div>
-                        <div style={{ fontSize: '12.5px', color: colors.textDark, lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{activeProposal.text}</div>
-                      </div>
-                    </div>
-                    {activeProposal.summary && (
-                      <p style={{ fontSize: '12px', color: colors.textMuted, marginTop: '10px' }}>✦ {activeProposal.summary}</p>
-                    )}
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
-                      <button
-                        onClick={() => submitChange(sectionName, activeProposal.text, 'ai')}
-                        disabled={busy}
-                        style={{ ...gradientButton, fontSize: '13px', padding: '8px 16px', opacity: busy ? 0.5 : 1 }}
-                      >
-                        {busy ? 'Submitting...' : 'Use this — Request Change'}
-                      </button>
-                      <button onClick={() => { setProposal(null) }} style={{ ...secondaryButton, fontSize: '13px', padding: '8px 16px' }}>
-                        Try a different instruction
-                      </button>
-                      <button onClick={closeMode} style={{ ...secondaryButton, fontSize: '13px', padding: '8px 16px' }}>
-                        Discard
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
-            )
-          })}
+            ))}
+            {sending && (
+              <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                <div style={{ padding: '10px 14px', borderRadius: '16px 16px 16px 4px', background: '#f1f5f9', color: colors.textMuted, fontSize: '13.5px' }}>
+                  Working on it…
+                </div>
+              </div>
+            )}
+            <div ref={chatEndRef} />
+          </div>
+          <div style={{ padding: '12px', borderTop: `1px solid ${colors.border}`, display: 'flex', gap: '8px' }}>
+            <textarea
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
+              rows={1}
+              placeholder='e.g. "change the headline to…" or "add our new phone number"'
+              style={{ ...inputStyle, resize: 'none', flex: 1 }}
+            />
+            <button
+              onClick={send}
+              disabled={sending || !input.trim()}
+              style={{ ...gradientButton, padding: '10px 18px', fontSize: '13px', opacity: sending || !input.trim() ? 0.5 : 1, whiteSpace: 'nowrap' }}
+            >
+              Send
+            </button>
+          </div>
         </div>
 
-        <div style={{ flex: 1, minWidth: '260px' }}>
-          <h2 style={{ fontSize: '15px', fontWeight: 700, color: colors.textDark, marginBottom: '8px', padding: '0 4px' }}>
-            Change History
-          </h2>
-          {changeRequests.length === 0 ? (
-            <div style={{ ...card, padding: '24px', textAlign: 'center' }}>
-              <p style={{ fontSize: '13px', color: colors.textMuted }}>No changes requested yet.</p>
-            </div>
+        {/* ── Right panel: live preview / content ── */}
+        <div style={{ ...card, flex: '1.4 1 420px', minWidth: '320px', display: 'flex', flexDirection: 'column', height: '72vh', minHeight: '480px', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', borderBottom: `1px solid ${colors.border}` }}>
+            <button
+              onClick={() => setRightTab('preview')}
+              style={{ ...(rightTab === 'preview' ? gradientButton : secondaryButton), padding: '6px 14px', fontSize: '12px' }}
+            >
+              Live site
+            </button>
+            <button
+              onClick={() => setRightTab('content')}
+              style={{ ...(rightTab === 'content' ? gradientButton : secondaryButton), padding: '6px 14px', fontSize: '12px' }}
+            >
+              Content & history
+            </button>
+            {rightTab === 'preview' && siteUrl && (
+              <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center', minWidth: 0 }}>
+                <span style={{ fontSize: '11px', color: colors.textLight, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '220px' }} className="hide-on-mobile">{siteUrl.replace(/^https?:\/\//, '')}</span>
+                <button onClick={() => setFrameKey(k => k + 1)} style={{ ...secondaryButton, padding: '6px 10px', fontSize: '12px' }} title="Refresh preview">↻</button>
+                <a href={siteUrl} target="_blank" rel="noopener noreferrer" style={{ ...secondaryButton, padding: '6px 10px', fontSize: '12px', textDecoration: 'none' }} title="Open in new tab">↗</a>
+              </div>
+            )}
+          </div>
+
+          {rightTab === 'preview' ? (
+            siteUrl ? (
+              <iframe
+                key={frameKey}
+                src={siteUrl}
+                title="Live website preview"
+                sandbox="allow-scripts allow-same-origin allow-forms"
+                style={{ flex: 1, width: '100%', border: 'none', background: '#fff' }}
+              />
+            ) : (
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px', textAlign: 'center' }}>
+                <p style={{ fontSize: '13px', color: colors.textMuted, maxWidth: '340px' }}>
+                  Your live site isn&apos;t linked yet. Once the Montero team connects it, you&apos;ll see it here — chat edits work either way.
+                </p>
+              </div>
+            )
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              {changeRequests.map(cr => <ChangeRequestCard key={cr.id} cr={cr} />)}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <p style={{ fontSize: '11.5px', color: colors.textLight, margin: '0 2px 2px' }}>
+                Text changes made in chat show here immediately and appear on your live site after our team syncs it (usually same day).
+              </p>
+              {WEBSITE_SECTIONS.map(sectionName => {
+                const content = getContent(sectionName)
+                const pending = changeRequests.some(cr => cr.section === sectionName && cr.status === 'pending')
+                return (
+                  <div key={sectionName} style={{ background: colors.inputBg, border: `1px solid ${colors.border}`, borderRadius: '12px', padding: '12px 14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: colors.textDark, textTransform: 'capitalize' }}>{sectionName}</span>
+                      {pending ? <StatusBadge status="pending" label="Changes Pending" /> : <StatusBadge status="live" />}
+                    </div>
+                    <div style={{ fontSize: '12.5px', color: colors.textMuted, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                      {content || <em>No content yet — ask the chat to write it.</em>}
+                    </div>
+                  </div>
+                )
+              })}
+              <h2 style={{ fontSize: '13px', fontWeight: 700, color: colors.textDark, margin: '8px 2px 0' }}>Change History</h2>
+              {changeRequests.length === 0 ? (
+                <p style={{ fontSize: '12.5px', color: colors.textMuted, margin: '0 2px' }}>No changes yet.</p>
+              ) : (
+                changeRequests.map(cr => <ChangeRequestCard key={cr.id} cr={cr} />)
+              )}
             </div>
           )}
         </div>
