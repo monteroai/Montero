@@ -44,6 +44,11 @@ export function PortalHeader({ clientName, onToggleSidebar }: PortalHeaderProps)
       backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
       borderRadius: '16px', border: '1px solid rgba(255,255,255,0.5)',
       boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+      // backdropFilter creates a stacking context; without an explicit
+      // z-index the glass content cards (later in DOM) paint OVER the
+      // business-switcher dropdown. Keep above content, below the mobile
+      // sidebar overlay (40/50).
+      position: 'relative', zIndex: 30,
     }}>
       {/* Mobile hamburger */}
       <button
