@@ -40,14 +40,32 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'automation_id and active required' }, { status: 400 })
   }
 
-  // Fetch automation + its owning client_id (RLS verifies ownership through business → client → user)
-  const { data: automation } = await supabase
+  // Admins toggle any client's automations (service role); users are RLS-scoped
+  const { data: caller } = await supabase
+    .from('portal_clients').select('is_admin').eq('user_id', user.id).maybeSingle()
+  const db = caller?.is_admin ? adminClient() : supabase
+
+  const { data: automation } = await db
     .from('portal_automations')
     .select('id, n8n_workflow_id, business_id, portal_businesses!inner(client_id)')
     .eq('id', automation_id)
     .single()
 
   if (!automation) return NextResponse.json({ error: 'Automation not found' }, { status: 404 })
+
+  // Display-only rows (slug ids like "lead-triage-consulting-v1") represent
+  // logic that lives in this app, not in n8n — toggle portal state only.
+  // Real n8n workflow ids are bare alphanumerics.
+  const isManaged = !/^[A-Za-z0-9]{8,}$/.test(automation.n8n_workflow_id)
+
+  if (isManaged) {
+    const { error } = await db
+      .from('portal_automations')
+      .update({ active })
+      .eq('id', automation_id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ success: true, active, managed: true })
+  }
 
   // Resolve the n8n API key: prefer the owning client's vaulted key (so the
   // toggle flips THEIR n8n, not whatever the global env var points at). Fall
@@ -67,7 +85,9 @@ export async function PATCH(request: Request) {
     }
   }
 
-  // Toggle in n8n (best-effort; local state still updates if n8n unreachable)
+  // Toggle in n8n FIRST. If n8n rejects it, do NOT update portal state —
+  // showing "off" while the workflow still runs (or vice versa) is worse
+  // than surfacing the error.
   try {
     if (n8nKey) {
       await toggleWorkflowWithKey(automation.n8n_workflow_id, active, n8nKey)
@@ -77,9 +97,12 @@ export async function PATCH(request: Request) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'n8n API error'
     console.error('n8n toggle failed:', msg)
+    return NextResponse.json({
+      error: `Couldn't ${active ? 'turn on' : 'turn off'} the automation — the automation engine rejected the change. Nothing was modified. Try again or use Talk to Emilio.`,
+    }, { status: 502 })
   }
 
-  const { error } = await supabase
+  const { error } = await db
     .from('portal_automations')
     .update({ active, last_run: new Date().toISOString() })
     .eq('id', automation_id)
