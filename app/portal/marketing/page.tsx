@@ -255,6 +255,35 @@ export default function MarketingPage() {
         </div>
       </div>
 
+      {/* Storyboards & creatives — the real marketing work. Admins see drafts
+          with prompts + the approve control; clients only ever get approved
+          boards (the API strips drafts and prompts server-side). */}
+      {(storyboards.length > 0 || isAdminView) && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', padding: '4px 4px 0' }}>
+            <h2 style={{ fontSize: '17px', fontWeight: 700, color: colors.navy, margin: 0, fontFamily: 'var(--font-cinzel)' }}>
+              Storyboards & creatives
+            </h2>
+            {isAdminView && (
+              <span style={{ fontSize: '11px', fontWeight: 700, color: '#8b5cf6', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                Admin review — approve to publish to the client
+              </span>
+            )}
+          </div>
+          {storyboards.length === 0 ? (
+            <div style={{ ...card, padding: '20px' }}>
+              <p style={{ fontSize: '13px', color: colors.textMuted, margin: 0 }}>
+                No storyboards for this business yet. New creatives land here as drafts for your review.
+              </p>
+            </div>
+          ) : (
+            storyboards.map(sb => (
+              <StoryboardCard key={sb.id} sb={sb} isAdmin={isAdminView} onToggle={toggleApproval} busy={toggling} />
+            ))
+          )}
+        </div>
+      )}
+
       {/* Section cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
         {SECTIONS.map(s => (
