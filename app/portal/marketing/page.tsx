@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, type CSSProperties } from 'react'
 import { card, colors, gradientButton, secondaryButton } from '@/lib/portal/styles'
 import { useBusiness } from '@/lib/portal/BusinessContext'
 
@@ -89,11 +89,91 @@ function AudioRow({ label, value }: { label: string; value?: string }) {
   )
 }
 
-function StoryboardCard({ sb, isAdmin, onToggle, busy }: {
+// Fullscreen image viewer — sits above the whole portal (header z-30,
+// sidebar z-50). Backdrop tap / Esc closes; chevrons + arrow keys navigate.
+function Lightbox({ frames, index, onClose, onNav }: {
+  frames: StoryboardFrame[]
+  index: number
+  onClose: () => void
+  onNav: (idx: number) => void
+}) {
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose()
+      if (e.key === 'ArrowRight' && index < frames.length - 1) onNav(index + 1)
+      if (e.key === 'ArrowLeft' && index > 0) onNav(index - 1)
+    }
+    window.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [index, frames.length, onClose, onNav])
+
+  const f = frames[index]
+  const navBtn: CSSProperties = {
+    position: 'absolute', top: '50%', transform: 'translateY(-50%)',
+    width: '44px', height: '44px', borderRadius: '999px',
+    background: 'rgba(255,255,255,0.14)', color: '#fff', border: 'none',
+    fontSize: '22px', cursor: 'pointer', display: 'flex',
+    alignItems: 'center', justifyContent: 'center',
+  }
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(8,10,18,0.92)',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        padding: '18px',
+      }}
+    >
+      <button
+        onClick={onClose}
+        aria-label="Close"
+        style={{
+          position: 'absolute', top: '14px', right: '14px', width: '40px', height: '40px',
+          borderRadius: '999px', background: 'rgba(255,255,255,0.14)', color: '#fff',
+          border: 'none', fontSize: '18px', cursor: 'pointer',
+        }}
+      >
+        ✕
+      </button>
+      {index > 0 && (
+        <button aria-label="Previous" onClick={e => { e.stopPropagation(); onNav(index - 1) }} style={{ ...navBtn, left: '10px' }}>‹</button>
+      )}
+      {index < frames.length - 1 && (
+        <button aria-label="Next" onClick={e => { e.stopPropagation(); onNav(index + 1) }} style={{ ...navBtn, right: '10px' }}>›</button>
+      )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={f.image}
+        alt={`Frame ${f.idx}`}
+        onClick={e => e.stopPropagation()}
+        style={{
+          maxWidth: 'min(92vw, 560px)', maxHeight: '78vh',
+          objectFit: 'contain', borderRadius: '14px',
+          boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+        }}
+      />
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{ marginTop: '14px', maxWidth: 'min(92vw, 560px)', textAlign: 'center', color: 'rgba(255,255,255,0.85)', fontSize: '13px', lineHeight: 1.55 }}
+      >
+        <strong style={{ color: '#fff' }}>{f.idx}{f.duration ? ` · ${f.duration}` : ''}</strong> — {f.story}
+      </div>
+    </div>
+  )
+}
+
+function StoryboardCard({ sb, isAdmin, onToggle, busy, onEnlarge }: {
   sb: Storyboard
   isAdmin: boolean
   onToggle: (sb: Storyboard) => void
   busy: boolean
+  onEnlarge: (frames: StoryboardFrame[], idx: number) => void
 }) {
   return (
     <div style={{ ...card, padding: '20px' }}>
@@ -127,8 +207,9 @@ function StoryboardCard({ sb, isAdmin, onToggle, busy }: {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={f.image}
-              alt={`Frame ${f.idx}`}
-              style={{ width: '200px', aspectRatio: '2/3', objectFit: 'cover', borderRadius: '12px', border: `1px solid ${colors.border}`, display: 'block' }}
+              alt={`Frame ${f.idx} — tap to enlarge`}
+              onClick={() => onEnlarge(sb.frames, sb.frames.indexOf(f))}
+              style={{ width: '200px', aspectRatio: '2/3', objectFit: 'cover', borderRadius: '12px', border: `1px solid ${colors.border}`, display: 'block', cursor: 'zoom-in' }}
             />
             <div style={{ padding: '8px 2px 0' }}>
               <div style={{ fontSize: '11px', fontWeight: 700, color: colors.navy }}>
@@ -173,6 +254,7 @@ export default function MarketingPage() {
   const [storyboards, setStoryboards] = useState<Storyboard[]>([])
   const [isAdminView, setIsAdminView] = useState(false)
   const [toggling, setToggling] = useState(false)
+  const [lightbox, setLightbox] = useState<{ frames: StoryboardFrame[]; index: number } | null>(null)
 
   const loadStoryboards = useCallback(() => {
     if (!activeBusinessId) { setStoryboards([]); return }
@@ -278,7 +360,14 @@ export default function MarketingPage() {
             </div>
           ) : (
             storyboards.map(sb => (
-              <StoryboardCard key={sb.id} sb={sb} isAdmin={isAdminView} onToggle={toggleApproval} busy={toggling} />
+              <StoryboardCard
+                key={sb.id}
+                sb={sb}
+                isAdmin={isAdminView}
+                onToggle={toggleApproval}
+                busy={toggling}
+                onEnlarge={(frames, index) => setLightbox({ frames, index })}
+              />
             ))
           )}
         </div>
@@ -322,6 +411,15 @@ export default function MarketingPage() {
           Use the <strong>chat bubble</strong> in the corner to send marketing requests, or hit the <strong>Talk to Emilio</strong> button if it&apos;s a bigger project.
         </p>
       </div>
+
+      {lightbox && (
+        <Lightbox
+          frames={lightbox.frames}
+          index={lightbox.index}
+          onClose={() => setLightbox(null)}
+          onNav={idx => setLightbox({ frames: lightbox.frames, index: idx })}
+        />
+      )}
     </>
   )
 }
