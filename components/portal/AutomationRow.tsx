@@ -18,7 +18,7 @@ function timeAgo(dateStr: string | null) {
   return `${days}d ago`
 }
 
-const KIND_META: Record<string, { icon: string; color: string }> = {
+export const KIND_META: Record<string, { icon: string; color: string }> = {
   trigger: { icon: '⚡', color: '#d97706' },
   branch: { icon: '◇', color: '#7c3aed' },
   email: { icon: '✉', color: '#64748b' },
@@ -31,8 +31,8 @@ const KIND_META: Record<string, { icon: string; color: string }> = {
   step: { icon: '●', color: '#475569' },
 }
 
-type FlowNode = { name: string; kind: string }
-type Graph =
+export type FlowNode = { name: string; kind: string }
+export type Graph =
   | { managed: true; description: string | null }
   | { name: string; levels: FlowNode[][]; edges?: Array<{ from: string; to: string }> }
   | { error: string }
@@ -41,7 +41,7 @@ type Graph =
 // parent to its children so branching and order are visually explicit.
 const TREE = { W: 172, H: 46, GAP: 14, VGAP: 40 }
 
-function FlowTree({ levels, edges }: { levels: FlowNode[][]; edges: Array<{ from: string; to: string }> }) {
+export function FlowTree({ levels, edges }: { levels: FlowNode[][]; edges: Array<{ from: string; to: string }> }) {
   const maxCount = Math.max(...levels.map(l => l.length), 1)
   const fullWidth = maxCount * TREE.W + (maxCount - 1) * TREE.GAP
   const height = levels.length * TREE.H + (levels.length - 1) * TREE.VGAP
