@@ -98,5 +98,11 @@ export async function GET(request: NextRequest) {
     frontier = Array.from(new Set(next))
   }
 
-  return NextResponse.json({ name: automation.friendly_name, levels })
+  // Edges between enabled nodes (for drawing connector lines)
+  const edges: Array<{ from: string; to: string }> = []
+  for (const [src, targets] of Array.from(out.entries())) {
+    for (const t of targets) if (seen.has(src) && seen.has(t)) edges.push({ from: src, to: t })
+  }
+
+  return NextResponse.json({ name: automation.friendly_name, levels, edges })
 }

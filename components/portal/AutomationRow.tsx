@@ -34,8 +34,83 @@ const KIND_META: Record<string, { icon: string; color: string }> = {
 type FlowNode = { name: string; kind: string }
 type Graph =
   | { managed: true; description: string | null }
-  | { name: string; levels: FlowNode[][] }
+  | { name: string; levels: FlowNode[][]; edges?: Array<{ from: string; to: string }> }
   | { error: string }
+
+// n8n-style tree: nodes laid out on a level grid, SVG lines connecting each
+// parent to its children so branching and order are visually explicit.
+const TREE = { W: 172, H: 46, GAP: 14, VGAP: 40 }
+
+function FlowTree({ levels, edges }: { levels: FlowNode[][]; edges: Array<{ from: string; to: string }> }) {
+  const maxCount = Math.max(...levels.map(l => l.length), 1)
+  const fullWidth = maxCount * TREE.W + (maxCount - 1) * TREE.GAP
+  const height = levels.length * TREE.H + (levels.length - 1) * TREE.VGAP
+
+  // Position each node: levels vertically, nodes centered within each level
+  const pos = new Map<string, { x: number; y: number }>()
+  levels.forEach((level, li) => {
+    const levelWidth = level.length * TREE.W + (level.length - 1) * TREE.GAP
+    const offsetX = (fullWidth - levelWidth) / 2
+    level.forEach((node, ni) => {
+      pos.set(node.name, { x: offsetX + ni * (TREE.W + TREE.GAP), y: li * (TREE.H + TREE.VGAP) })
+    })
+  })
+
+  return (
+    <div style={{ overflowX: 'auto', paddingBottom: '4px' }}>
+      <div style={{ position: 'relative', width: `${fullWidth}px`, height: `${height}px` }}>
+        <svg width={fullWidth} height={height} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+          {edges.map((e, i) => {
+            const from = pos.get(e.from)
+            const to = pos.get(e.to)
+            if (!from || !to) return null
+            const x1 = from.x + TREE.W / 2
+            const y1 = from.y + TREE.H
+            const x2 = to.x + TREE.W / 2
+            const y2 = to.y
+            const midY = (y1 + y2) / 2
+            return (
+              <path
+                key={i}
+                d={`M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`}
+                fill="none"
+                stroke="#cbd5e1"
+                strokeWidth="1.5"
+              />
+            )
+          })}
+        </svg>
+        {levels.flat().map(node => {
+          const p = pos.get(node.name)
+          if (!p) return null
+          const meta = KIND_META[node.kind] || KIND_META.step
+          return (
+            <div
+              key={node.name}
+              title={node.name}
+              style={{
+                position: 'absolute', left: `${p.x}px`, top: `${p.y}px`,
+                width: `${TREE.W}px`, height: `${TREE.H}px`,
+                display: 'flex', alignItems: 'center', gap: '8px',
+                background: '#fff', border: `1px solid ${colors.border}`,
+                borderLeft: `3px solid ${meta.color}`,
+                borderRadius: '10px', padding: '0 10px', boxSizing: 'border-box',
+              }}
+            >
+              <span style={{ color: meta.color, fontSize: '13px', flexShrink: 0 }}>{meta.icon}</span>
+              <span style={{
+                fontSize: '11.5px', fontWeight: 600, color: colors.textDark, lineHeight: 1.25,
+                overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+              }}>
+                {node.name}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
 interface AutomationRowProps {
   automation: PortalAutomation
@@ -153,31 +228,7 @@ export function AutomationRow({ automation, onToggle }: AutomationRowProps) {
             </div>
           )}
           {graph && 'levels' in graph && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0, overflowX: 'auto', paddingBottom: '4px' }}>
-              {graph.levels.map((level, li) => (
-                <div key={li} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                  {li > 0 && (
-                    <div style={{ width: '2px', height: '14px', background: colors.border, marginLeft: '17px' }} />
-                  )}
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {level.map(node => {
-                      const meta = KIND_META[node.kind] || KIND_META.step
-                      return (
-                        <div key={node.name} style={{
-                          display: 'flex', alignItems: 'center', gap: '8px',
-                          background: '#fff', border: `1px solid ${colors.border}`,
-                          borderLeft: `3px solid ${meta.color}`,
-                          borderRadius: '10px', padding: '7px 12px',
-                        }}>
-                          <span style={{ color: meta.color, fontSize: '13px', width: '16px', textAlign: 'center' }}>{meta.icon}</span>
-                          <span style={{ fontSize: '12px', fontWeight: 600, color: colors.textDark }}>{node.name}</span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <FlowTree levels={graph.levels} edges={graph.edges || []} />
           )}
         </div>
       )}
