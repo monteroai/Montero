@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient, isAdminEnvConfigured } from '@/lib/supabase/admin'
+import { FLOW_HINTS } from '@/lib/portal/flowHints'
 
 // GET /api/portal/automations/system-map?business_id=xxx
 // Aerial view of how a business's automations interconnect:
@@ -75,7 +76,7 @@ export async function GET(request: NextRequest) {
 
   const byWfId = new Map(automations.map(a => [a.n8n_workflow_id, a]))
   const nodes: MapNode[] = []
-  const edges: Array<{ from: string; to: string }> = []
+  const edges: Array<{ from: string; to: string; note?: string }> = []
 
   await Promise.all(automations.map(async a => {
     const isReal = /^[A-Za-z0-9]{8,}$/.test(a.n8n_workflow_id)
@@ -116,6 +117,17 @@ export async function GET(request: NextRequest) {
       })
     }
   }))
+
+  // Merge curated sequence hints (matched by friendly name) with detected
+  // edges; hints fill in the flow for workflows not yet wired to live n8n ids.
+  const idByName = new Map(automations.map(a => [a.friendly_name.toLowerCase(), a.id]))
+  for (const hint of FLOW_HINTS) {
+    const from = idByName.get(hint.from.toLowerCase())
+    const to = idByName.get(hint.to.toLowerCase())
+    if (from && to && !edges.some(e => e.from === from && e.to === to)) {
+      edges.push({ from, to, note: hint.note })
+    }
+  }
 
   // Preserve original ordering
   const order = new Map(automations.map((a, i) => [a.id, i]))

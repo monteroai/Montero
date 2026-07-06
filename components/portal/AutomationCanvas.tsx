@@ -1,11 +1,13 @@
 'use client'
 
-// n8n-style automation canvas: the whole system as one zoomable, pannable
-// map. Entry channels (Phone / Website / Chat / Schedule / Internal) branch
-// left-to-right into automation nodes; cross-workflow handoffs draw as
-// dashed purple curves. Click a node → detail panel with plain-English
-// explanation, the internal flow tree, and the on/off toggle (off requires
-// confirmation).
+// n8n-style automation canvas v2.
+// - Sequence-aware layout: automations are placed in columns by their order
+//   in the operational flow (entry points left, follow-on steps right),
+//   derived from live n8n handoff edges + curated flow hints.
+// - Click a node → it EXPANDS IN PLACE on the canvas, revealing its
+//   plain-English description, on/off control, and internal flow tree;
+//   nodes below shift down to stay organized.
+// - Drag to pan, scroll/buttons to zoom. Off requires confirmation.
 
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { colors, gradientButton, secondaryButton } from '@/lib/portal/styles'
@@ -13,7 +15,7 @@ import { FlowTree, type Graph } from './AutomationRow'
 import type { PortalAutomation } from '@/lib/portal/types'
 
 export type MapNode = { id: string; name: string; category: string; channel: string; outputs: string[]; active: boolean; linked: boolean }
-export type SystemMap = { nodes: MapNode[]; edges: Array<{ from: string; to: string }> }
+export type SystemMap = { nodes: MapNode[]; edges: Array<{ from: string; to: string; note?: string }> }
 
 const CHANNEL_META: Record<string, { icon: string; color: string; blurb: string }> = {
   Phone: { icon: '☎', color: '#0891b2', blurb: 'calls in & out' },
@@ -25,57 +27,97 @@ const CHANNEL_META: Record<string, { icon: string; color: string; blurb: string 
 }
 const OUTPUT_LABEL: Record<string, string> = { sms: 'SMS', email: 'email', calls: 'calls', ai: 'AI', data: 'records' }
 
-// Layout constants (canvas coordinates, pre-zoom)
-const CH_W = 170, CH_H = 54, A_W = 235, A_H = 62, COL_GAP = 110, ROW_GAP = 18, GROUP_GAP = 44, PAD = 40
+const A_W = 235, A_H = 62, EXP_W = 340, EXP_H = 350
+const CH_W = 165, CH_H = 54
+const COL_SPACING = 130, ROW_GAP = 20, PAD = 40
 
+type Rect = { x: number; y: number; w: number; h: number }
 type Layout = {
   width: number
   height: number
   channels: Array<{ name: string; x: number; y: number }>
-  nodes: Map<string, { x: number; y: number }>
+  nodes: Map<string, Rect>
 }
 
-function computeLayout(map: SystemMap): Layout {
+// Column = longest-path depth from an entry node, so "what runs after what"
+// reads left to right.
+function computeDepths(map: SystemMap): Map<string, number> {
+  const incoming = new Map<string, number>()
+  map.nodes.forEach(n => incoming.set(n.id, 0))
+  map.edges.forEach(e => incoming.set(e.to, (incoming.get(e.to) || 0) + 1))
+  const depth = new Map<string, number>()
+  map.nodes.forEach(n => { if ((incoming.get(n.id) || 0) === 0) depth.set(n.id, 0) })
+  // relax edges (graph is small; iterate a few times, guard cycles)
+  for (let pass = 0; pass < 8; pass++) {
+    let changed = false
+    for (const e of map.edges) {
+      const d = (depth.get(e.from) ?? 0) + 1
+      if (d > (depth.get(e.to) ?? 0) && d < 12) { depth.set(e.to, d); changed = true }
+    }
+    if (!changed) break
+  }
+  map.nodes.forEach(n => { if (!depth.has(n.id)) depth.set(n.id, 0) })
+  return depth
+}
+
+function computeLayout(map: SystemMap, expandedId: string | null): Layout {
+  const depths = computeDepths(map)
+  const maxDepth = Math.max(...Array.from(depths.values()), 0)
   const channels = Array.from(new Set(map.nodes.map(n => n.channel)))
-  const layoutChannels: Layout['channels'] = []
-  const nodePos = new Map<string, { x: number; y: number }>()
-  let y = PAD
+  const nodes = new Map<string, Rect>()
+
+  const colX = (d: number) => PAD + CH_W + 90 + d * (A_W + COL_SPACING)
+  const colCursor: number[] = new Array(maxDepth + 1).fill(PAD)
+  const channelYs = new Map<string, number[]>()
+
+  // Stack nodes per column; iterate channels in canonical order for stable,
+  // grouped placement of the entry column.
   for (const ch of channels) {
-    const members = map.nodes.filter(n => n.channel === ch)
-    const groupHeight = members.length * A_H + (members.length - 1) * ROW_GAP
-    layoutChannels.push({ name: ch, x: PAD, y: y + groupHeight / 2 - CH_H / 2 })
-    members.forEach((m, i) => {
-      nodePos.set(m.id, { x: PAD + CH_W + COL_GAP, y: y + i * (A_H + ROW_GAP) })
-    })
-    y += groupHeight + GROUP_GAP
+    for (const n of map.nodes.filter(m => m.channel === ch)) {
+      const d = depths.get(n.id) || 0
+      const isExp = expandedId === n.id
+      const w = isExp ? EXP_W : A_W
+      const h = isExp ? EXP_H : A_H
+      const y = colCursor[d]
+      nodes.set(n.id, { x: colX(d), y, w, h })
+      colCursor[d] = y + h + ROW_GAP
+      if (d === 0) {
+        if (!channelYs.has(ch)) channelYs.set(ch, [])
+        channelYs.get(ch)!.push(y + h / 2)
+      }
+    }
   }
+
+  const layoutChannels = channels
+    .filter(ch => channelYs.has(ch))
+    .map(ch => {
+      const ys = channelYs.get(ch)!
+      return { name: ch, x: PAD, y: ys.reduce((a, b) => a + b, 0) / ys.length - CH_H / 2 }
+    })
+
   return {
-    width: PAD + CH_W + COL_GAP + A_W + PAD,
-    height: y - GROUP_GAP + PAD,
+    width: colX(maxDepth) + Math.max(A_W, expandedId ? EXP_W : A_W) + PAD,
+    height: Math.max(...colCursor, PAD) + PAD,
     channels: layoutChannels,
-    nodes: nodePos,
+    nodes,
   }
 }
 
-export function AutomationCanvas({ map, automations, onToggle }: {
+export function AutomationCanvas({ map, automations, onToggle, focusId }: {
   map: SystemMap
   automations: PortalAutomation[]
   onToggle: (id: string, active: boolean) => Promise<void>
+  focusId?: string | null
 }) {
-  const layout = computeLayout(map)
   const byId = new Map(map.nodes.map(n => [n.id, n]))
   const autoById = new Map(automations.map(a => [a.id, a]))
 
-  // Pan + zoom state
-  const [scale, setScale] = useState(0.9)
+  const [scale, setScale] = useState(0.85)
   const [offset, setOffset] = useState({ x: 0, y: 0 })
-  const dragRef = useRef<{ startX: number; startY: number; baseX: number; baseY: number } | null>(null)
-  const viewportRef = useRef<HTMLDivElement>(null)
+  const dragRef = useRef<{ startX: number; startY: number; baseX: number; baseY: number; moved: boolean } | null>(null)
 
-  // Selected node detail panel
-  const [selected, setSelected] = useState<string | null>(null)
-  const [graph, setGraph] = useState<Graph | null>(null)
-  const [graphLoading, setGraphLoading] = useState(false)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [graphs, setGraphs] = useState<Record<string, Graph>>({})
   const [confirmOff, setConfirmOff] = useState(false)
   const [toggling, setToggling] = useState(false)
   const [toggleError, setToggleError] = useState('')
@@ -86,41 +128,43 @@ export function AutomationCanvas({ map, automations, onToggle }: {
     setActiveMap(Object.fromEntries(map.nodes.map(n => [n.id, n.active])))
   }, [map])
 
-  const zoomBy = useCallback((factor: number) => {
-    setScale(s => Math.min(1.8, Math.max(0.35, s * factor)))
-  }, [])
+  const layout = computeLayout(map, expandedId)
 
-  function onWheel(e: React.WheelEvent) {
-    e.preventDefault()
-    zoomBy(e.deltaY < 0 ? 1.1 : 0.9)
-  }
+  const expandNode = useCallback(async (id: string) => {
+    setExpandedId(cur => (cur === id ? null : id))
+    setToggleError('')
+    if (!graphs[id]) {
+      try {
+        const r = await fetch(`/api/portal/automations/graph?automation_id=${id}`)
+        const g = await r.json()
+        setGraphs(prev => ({ ...prev, [id]: g }))
+      } catch {
+        setGraphs(prev => ({ ...prev, [id]: { error: 'Could not load the flow right now.' } }))
+      }
+    }
+  }, [graphs])
+
+  // Deep-link: /portal/automations?focus=<automation_id> opens that node
+  useEffect(() => {
+    if (focusId && byId.has(focusId)) expandNode(focusId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusId])
+
+  const zoomBy = useCallback((f: number) => setScale(s => Math.min(1.8, Math.max(0.35, s * f))), [])
+
+  function onWheel(e: React.WheelEvent) { e.preventDefault(); zoomBy(e.deltaY < 0 ? 1.1 : 0.9) }
   function onPointerDown(e: React.PointerEvent) {
-    dragRef.current = { startX: e.clientX, startY: e.clientY, baseX: offset.x, baseY: offset.y }
+    dragRef.current = { startX: e.clientX, startY: e.clientY, baseX: offset.x, baseY: offset.y, moved: false }
     ;(e.target as HTMLElement).setPointerCapture?.(e.pointerId)
   }
   function onPointerMove(e: React.PointerEvent) {
     if (!dragRef.current) return
-    setOffset({
-      x: dragRef.current.baseX + (e.clientX - dragRef.current.startX),
-      y: dragRef.current.baseY + (e.clientY - dragRef.current.startY),
-    })
+    const dx = e.clientX - dragRef.current.startX
+    const dy = e.clientY - dragRef.current.startY
+    if (Math.abs(dx) + Math.abs(dy) > 4) dragRef.current.moved = true
+    setOffset({ x: dragRef.current.baseX + dx, y: dragRef.current.baseY + dy })
   }
   function onPointerUp() { dragRef.current = null }
-
-  async function selectNode(id: string) {
-    setSelected(id)
-    setGraph(null)
-    setToggleError('')
-    setGraphLoading(true)
-    try {
-      const r = await fetch(`/api/portal/automations/graph?automation_id=${id}`)
-      setGraph(await r.json())
-    } catch {
-      setGraph({ error: 'Could not load the flow right now.' })
-    } finally {
-      setGraphLoading(false)
-    }
-  }
 
   async function doToggle(id: string, next: boolean) {
     setToggling(true)
@@ -134,18 +178,14 @@ export function AutomationCanvas({ map, automations, onToggle }: {
     setToggling(false)
   }
 
-  const sel = selected ? byId.get(selected) : null
-  const selAuto = selected ? autoById.get(selected) : null
-  const selActive = selected ? Boolean(activeMap[selected]) : false
-
+  const expNode = expandedId ? byId.get(expandedId) : null
   const btn: React.CSSProperties = {
     width: '32px', height: '32px', borderRadius: '9px', border: `1px solid ${colors.border}`,
     background: '#fff', cursor: 'pointer', fontSize: '15px', color: colors.textDark,
   }
 
   return (
-    <div style={{ position: 'relative', height: '560px', borderRadius: '14px', overflow: 'hidden', background: '#f6f8fb', border: `1px solid ${colors.border}` }}>
-      {/* dot grid backdrop, n8n-style */}
+    <div style={{ position: 'relative', height: '580px', borderRadius: '14px', overflow: 'hidden', background: '#f6f8fb', border: `1px solid ${colors.border}` }}>
       <div style={{
         position: 'absolute', inset: 0,
         backgroundImage: 'radial-gradient(circle 1px at center, #d3dae6 1px, transparent 1px)',
@@ -153,24 +193,21 @@ export function AutomationCanvas({ map, automations, onToggle }: {
         backgroundPosition: `${offset.x}px ${offset.y}px`,
       }} />
 
-      {/* zoom controls */}
       <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 20, display: 'flex', gap: '6px' }}>
         <button style={btn} onClick={() => zoomBy(1.15)} aria-label="Zoom in">＋</button>
         <button style={btn} onClick={() => zoomBy(0.87)} aria-label="Zoom out">－</button>
-        <button style={{ ...btn, width: 'auto', padding: '0 10px', fontSize: '11px' }} onClick={() => { setScale(0.9); setOffset({ x: 0, y: 0 }) }}>Reset</button>
+        <button style={{ ...btn, width: 'auto', padding: '0 10px', fontSize: '11px' }} onClick={() => { setScale(0.85); setOffset({ x: 0, y: 0 }) }}>Reset</button>
       </div>
       <div style={{ position: 'absolute', bottom: '10px', left: '12px', zIndex: 20, fontSize: '10.5px', color: colors.textLight }}>
-        drag to move · scroll to zoom · click a node for details
+        left to right = the order things run · drag to move · scroll to zoom · click a node to open it
       </div>
 
-      {/* pannable viewport */}
       <div
-        ref={viewportRef}
         onWheel={onWheel}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        style={{ position: 'absolute', inset: 0, cursor: dragRef.current ? 'grabbing' : 'grab', touchAction: 'none' }}
+        style={{ position: 'absolute', inset: 0, cursor: 'grab', touchAction: 'none' }}
       >
         <div style={{
           position: 'absolute', left: 0, top: 0,
@@ -178,31 +215,38 @@ export function AutomationCanvas({ map, automations, onToggle }: {
           transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
           transformOrigin: '0 0',
         }}>
-          {/* connector lines */}
           <svg width={layout.width} height={layout.height} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-            {/* channel → automation stems */}
+            {/* channel stems into entry-column nodes */}
             {map.nodes.map(n => {
-              const p = layout.nodes.get(n.id)
+              const r = layout.nodes.get(n.id)
               const ch = layout.channels.find(c => c.name === n.channel)
-              if (!p || !ch) return null
+              const hasIncoming = map.edges.some(e => e.to === n.id)
+              if (!r || !ch || hasIncoming) return null
               const x1 = ch.x + CH_W, y1 = ch.y + CH_H / 2
-              const x2 = p.x, y2 = p.y + A_H / 2
+              const x2 = r.x, y2 = r.y + Math.min(r.h, A_H) / 2
               const midX = (x1 + x2) / 2
               return <path key={`s${n.id}`} d={`M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`} fill="none" stroke="#c3cbd9" strokeWidth="1.75" />
             })}
-            {/* cross-workflow handoffs */}
+            {/* sequence edges between automations */}
             {map.edges.map((e, i) => {
               const from = layout.nodes.get(e.from)
               const to = layout.nodes.get(e.to)
               if (!from || !to) return null
-              const x1 = from.x + A_W, y1 = from.y + A_H / 2
-              const x2 = to.x + A_W, y2 = to.y + A_H / 2
-              const bow = 60 + Math.abs(y2 - y1) * 0.15
-              return <path key={`e${i}`} d={`M ${x1} ${y1} C ${x1 + bow} ${y1}, ${x2 + bow} ${y2}, ${x2} ${y2}`} fill="none" stroke="#8b5cf6" strokeWidth="1.75" strokeDasharray="5 4" />
+              const x1 = from.x + from.w, y1 = from.y + Math.min(from.h, A_H) / 2
+              const x2 = to.x, y2 = to.y + Math.min(to.h, A_H) / 2
+              const midX = (x1 + x2) / 2
+              return (
+                <g key={`e${i}`}>
+                  <path d={`M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`} fill="none" stroke="#8b5cf6" strokeWidth="1.75" opacity="0.75" />
+                  <circle cx={x2 - 3} cy={y2} r="3" fill="#8b5cf6" opacity="0.75" />
+                  {e.note && (
+                    <text x={midX} y={(y1 + y2) / 2 - 6} textAnchor="middle" fontSize="9.5" fill="#8b5cf6" opacity="0.85">{e.note}</text>
+                  )}
+                </g>
+              )
             })}
           </svg>
 
-          {/* channel roots */}
           {layout.channels.map(ch => {
             const meta = CHANNEL_META[ch.name] || CHANNEL_META.Internal
             return (
@@ -217,111 +261,96 @@ export function AutomationCanvas({ map, automations, onToggle }: {
             )
           })}
 
-          {/* automation nodes */}
           {map.nodes.map(n => {
-            const p = layout.nodes.get(n.id)
-            if (!p) return null
+            const r = layout.nodes.get(n.id)
+            if (!r) return null
             const isActive = Boolean(activeMap[n.id])
-            const isSel = selected === n.id
+            const isExp = expandedId === n.id
+            const auto = autoById.get(n.id)
+            const graph = graphs[n.id]
             return (
               <div
                 key={n.id}
-                onClick={e => { e.stopPropagation(); selectNode(n.id) }}
+                onClick={e => { e.stopPropagation(); if (!dragRef.current?.moved && !isExp) expandNode(n.id) }}
                 onPointerDown={e => e.stopPropagation()}
                 style={{
-                  position: 'absolute', left: `${p.x}px`, top: `${p.y}px`, width: `${A_W}px`, height: `${A_H}px`,
-                  background: '#fff', borderRadius: '12px', boxSizing: 'border-box', padding: '9px 12px',
-                  border: isSel ? `2px solid ${colors.blue}` : `1px solid ${colors.border}`,
-                  boxShadow: isSel ? '0 4px 18px rgba(37,99,235,0.18)' : '0 1px 4px rgba(0,0,0,0.05)',
-                  opacity: isActive ? 1 : 0.62, cursor: 'pointer',
+                  position: 'absolute', left: `${r.x}px`, top: `${r.y}px`, width: `${r.w}px`, height: `${r.h}px`,
+                  background: '#fff', borderRadius: '12px', boxSizing: 'border-box',
+                  border: isExp ? `2px solid ${colors.blue}` : `1px solid ${colors.border}`,
+                  boxShadow: isExp ? '0 8px 28px rgba(37,99,235,0.16)' : '0 1px 4px rgba(0,0,0,0.05)',
+                  opacity: isActive || isExp ? 1 : 0.62,
+                  cursor: isExp ? 'default' : 'pointer',
+                  transition: 'width 0.15s, height 0.15s',
+                  overflow: 'hidden',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-                  <span style={{
-                    width: '8px', height: '8px', borderRadius: '999px', flexShrink: 0,
-                    background: isActive ? colors.success : '#cbd5e1',
-                  }} />
-                  <span style={{ fontSize: '12px', fontWeight: 700, color: colors.textDark, lineHeight: 1.25, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                <div style={{ padding: '9px 12px', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '999px', flexShrink: 0, background: isActive ? colors.success : '#cbd5e1' }} />
+                  <span style={{ flex: 1, fontSize: '12px', fontWeight: 700, color: colors.textDark, lineHeight: 1.25, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                     {n.name}
                   </span>
+                  {isExp && (
+                    <button onClick={e => { e.stopPropagation(); setExpandedId(null) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: colors.textMuted, fontSize: '13px' }}>✕</button>
+                  )}
                 </div>
-                <div style={{ fontSize: '10px', color: colors.textLight, marginTop: '4px' }}>
-                  {isActive ? 'running' : 'off'}{n.outputs.length > 0 ? ` · ${n.outputs.map(o => OUTPUT_LABEL[o] || o).join(', ')}` : ''}{!n.linked ? ' · setup pending' : ''}
-                </div>
+
+                {!isExp && (
+                  <div style={{ padding: '0 12px', fontSize: '10px', color: colors.textLight }}>
+                    {isActive ? 'running' : 'off'}{n.outputs.length > 0 ? ` · ${n.outputs.map(o => OUTPUT_LABEL[o] || o).join(', ')}` : ''}{!n.linked ? ' · setup pending' : ''}
+                  </div>
+                )}
+
+                {isExp && (
+                  <div style={{ padding: '0 12px 12px', height: `${EXP_H - 46}px`, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {auto?.description && (
+                      <p style={{ fontSize: '11px', color: colors.textMuted, lineHeight: 1.5, margin: 0, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
+                        {auto.description}
+                      </p>
+                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <button
+                        onClick={e => { e.stopPropagation(); isActive ? setConfirmOff(true) : doToggle(n.id, true) }}
+                        disabled={toggling}
+                        style={{ ...(isActive ? secondaryButton : gradientButton), fontSize: '11px', padding: '6px 12px', opacity: toggling ? 0.5 : 1 }}
+                      >
+                        {toggling ? 'Working…' : isActive ? 'Turn off' : 'Turn on'}
+                      </button>
+                      <span style={{ fontSize: '10.5px', fontWeight: 600, color: isActive ? colors.success : colors.textLight }}>
+                        {isActive ? '● running' : '○ off'}
+                      </span>
+                    </div>
+                    {toggleError && <p style={{ fontSize: '10.5px', color: colors.error, margin: 0 }}>{toggleError}</p>}
+                    <div style={{ flex: 1, overflow: 'auto', borderTop: `1px dashed ${colors.border}`, paddingTop: '8px' }}>
+                      {!graph && <div style={{ fontSize: '11px', color: colors.textMuted }}>Loading flow…</div>}
+                      {graph && 'error' in graph && <div style={{ fontSize: '11px', color: colors.textMuted }}>{graph.error}</div>}
+                      {graph && 'managed' in graph && (
+                        <div style={{ fontSize: '11px', color: colors.textMuted, lineHeight: 1.5 }}>
+                          Runs inside the Montero platform itself. {graph.description || ''}
+                        </div>
+                      )}
+                      {graph && 'levels' in graph && <FlowTree levels={graph.levels} edges={graph.edges || []} />}
+                    </div>
+                  </div>
+                )}
               </div>
             )
           })}
         </div>
       </div>
 
-      {/* detail panel */}
-      {sel && (
-        <div
-          onPointerDown={e => e.stopPropagation()}
-          style={{
-            position: 'absolute', top: 0, right: 0, bottom: 0, width: 'min(360px, 92%)', zIndex: 30,
-            background: 'rgba(255,255,255,0.97)', borderLeft: `1px solid ${colors.border}`,
-            padding: '16px', overflowY: 'auto', boxShadow: '-8px 0 24px rgba(0,0,0,0.06)',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '15px', fontWeight: 700, color: colors.navy }}>{sel.name}</div>
-              <div style={{ fontSize: '11px', color: colors.textLight, marginTop: '2px' }}>
-                starts from: {sel.channel}{sel.outputs.length > 0 ? ` · produces: ${sel.outputs.map(o => OUTPUT_LABEL[o] || o).join(', ')}` : ''}
-              </div>
-            </div>
-            <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '15px', color: colors.textMuted }}>✕</button>
-          </div>
-
-          {selAuto?.description && (
-            <p style={{ fontSize: '12.5px', color: colors.textMuted, lineHeight: 1.6, margin: '10px 0 0' }}>{selAuto.description}</p>
-          )}
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '14px 0 0' }}>
-            <button
-              onClick={() => selActive ? setConfirmOff(true) : doToggle(sel.id, true)}
-              disabled={toggling}
-              style={{ ...(selActive ? secondaryButton : gradientButton), fontSize: '12px', padding: '8px 14px', opacity: toggling ? 0.5 : 1 }}
-            >
-              {toggling ? 'Working…' : selActive ? 'Turn off' : 'Turn on'}
-            </button>
-            <span style={{ fontSize: '11.5px', color: selActive ? colors.success : colors.textLight, fontWeight: 600 }}>
-              {selActive ? '● running' : '○ off'}
-            </span>
-          </div>
-          {toggleError && <p style={{ fontSize: '11.5px', color: colors.error, margin: '8px 0 0' }}>{toggleError}</p>}
-
-          <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: `1px dashed ${colors.border}` }}>
-            <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: colors.textLight, marginBottom: '10px' }}>
-              Inside this automation
-            </div>
-            {graphLoading && <div style={{ fontSize: '12px', color: colors.textMuted }}>Loading flow…</div>}
-            {graph && 'error' in graph && <div style={{ fontSize: '12px', color: colors.textMuted }}>{graph.error}</div>}
-            {graph && 'managed' in graph && (
-              <div style={{ fontSize: '12px', color: colors.textMuted, lineHeight: 1.6 }}>
-                Runs inside the Montero platform itself. {graph.description || ''}
-              </div>
-            )}
-            {graph && 'levels' in graph && <FlowTree levels={graph.levels} edges={graph.edges || []} />}
-          </div>
-        </div>
-      )}
-
-      {/* confirm turn-off */}
-      {confirmOff && sel && (
+      {confirmOff && expNode && (
         <div
           onClick={() => setConfirmOff(false)}
           style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(15,23,42,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
         >
           <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: '18px', padding: '24px', maxWidth: '420px', width: '100%', boxShadow: '0 24px 64px rgba(0,0,0,0.25)' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, color: colors.textDark, margin: '0 0 8px' }}>Turn off “{sel.name}”?</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: 700, color: colors.textDark, margin: '0 0 8px' }}>Turn off “{expNode.name}”?</h3>
             <p style={{ fontSize: '13px', color: colors.textMuted, lineHeight: 1.6, margin: '0 0 18px' }}>
               While it&apos;s off, this automation stops completely until you turn it back on. Nothing already processed is affected.
             </p>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
               <button onClick={() => setConfirmOff(false)} style={{ ...secondaryButton, fontSize: '13px', padding: '9px 16px' }}>Keep it running</button>
-              <button onClick={() => { setConfirmOff(false); doToggle(sel.id, false) }} style={{ ...gradientButton, fontSize: '13px', padding: '9px 16px', background: colors.error }}>Turn it off</button>
+              <button onClick={() => { setConfirmOff(false); doToggle(expNode.id, false) }} style={{ ...gradientButton, fontSize: '13px', padding: '9px 16px', background: colors.error }}>Turn it off</button>
             </div>
           </div>
         </div>

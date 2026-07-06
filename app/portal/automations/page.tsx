@@ -23,6 +23,14 @@ export default function AutomationsPage() {
   const [deployMessage, setDeployMessage] = useState<string | null>(null)
   const [systemMap, setSystemMap] = useState<SystemMap | null>(null)
   const [view, setView] = useState<'map' | 'list'>('map')
+  const [focusId, setFocusId] = useState<string | null>(null)
+
+  // Deep-link support: /portal/automations?focus=<automation_id> (used by the
+  // AI assistant to open a specific node on the map)
+  useEffect(() => {
+    const f = new URLSearchParams(window.location.search).get('focus')
+    if (f) setFocusId(f)
+  }, [])
 
   // Check admin flag once for this user (drives visibility of the Sync button)
   useEffect(() => {
@@ -225,7 +233,7 @@ export default function AutomationsPage() {
           {view === 'map' ? (
             systemMap ? (
               <div style={{ ...card, padding: '10px' }}>
-                <AutomationCanvas map={systemMap} automations={automations} onToggle={handleToggle} />
+                <AutomationCanvas map={systemMap} automations={automations} onToggle={handleToggle} focusId={focusId} />
               </div>
             ) : (
               <div style={{ ...card, padding: '32px', textAlign: 'center', fontSize: '13px', color: colors.textMuted }}>
