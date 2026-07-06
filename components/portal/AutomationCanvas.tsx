@@ -235,12 +235,22 @@ export function AutomationCanvas({ map, automations, onToggle, focusId }: {
               const x1 = from.x + from.w, y1 = from.y + Math.min(from.h, A_H) / 2
               const x2 = to.x, y2 = to.y + Math.min(to.h, A_H) / 2
               const midX = (x1 + x2) / 2
+              // Stagger label heights so crossing edges don't overprint each
+              // other; halo stroke keeps them readable over lines; hide when
+              // zoomed out (they'd be unreadable soup at small scales).
+              const labelY = (y1 + y2) / 2 - 8 + ((i % 3) - 1) * 16
               return (
                 <g key={`e${i}`}>
-                  <path d={`M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`} fill="none" stroke="#8b5cf6" strokeWidth="1.75" opacity="0.75" />
-                  <circle cx={x2 - 3} cy={y2} r="3" fill="#8b5cf6" opacity="0.75" />
-                  {e.note && (
-                    <text x={midX} y={(y1 + y2) / 2 - 6} textAnchor="middle" fontSize="9.5" fill="#8b5cf6" opacity="0.85">{e.note}</text>
+                  <path d={`M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`} fill="none" stroke="#8b5cf6" strokeWidth="1.75" opacity="0.55" />
+                  <circle cx={x2 - 3} cy={y2} r="3" fill="#8b5cf6" opacity="0.7" />
+                  {e.note && scale >= 0.7 && (
+                    <text
+                      x={midX} y={labelY} textAnchor="middle" fontSize="9.5"
+                      fill="#7c3aed" stroke="#f6f8fb" strokeWidth="3.5"
+                      style={{ paintOrder: 'stroke' }}
+                    >
+                      {e.note}
+                    </text>
                   )}
                 </g>
               )
