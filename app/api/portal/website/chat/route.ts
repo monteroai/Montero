@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient, isAdminEnvConfigured } from '@/lib/supabase/admin'
 import { sendEmail } from '@/lib/portal/email'
 import { WEBSITE_SECTIONS } from '@/lib/portal/constants'
+import { isManagedSite } from '@/lib/portal/managedSites'
 
 // Site Studio chat â€” the client edits their website by talking to it.
 //
@@ -100,6 +101,10 @@ export async function POST(req: NextRequest) {
     if (!business) return NextResponse.json({ error: 'Business not found' }, { status: 404 })
     const exempt = (client as Record<string, unknown>).billing_exempt === true
 
+    // Sites we don't host (e.g. Wix) can't receive edits from us — run the
+    // chat in request-mode: no edit tool, everything routes to the team.
+    const managed = isManagedSite(business.website_url)
+
     // Monthly cap (skipped for exempt clients; degrades to unmetered pre-SQL)
     let used = 0
     let metered = false
@@ -136,7 +141,7 @@ export async function POST(req: NextRequest) {
       { type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } },
       {
         type: 'text',
-        text: `Business: ${business.business_name}${business.industry ? ` (${business.industry})` : ''}\n${business.description ? `About: ${business.description}\n` : ''}Live site: ${business.website_url || 'not set'}\n\nCurrent website content:\n${sectionBlock}`,
+        text: `Business: ${business.business_name}${business.industry ? ` (${business.industry})` : ''}\n${business.description ? `About: ${business.description}\n` : ''}Live site: ${business.website_url || 'not set'}\n${managed ? '' : 'IMPORTANT: this website is hosted on an external platform Montero does not control (e.g. Wix). You CANNOT make any edits yourself — the update tool is unavailable. For EVERY change request, capture exactly what the client wants (which section, old text, desired new text) and use escalate_to_team. Tell the client the Montero team applies changes on their site host, usually within a business day.\n'}\nCurrent website content:\n${sectionBlock}`,
       },
     ]
 
@@ -147,11 +152,12 @@ export async function POST(req: NextRequest) {
     let reply = ''
 
     for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+      const activeTools = managed ? TOOLS : TOOLS.filter(t => t.name !== 'update_section_text')
       const response = await anthropic.messages.create({
         model: 'claude-opus-4-8',
         max_tokens: 1500,
         system: systemBlocks,
-        tools: TOOLS,
+        tools: activeTools,
         messages,
       })
 
@@ -266,6 +272,7 @@ export async function POST(req: NextRequest) {
       reply: reply || (updates.length ? 'Done â€” the change is saved and will be live on your site shortly.' : 'How can I help with your website?'),
       updates: updates.map(u => ({ section: u.section, new_text: u.new_text })),
       escalated,
+      managed,
       usage: { used: newUsed, limit: DEFAULT_MONTHLY_LIMIT, exempt },
     })
   } catch (e: unknown) {

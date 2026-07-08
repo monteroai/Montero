@@ -6,6 +6,7 @@ import { ChangeRequestCard } from '@/components/portal/ChangeRequestCard'
 import { StatusBadge } from '@/components/portal/StatusBadge'
 import { WEBSITE_SECTIONS } from '@/lib/portal/constants'
 import { useBusiness } from '@/lib/portal/BusinessContext'
+import { isManagedSite } from '@/lib/portal/managedSites'
 import type { PortalWebsiteContent, PortalChangeRequest } from '@/lib/portal/types'
 
 // Site Studio — bolt.new-style website editing. Chat on the left makes
@@ -19,6 +20,12 @@ const WELCOME: ChatMsg = {
   role: 'assistant',
   content:
     "Hi — I'm your website editor. Tell me what to change in plain English: \"make the headline punchier\", \"we're now open Saturdays\", \"fix the typo in the about section\". Text changes I make right away; photos, colors, or layout I send to the Montero team for you.",
+}
+
+const WELCOME_EXTERNAL: ChatMsg = {
+  role: 'assistant',
+  content:
+    "Hi — I'm your website assistant. Your site is hosted on an external platform, so I don't change it directly — instead, describe any change you want (\"update our hours\", \"swap the headline\", \"new photo on the homepage\") and I'll send exactly what you need to the Montero team, who apply it on your site, usually within a business day.",
 }
 
 export default function WebsitePage() {
@@ -51,10 +58,12 @@ export default function WebsitePage() {
       .catch(() => {})
   }, [activeBusinessId])
 
+  const managed = isManagedSite(activeBusiness?.website_url)
+
   useEffect(() => {
     load()
-    setMessages([WELCOME])
-  }, [load])
+    setMessages([managed ? WELCOME : WELCOME_EXTERNAL])
+  }, [load, managed])
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -119,7 +128,9 @@ export default function WebsitePage() {
             Website {activeBusiness && <span style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, color: colors.textMuted }}>· {activeBusiness.business_name}</span>}
           </h1>
           <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>
-            Chat to edit your site. Text changes happen right away; bigger changes go to our team.
+            {managed
+              ? 'Chat to edit your site. Text changes happen right away; bigger changes go to our team.'
+              : 'Your site is hosted externally — describe any change here and our team applies it for you, usually same day.'}
           </p>
         </div>
         {usage && (
