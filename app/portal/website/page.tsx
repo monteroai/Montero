@@ -93,6 +93,8 @@ export default function WebsitePage() {
       }
       const meta: string[] = []
       if (d.updates?.length) meta.push(`✦ Updated: ${d.updates.map((u: { section: string }) => u.section).join(', ')}`)
+      if (d.published?.ok) meta.push('⚡ Published to your live site')
+      else if (d.updates?.length) meta.push('→ Our team syncs it to your live site shortly')
       if (d.escalated) meta.push('→ Sent to the Montero team')
       setMessages(m => [...m, { role: 'assistant', content: d.reply, meta: meta.join('  ·  ') || undefined }])
       if (d.usage) setUsage(d.usage)
@@ -129,8 +131,8 @@ export default function WebsitePage() {
           </h1>
           <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>
             {managed
-              ? 'Chat to edit your site. Text changes happen right away; bigger changes go to our team.'
-              : 'Your site is hosted externally — describe any change here and our team applies it for you, usually same day.'}
+              ? 'Chat to edit your site — text changes publish straight to your live website.'
+              : 'Your site is hosted on an outside platform, so it appears here view-only. Ask the assistant for any changes.'}
           </p>
         </div>
         {usage && (
@@ -146,8 +148,24 @@ export default function WebsitePage() {
       </div>
 
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'stretch' }}>
-        {/* ── Chat panel ── */}
+        {/* ── Chat panel (sealed for externally hosted sites) ── */}
         <div style={{ ...card, flex: '1 1 340px', minWidth: '300px', display: 'flex', flexDirection: 'column', height: '72vh', minHeight: '480px', overflow: 'hidden' }}>
+          {!managed ? (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px', textAlign: 'center', gap: '12px' }}>
+              <div style={{ width: '52px', height: '52px', borderRadius: '16px', background: colors.inputBg, border: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' }}>
+                🔒
+              </div>
+              <div style={{ fontSize: '14.5px', fontWeight: 700, color: colors.textDark }}>Editing isn&apos;t available for this site</div>
+              <p style={{ fontSize: '12.5px', color: colors.textMuted, lineHeight: 1.6, maxWidth: '300px', margin: 0 }}>
+                This website is hosted on an outside platform that Montero doesn&apos;t manage, so changes can&apos;t be made from here.
+                Need something updated? Use the <strong>Talk to Emilio</strong> button in the assistant and our team will handle it.
+              </p>
+              <p style={{ fontSize: '11.5px', color: colors.textLight, lineHeight: 1.6, maxWidth: '300px', margin: 0 }}>
+                Move your site to Montero hosting and instant AI editing unlocks here.
+              </p>
+            </div>
+          ) : (
+          <>
           <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {messages.map((m, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
@@ -196,6 +214,8 @@ export default function WebsitePage() {
               Send
             </button>
           </div>
+          </>
+          )}
         </div>
 
         {/* ── Right panel: live preview / content ── */}

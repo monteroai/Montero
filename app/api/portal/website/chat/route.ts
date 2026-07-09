@@ -5,6 +5,7 @@ import { adminClient, isAdminEnvConfigured } from '@/lib/supabase/admin'
 import { sendEmail } from '@/lib/portal/email'
 import { WEBSITE_SECTIONS } from '@/lib/portal/constants'
 import { isManagedSite } from '@/lib/portal/managedSites'
+import { pushTextToLiveSite } from '@/lib/portal/netlifyDeploy'
 
 // Site Studio chat â€” the client edits their website by talking to it.
 //
@@ -251,28 +252,56 @@ export async function POST(req: NextRequest) {
       messages.push({ role: 'user', content: results })
     }
 
-    // One digest email per turn so the live static site gets synced
+    // Push the text changes to the LIVE site (Montero-hosted Netlify sites
+    // only). Swaps are tried at two granularities: the full section text and
+    // each changed line — HTML markup between paragraphs means whole-section
+    // matches often miss where single lines hit.
+    let published: { ok: boolean; applied: number } | null = null
+    if (updates.length > 0 && managed && business.website_url) {
+      const swaps: Array<{ old: string; new: string }> = []
+      for (const u of updates) {
+        if (u.old_text) swaps.push({ old: u.old_text, new: u.new_text })
+        const oldLines = (u.old_text || '').split('\n').map(l => l.trim()).filter(Boolean)
+        const newLines = u.new_text.split('\n').map(l => l.trim()).filter(Boolean)
+        const n = Math.min(oldLines.length, newLines.length)
+        for (let i = 0; i < n; i++) {
+          if (oldLines[i] !== newLines[i] && oldLines[i].length >= 8) {
+            swaps.push({ old: oldLines[i], new: newLines[i] })
+          }
+        }
+      }
+      const res = await pushTextToLiveSite(business.website_url, swaps)
+      published = { ok: res.ok, applied: res.applied }
+      if (!res.ok) console.log('[site-studio] live push fell back to manual:', res.error)
+    }
+
+    // Digest email per turn: either a confirmation of what auto-published, or
+    // the manual sync request with exact old/new text.
     if (updates.length > 0) {
       await sendEmail({
         to: TEAM_EMAIL,
-        subject: `[Site Studio] ${business.business_name}: ${updates.length} text change${updates.length > 1 ? 's' : ''} to sync`,
+        subject: published?.ok
+          ? `[Site Studio] ${business.business_name}: ${updates.length} change${updates.length > 1 ? 's' : ''} AUTO-PUBLISHED live`
+          : `[Site Studio] ${business.business_name}: ${updates.length} text change${updates.length > 1 ? 's' : ''} to sync`,
         text: [
           `Client: ${client.owner_name} (${client.primary_email || 'no email'})`,
           `Business: ${business.business_name}`,
           `Live site: ${business.website_url || 'not set'}`,
-          '',
+          published?.ok
+            ? `\nAuto-published to the live Netlify site (${published.applied} swap${published.applied === 1 ? '' : 's'} applied). Spot-check when convenient.\n`
+            : '\nAuto-publish did not apply (text not found verbatim / not a hosted site) — apply the NEW text below manually.\n',
           ...updates.map(u => `SECTION: ${u.section}\n--- OLD ---\n${u.old_text || '(empty)'}\n--- NEW ---\n${u.new_text}\n`),
-          'Applied in the portal (auto-approved). Sync the live static site with the NEW text above.',
         ].join('\n'),
       }).then(() => undefined, () => undefined)
     }
 
     const newUsed = exempt ? used : used + updates.length
     return NextResponse.json({
-      reply: reply || (updates.length ? 'Done â€” the change is saved and will be live on your site shortly.' : 'How can I help with your website?'),
+      reply: reply || (updates.length ? 'Done — the change is saved and will be live on your site shortly.' : 'How can I help with your website?'),
       updates: updates.map(u => ({ section: u.section, new_text: u.new_text })),
       escalated,
       managed,
+      published,
       usage: { used: newUsed, limit: DEFAULT_MONTHLY_LIMIT, exempt },
     })
   } catch (e: unknown) {
