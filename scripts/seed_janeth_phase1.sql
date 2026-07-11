@@ -18,7 +18,7 @@ where user_id = '9d0d8e23-1a93-4f46-a582-926329be4d5c';
 --    Netlify site so the portal shows a real website.
 -- =====================================================
 update public.portal_businesses
-set website_url = 'https://smileconsultingplaceholder.netlify.app',
+set website_url = 'https://smilemanagementconsultingsnj.com',
     updated_at  = now()
 where id = 'a0bbeee7-0837-41bf-83b2-2dbe51e92f4d';
 
