@@ -18,28 +18,33 @@ export const colors = {
   infoBg: '#dbeafe',
 } as const
 
-// iOS-style neutral canvas: soft light gray with a faint top glow — no pink.
-export const mainBg = 'radial-gradient(1400px 700px at 50% -12%, #fbfbfd 0%, #f2f3f5 48%, #e9ebee 100%)'
+// Soft-glass canvas: cool blue-gray with ambient light pools (the "milky
+// waves" look) — stacked radial gradients, no extra DOM needed.
+export const mainBg = [
+  'radial-gradient(1000px 520px at 12% 6%, rgba(255,255,255,0.95), transparent 60%)',
+  'radial-gradient(1200px 640px at 90% 24%, rgba(203,216,240,0.55), transparent 65%)',
+  'radial-gradient(1100px 720px at 26% 100%, rgba(210,222,245,0.6), transparent 62%)',
+  'linear-gradient(180deg, #eef1f7 0%, #e9edf5 100%)',
+].join(', ')
 
-// Frosted panel (sidebars, sheets). More transparent + heavier blur so the
-// gray canvas reads through — the "foggy glass" look.
+// Frosted panel (sidebar, sheets) — floats over the canvas.
 export const glass: CSSProperties = {
-  background: 'rgba(255,255,255,0.55)',
+  background: 'rgba(255,255,255,0.6)',
   backdropFilter: 'blur(28px) saturate(170%)',
   WebkitBackdropFilter: 'blur(28px) saturate(170%)',
-  borderRadius: '22px',
-  border: '1px solid rgba(255,255,255,0.65)',
-  boxShadow: '0 8px 32px rgba(17,24,39,0.06)',
+  borderRadius: '24px',
+  border: '1px solid rgba(255,255,255,0.75)',
+  boxShadow: '0 18px 44px rgba(23,32,64,0.08)',
 }
 
-// Frosted card (list rows, stat tiles). Translucent bubble over the canvas.
+// Card — near-white glass bubble with a soft, wide drop shadow.
 export const card: CSSProperties = {
-  background: 'rgba(255,255,255,0.62)',
-  backdropFilter: 'blur(22px) saturate(160%)',
-  WebkitBackdropFilter: 'blur(22px) saturate(160%)',
-  borderRadius: '18px',
-  border: '1px solid rgba(255,255,255,0.7)',
-  boxShadow: '0 1px 2px rgba(16,24,40,0.04), 0 8px 24px rgba(16,24,40,0.05)',
+  background: 'rgba(255,255,255,0.78)',
+  backdropFilter: 'blur(24px) saturate(160%)',
+  WebkitBackdropFilter: 'blur(24px) saturate(160%)',
+  borderRadius: '20px',
+  border: '1px solid rgba(255,255,255,0.85)',
+  boxShadow: '0 2px 6px rgba(23,32,64,0.04), 0 18px 44px rgba(23,32,64,0.07)',
 }
 
 // Primary action — flat iOS-style fill of the active business's primary color

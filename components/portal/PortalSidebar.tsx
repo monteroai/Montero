@@ -138,15 +138,22 @@ export function PortalSidebar({ open, onClose }: PortalSidebarProps) {
               onClick={onClose}
               style={{
                 display: 'flex', alignItems: 'center', gap: '12px',
-                padding: '10px 14px', borderRadius: '12px',
+                padding: '7px 10px', borderRadius: '16px',
                 fontSize: '14px', fontWeight: active ? 600 : 500,
-                color: active ? colors.navy : colors.textMuted,
-                background: active ? 'rgba(255,255,255,0.6)' : 'transparent',
+                color: active ? colors.blue : colors.textMuted,
+                background: active ? '#ffffff' : 'transparent',
+                boxShadow: active ? '0 8px 20px rgba(23,32,64,0.08), 0 1px 2px rgba(23,32,64,0.04)' : undefined,
                 textDecoration: 'none',
-                transition: 'background 0.15s, color 0.15s',
+                transition: 'background 0.15s, color 0.15s, box-shadow 0.15s',
               }}
             >
-              <span style={{ color: active ? colors.blue : colors.textLight, display: 'flex' }}>
+              <span style={{
+                width: '34px', height: '34px', borderRadius: '11px', flexShrink: 0,
+                background: active ? 'rgba(37,99,235,0.09)' : 'rgba(255,255,255,0.65)',
+                boxShadow: active ? undefined : '0 1px 3px rgba(23,32,64,0.05)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: active ? colors.blue : colors.textMuted,
+              }}>
                 {item.icon}
               </span>
               {item.label}
@@ -164,15 +171,23 @@ export function PortalSidebar({ open, onClose }: PortalSidebarProps) {
               onClick={onClose}
               style={{
                 display: 'flex', alignItems: 'center', gap: '12px',
-                padding: '10px 14px', borderRadius: '12px',
+                padding: '7px 10px', borderRadius: '16px',
                 fontSize: '14px',
                 fontWeight: isActive('/portal/admin') ? 600 : 500,
-                color: isActive('/portal/admin') ? colors.navy : colors.textMuted,
-                background: isActive('/portal/admin') ? 'rgba(255,255,255,0.6)' : 'transparent',
+                color: isActive('/portal/admin') ? colors.blue : colors.textMuted,
+                background: isActive('/portal/admin') ? '#ffffff' : 'transparent',
+                boxShadow: isActive('/portal/admin') ? '0 8px 20px rgba(23,32,64,0.08), 0 1px 2px rgba(23,32,64,0.04)' : undefined,
                 textDecoration: 'none',
+                transition: 'background 0.15s, color 0.15s, box-shadow 0.15s',
               }}
             >
-              <span style={{ color: isActive('/portal/admin') ? colors.blue : colors.textLight, display: 'flex' }}>
+              <span style={{
+                width: '34px', height: '34px', borderRadius: '11px', flexShrink: 0,
+                background: isActive('/portal/admin') ? 'rgba(37,99,235,0.09)' : 'rgba(255,255,255,0.65)',
+                boxShadow: isActive('/portal/admin') ? undefined : '0 1px 3px rgba(23,32,64,0.05)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: isActive('/portal/admin') ? colors.blue : colors.textMuted,
+              }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/></svg>
               </span>
               Overview
