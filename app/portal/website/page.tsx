@@ -8,6 +8,7 @@ import { WEBSITE_SECTIONS } from '@/lib/portal/constants'
 import { useBusiness } from '@/lib/portal/BusinessContext'
 import { isManagedSite } from '@/lib/portal/managedSites'
 import type { PortalWebsiteContent, PortalChangeRequest } from '@/lib/portal/types'
+import { DecodeText } from '@/components/portal/DecodeText'
 
 // Site Studio — bolt.new-style website editing. Chat on the left makes
 // text-only changes (anything bigger is auto-routed to the Montero team);
@@ -114,7 +115,7 @@ export default function WebsitePage() {
   if (!activeBusinessId) {
     return (
       <div style={{ padding: '8px 4px 0' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: 700, color: colors.navy, fontFamily: 'var(--font-cinzel)' }}>Website</h1>
+        <h1 style={{ fontSize: '24px', fontWeight: 700, color: colors.textDark, letterSpacing: '-0.02em' }}><DecodeText text="Website" /></h1>
         <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>Add a business first.</p>
       </div>
     )
@@ -126,8 +127,8 @@ export default function WebsitePage() {
     <>
       <div style={{ padding: '8px 4px 0', display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', gap: '12px' }}>
         <div style={{ flex: 1, minWidth: '240px' }}>
-          <h1 style={{ fontSize: '22px', fontWeight: 700, color: colors.navy, fontFamily: 'var(--font-cinzel)' }}>
-            Website {activeBusiness && <span style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, color: colors.textMuted }}>· {activeBusiness.business_name}</span>}
+          <h1 style={{ fontSize: '24px', fontWeight: 700, color: colors.textDark, letterSpacing: '-0.02em' }}>
+            <DecodeText text="Website" /> {activeBusiness && <span style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, color: colors.textMuted }}>· {activeBusiness.business_name}</span>}
           </h1>
           <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>
             {managed

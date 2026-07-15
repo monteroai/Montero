@@ -4,6 +4,11 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 
 const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghikmnopqrstuvwxyz'
 
+// Titles that already decoded this session (module scope = survives tab
+// switches within the SPA, resets on hard refresh). Repeat visits render
+// the word instantly instead of replaying the intro.
+const played = new Set<string>()
+
 // Scramble-decode intro for page titles: letters flicker through random
 // glyphs and lock in left-to-right. Runs once on mount (i.e. per tab visit),
 // ~700ms total, rAF-driven — no timers piling up, no layout shift (the real
@@ -15,10 +20,11 @@ export function DecodeText({ text, style }: { text: string; style?: CSSPropertie
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (played.has(text) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setDisplay(text)
       return
     }
+    played.add(text)
 
     const DURATION = 700
     const start = performance.now()
