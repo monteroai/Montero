@@ -93,7 +93,6 @@ export function FlowTree({ levels, edges }: { levels: FlowNode[][]; edges: Array
                 width: `${TREE.W}px`, height: `${TREE.H}px`,
                 display: 'flex', alignItems: 'center', gap: '8px',
                 background: '#fff', border: `1px solid ${colors.border}`,
-                borderLeft: `3px solid ${meta.color}`,
                 borderRadius: '10px', padding: '0 10px', boxSizing: 'border-box',
               }}
             >

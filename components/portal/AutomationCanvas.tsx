@@ -262,10 +262,13 @@ export function AutomationCanvas({ map, automations, onToggle, focusId }: {
             return (
               <div key={ch.name} style={{
                 position: 'absolute', left: `${ch.x}px`, top: `${ch.y}px`, width: `${CH_W}px`, height: `${CH_H}px`,
-                background: '#fff', border: `1px solid ${colors.border}`, borderLeft: `4px solid ${meta.color}`,
+                background: '#fff', border: `1px solid ${colors.border}`,
                 borderRadius: '12px', padding: '8px 12px', boxSizing: 'border-box',
               }}>
-                <div style={{ fontSize: '12.5px', fontWeight: 700, color: colors.textDark }}>{meta.icon} {ch.name}</div>
+                <div style={{ fontSize: '12.5px', fontWeight: 700, color: colors.textDark, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: meta.color, flexShrink: 0 }} />
+                  {ch.name}
+                </div>
                 <div style={{ fontSize: '10px', color: colors.textLight }}>{meta.blurb}</div>
               </div>
             )

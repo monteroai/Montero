@@ -68,7 +68,7 @@ export default function DashboardPage() {
     return (
       <>
         <div style={{ padding: '8px 4px 0' }}>
-          <h1 style={{ fontSize: '22px', fontWeight: 700, color: colors.navy, fontFamily: 'var(--font-cinzel)' }}>{greeting}</h1>
+          <h1 style={{ fontSize: '24px', fontWeight: 700, color: colors.textDark, letterSpacing: '-0.02em' }}>{greeting}</h1>
           <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>
             Welcome to Montero. Let&apos;s set up your first business.
           </p>
@@ -93,8 +93,8 @@ export default function DashboardPage() {
   return (
     <>
       <div style={{ padding: '8px 4px 0' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: 700, color: colors.navy, fontFamily: 'var(--font-cinzel)' }}>
-          {greeting}{activeBusiness ? `, ${activeBusiness.business_name}` : ''}
+        <h1 style={{ fontSize: '24px', fontWeight: 700, color: colors.textDark, letterSpacing: '-0.02em' }}>
+          {greeting}
         </h1>
         <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>
           {activeBusiness

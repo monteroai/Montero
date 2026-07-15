@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { card, colors } from '@/lib/portal/styles'
 import { StatusBadge } from './StatusBadge'
-import { INTERACTION_ICONS } from '@/lib/portal/constants'
+import { InteractionIcon } from './InteractionIcon'
 import type { PortalInteraction } from '@/lib/portal/types'
 
 function timeAgo(dateStr: string) {
@@ -106,8 +106,10 @@ export function ActivityFeed({ interactions, compact }: ActivityFeedProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
       {interactions.map(item => {
-        const icon = INTERACTION_ICONS[item.type] || { label: item.type, emoji: '📌' }
         const expanded = expandedId === item.id
+        const isError = item.flag_reason?.includes('error')
+        const chipBg = item.flagged ? (isError ? colors.errorBg : colors.warningBg) : 'rgba(120,120,128,0.08)'
+        const chipColor = item.flagged ? (isError ? colors.error : colors.warning) : colors.textMuted
         return (
           <div
             key={item.id}
@@ -116,12 +118,17 @@ export function ActivityFeed({ interactions, compact }: ActivityFeedProps) {
               ...card,
               padding: compact ? '10px 14px' : '14px 18px',
               cursor: item.detail ? 'pointer' : 'default',
-              borderLeft: item.flagged ? `3px solid ${item.flag_reason?.includes('error') ? colors.error : colors.warning}` : undefined,
               transition: 'box-shadow 0.15s',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: compact ? '16px' : '20px' }}>{icon.emoji}</span>
+              <span style={{
+                width: compact ? '26px' : '30px', height: compact ? '26px' : '30px',
+                borderRadius: '9px', background: chipBg, color: chipColor,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                <InteractionIcon type={item.type} size={compact ? 13 : 15} />
+              </span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '13px', fontWeight: 500, color: colors.textDark, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: compact ? 'nowrap' : undefined }}>
                   {item.summary}
