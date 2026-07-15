@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { card, colors, gradientButton, secondaryButton, inputStyle, labelStyle } from '@/lib/portal/styles'
 import { INTEGRATIONS, type IntegrationDef, type IntegrationStatus } from '@/lib/portal/integrations'
+import { DecodeText } from '@/components/portal/DecodeText'
 
 export default function IntegrationsPage() {
   const [statuses, setStatuses] = useState<Record<string, IntegrationStatus>>({})
@@ -33,8 +34,8 @@ export default function IntegrationsPage() {
   return (
     <>
       <div style={{ padding: '8px 4px 0' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: 700, color: colors.navy, fontFamily: 'var(--font-cinzel)' }}>
-          Integrations
+        <h1 style={{ fontSize: '24px', fontWeight: 700, color: colors.textDark, letterSpacing: '-0.02em' }}>
+          <DecodeText text="Integrations" />
         </h1>
         <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '4px', maxWidth: '640px' }}>
           Paste the API keys for tools you already use. We store them encrypted with{' '}

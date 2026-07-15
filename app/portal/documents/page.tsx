@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { card, colors, gradientButton } from '@/lib/portal/styles'
 import { DocumentCard } from '@/components/portal/DocumentCard'
 import type { PortalDocument } from '@/lib/portal/types'
+import { DecodeText } from '@/components/portal/DecodeText'
 
 const TABS = [
   { key: '', label: 'All' },
@@ -53,8 +54,8 @@ export default function DocumentsPage() {
     <>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 4px 0' }}>
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 700, color: colors.navy, fontFamily: 'var(--font-cinzel)' }}>
-            Documents
+          <h1 style={{ fontSize: '24px', fontWeight: 700, color: colors.textDark, letterSpacing: '-0.02em' }}>
+            <DecodeText text="Documents" />
           </h1>
           <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>
             Contracts, invoices, and files shared with your account.

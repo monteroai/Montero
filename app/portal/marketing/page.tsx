@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, type CSSProperties } from 'react'
 import { card, colors, gradientButton, secondaryButton } from '@/lib/portal/styles'
 import { useBusiness } from '@/lib/portal/BusinessContext'
+import { DecodeText } from '@/components/portal/DecodeText'
 
 type StoryboardFrame = {
   idx: number
@@ -304,8 +305,8 @@ export default function MarketingPage() {
     <>
       <div style={{ padding: '8px 4px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '12px', flexWrap: 'wrap' }}>
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 700, color: colors.navy, fontFamily: 'var(--font-cinzel)' }}>
-            Marketing
+          <h1 style={{ fontSize: '24px', fontWeight: 700, color: colors.textDark, letterSpacing: '-0.02em' }}>
+            <DecodeText text="Marketing" />
             {activeBusiness && <span style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, color: colors.textMuted, marginLeft: '8px' }}>· {activeBusiness.business_name}</span>}
           </h1>
           <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px', maxWidth: '640px' }}>

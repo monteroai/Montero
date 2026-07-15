@@ -9,6 +9,7 @@ import { TEMPLATES } from '@/lib/portal/templates'
 import type { PortalAutomation } from '@/lib/portal/types'
 
 import { AutomationCanvas, type SystemMap } from '@/components/portal/AutomationCanvas'
+import { DecodeText } from '@/components/portal/DecodeText'
 
 export default function AutomationsPage() {
   const { activeBusinessId, activeBusiness } = useBusiness()
@@ -124,8 +125,8 @@ export default function AutomationsPage() {
     <>
       <div style={{ padding: '8px 4px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '12px', flexWrap: 'wrap' }}>
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 700, color: colors.navy, fontFamily: 'var(--font-cinzel)' }}>
-            Automations {activeBusiness && <span style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, color: colors.textMuted }}>· {activeBusiness.business_name}</span>}
+          <h1 style={{ fontSize: '24px', fontWeight: 700, color: colors.textDark, letterSpacing: '-0.02em' }}>
+            <DecodeText text="Automations" /> {activeBusiness && <span style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, color: colors.textMuted }}>· {activeBusiness.business_name}</span>}
           </h1>
           <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>
             {activeBusinessId
