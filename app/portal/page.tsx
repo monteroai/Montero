@@ -7,6 +7,7 @@ import { StatCard } from '@/components/portal/StatCard'
 import { ActivityFeed } from '@/components/portal/ActivityFeed'
 import { SystemStatusDot } from '@/components/portal/SystemStatusDot'
 import { useBusiness } from '@/lib/portal/BusinessContext'
+import { createClient } from '@/lib/supabase/client'
 import type { PortalInteraction, PortalAutomation } from '@/lib/portal/types'
 import { DecodeText } from '@/components/portal/DecodeText'
 
@@ -23,6 +24,25 @@ export default function DashboardPage() {
   const [automations, setAutomations] = useState<PortalAutomation[]>([])
   const [stats, setStats] = useState({ active: 0, thisWeek: 0, documents: 0, flagged: 0 })
   const [greeting] = useState(getGreeting())
+  // Personal greeting — first name from the client record. Gate rendering on
+  // `nameLoaded` so the decode intro plays once with the final phrase.
+  const [firstName, setFirstName] = useState<string | null>(null)
+  const [nameLoaded, setNameLoaded] = useState(false)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) { setNameLoaded(true); return }
+      supabase.from('portal_clients').select('owner_name').eq('user_id', data.user.id).maybeSingle()
+        .then(({ data: c }) => {
+          const first = (c?.owner_name || '').trim().split(/\s+/)[0]
+          if (first) setFirstName(first)
+          setNameLoaded(true)
+        })
+    })
+  }, [])
+
+  const greetingText = firstName ? `${greeting}, ${firstName}` : greeting
 
   useEffect(() => {
     if (!activeBusinessId) return
@@ -69,7 +89,7 @@ export default function DashboardPage() {
     return (
       <>
         <div style={{ padding: '8px 4px 0' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 700, color: colors.textDark, letterSpacing: '-0.02em' }}><DecodeText text={greeting} /></h1>
+          <h1 style={{ fontSize: '24px', fontWeight: 700, color: colors.textDark, letterSpacing: '-0.02em', minHeight: '30px' }}>{nameLoaded && <DecodeText text={greetingText} />}</h1>
           <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>
             Welcome to Montero. Let&apos;s set up your first business.
           </p>
@@ -94,8 +114,8 @@ export default function DashboardPage() {
   return (
     <>
       <div style={{ padding: '8px 4px 0' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 700, color: colors.textDark, letterSpacing: '-0.02em' }}>
-          <DecodeText text={greeting} />
+        <h1 style={{ fontSize: '24px', fontWeight: 700, color: colors.textDark, letterSpacing: '-0.02em', minHeight: '30px' }}>
+          {nameLoaded && <DecodeText text={greetingText} />}
         </h1>
         <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>
           {activeBusiness
