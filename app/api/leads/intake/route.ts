@@ -14,6 +14,8 @@ const FORM_TO_BUSINESS: Record<string, string | undefined> = {
 
 const ALLOWED_ORIGINS = new Set<string>([
   'https://smileconsultingplaceholder.netlify.app',
+  'https://smilemanagementconsultingsnj.com',
+  'https://www.smilemanagementconsultingsnj.com',
 ])
 
 type LeadFields = {
@@ -108,6 +110,50 @@ async function sendTwilioSMS(to: string, body: string): Promise<{ ok: boolean; e
   }
 }
 
+// Forward the lead to the owning client's n8n instance (if they have one
+// connected via the dashboard). Convention: the n8n webhook path equals the
+// source_form name. Best-effort — a down/missing n8n never fails the lead.
+async function forwardToClientN8n(businessId: string, fields: LeadFields): Promise<void> {
+  try {
+    const supabase = adminClient()
+    const { data: biz } = await supabase
+      .from('portal_businesses')
+      .select('client_id')
+      .eq('id', businessId)
+      .maybeSingle()
+    if (!biz?.client_id) return
+
+    const { data: client } = await supabase
+      .from('portal_clients')
+      .select('onboarding_data')
+      .eq('id', biz.client_id)
+      .maybeSingle()
+    const od = (client?.onboarding_data as Record<string, unknown> | null) || {}
+    const base = typeof od.n8n_base_url === 'string' ? od.n8n_base_url.replace(/\/+$/, '') : ''
+    if (!base || !fields.source_form) return
+
+    const r = await fetch(`${base}/webhook/${fields.source_form}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        form_name: fields.source_form,
+        data: {
+          name: fields.name,
+          email: fields.email,
+          phone: fields.phone,
+          practice: fields.practice,
+          service: fields.service,
+          message: fields.message,
+        },
+      }),
+      signal: AbortSignal.timeout(5000),
+    })
+    if (!r.ok) console.error(`[leads/intake] n8n forward returned ${r.status} for ${base}/webhook/${fields.source_form}`)
+  } catch (e) {
+    console.error('[leads/intake] n8n forward failed:', e instanceof Error ? e.message : e)
+  }
+}
+
 export async function POST(request: NextRequest) {
   const headers = corsHeaders(request)
 
@@ -164,6 +210,9 @@ export async function POST(request: NextRequest) {
   if (insertErr) {
     return NextResponse.json({ error: insertErr.message }, { status: 500, headers })
   }
+
+  // Forward to the client's own n8n (their alert/follow-up workflows).
+  await forwardToClientN8n(fields.business_id, fields)
 
   // Fire SMS but don't fail the webhook if SMS errors — the lead is captured.
   const notifyTo = process.env.JANETH_NOTIFY_PHONE
