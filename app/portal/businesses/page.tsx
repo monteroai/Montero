@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { card, colors, gradientButton, secondaryButton } from '@/lib/portal/styles'
+import { card, colors, gradientButton, secondaryButton, voiceTitle } from '@/lib/portal/styles'
 import { useBusiness } from '@/lib/portal/BusinessContext'
 import type { PortalBusiness } from '@/lib/portal/types'
 import { DecodeText } from '@/components/portal/DecodeText'
@@ -29,7 +29,7 @@ export default function BusinessesPage() {
     <>
       <div style={{ padding: '8px 4px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: 700, color: colors.textDark, letterSpacing: '-0.02em' }}><DecodeText text="Businesses" /></h1>
+          <h1 style={{ fontSize: '26px', ...voiceTitle }}><DecodeText text="Businesses" /></h1>
           <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>
             Each business gets its own branded dashboard, automations, and AI assistant context.
           </p>

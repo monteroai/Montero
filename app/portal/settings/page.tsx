@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { card, colors, gradientButton, inputStyle, labelStyle } from '@/lib/portal/styles'
+import { card, colors, gradientButton, inputStyle, labelStyle, voiceTitle } from '@/lib/portal/styles'
 import { useBusiness } from '@/lib/portal/BusinessContext'
 import { DecodeText } from '@/components/portal/DecodeText'
 
@@ -75,7 +75,7 @@ export default function SettingsPage() {
   return (
     <>
       <div style={{ padding: '8px 4px 0' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 700, color: colors.textDark, letterSpacing: '-0.02em' }}><DecodeText text="Settings" /></h1>
+        <h1 style={{ fontSize: '26px', ...voiceTitle }}><DecodeText text="Settings" /></h1>
         <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>
           Manage your account. To edit business-specific details (name, brand, logo), go to <Link href="/portal/businesses" style={{ color: colors.blue }}>Businesses</Link>.
         </p>

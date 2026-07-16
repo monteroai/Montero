@@ -1,4 +1,4 @@
-import { card, colors } from '@/lib/portal/styles'
+import { card, colors, voiceLabel } from '@/lib/portal/styles'
 
 interface StatCardProps {
   icon: React.ReactNode
@@ -15,7 +15,7 @@ export function StatCard({ icon, label, value, accent, delta, deltaUp = true }: 
   return (
     <div style={{ ...card, padding: '20px 22px', flex: 1, minWidth: '170px' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '14px' }}>
-        <span style={{ fontSize: '13px', color: colors.textMuted, fontWeight: 500, paddingTop: '6px' }}>{label}</span>
+        <span style={{ fontSize: '11px', color: colors.textMuted, paddingTop: '6px', ...voiceLabel }}>{label}</span>
         <div style={{
           width: 42, height: 42, borderRadius: '50%',
           background: accent || 'rgba(37,99,235,0.09)',

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { colors, gradientButton } from '@/lib/portal/styles'
+import { colors, gradientButton, voiceTitle } from '@/lib/portal/styles'
 import { ActivityFeed } from '@/components/portal/ActivityFeed'
 import { useBusiness } from '@/lib/portal/BusinessContext'
 import type { PortalInteraction } from '@/lib/portal/types'
@@ -44,7 +44,7 @@ export default function ActivityPage() {
   return (
     <>
       <div style={{ padding: '8px 4px 0' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 700, color: colors.textDark, letterSpacing: '-0.02em' }}>
+        <h1 style={{ fontSize: '26px', ...voiceTitle }}>
           <DecodeText text="Activity" /> {activeBusiness && <span style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, color: colors.textMuted }}>· {activeBusiness.business_name}</span>}
         </h1>
         <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { card, colors, gradientButton, secondaryButton, inputStyle, labelStyle } from '@/lib/portal/styles'
+import { card, colors, gradientButton, secondaryButton, inputStyle, labelStyle, voiceTitle } from '@/lib/portal/styles'
 import { INTEGRATIONS, type IntegrationDef, type IntegrationStatus } from '@/lib/portal/integrations'
 import { DecodeText } from '@/components/portal/DecodeText'
 
@@ -34,7 +34,7 @@ export default function IntegrationsPage() {
   return (
     <>
       <div style={{ padding: '8px 4px 0' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 700, color: colors.textDark, letterSpacing: '-0.02em' }}>
+        <h1 style={{ fontSize: '26px', ...voiceTitle }}>
           <DecodeText text="Integrations" />
         </h1>
         <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '4px', maxWidth: '640px' }}>

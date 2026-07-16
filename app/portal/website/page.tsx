@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { card, colors, gradientButton, secondaryButton, inputStyle, themeGradient } from '@/lib/portal/styles'
+import { card, colors, gradientButton, secondaryButton, inputStyle, themeGradient, voiceTitle } from '@/lib/portal/styles'
 import { ChangeRequestCard } from '@/components/portal/ChangeRequestCard'
 import { StatusBadge } from '@/components/portal/StatusBadge'
 import { WEBSITE_SECTIONS } from '@/lib/portal/constants'
@@ -115,7 +115,7 @@ export default function WebsitePage() {
   if (!activeBusinessId) {
     return (
       <div style={{ padding: '8px 4px 0' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 700, color: colors.textDark, letterSpacing: '-0.02em' }}><DecodeText text="Website" /></h1>
+        <h1 style={{ fontSize: '26px', ...voiceTitle }}><DecodeText text="Website" /></h1>
         <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>Add a business first.</p>
       </div>
     )
@@ -127,7 +127,7 @@ export default function WebsitePage() {
     <>
       <div style={{ padding: '8px 4px 0', display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', gap: '12px' }}>
         <div style={{ flex: 1, minWidth: '240px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 700, color: colors.textDark, letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '26px', ...voiceTitle }}>
             <DecodeText text="Website" /> {activeBusiness && <span style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, color: colors.textMuted }}>· {activeBusiness.business_name}</span>}
           </h1>
           <p style={{ fontSize: '13px', color: colors.textMuted, marginTop: '2px' }}>

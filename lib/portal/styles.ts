@@ -18,33 +18,52 @@ export const colors = {
   infoBg: '#dbeafe',
 } as const
 
-// Soft-glass canvas: cool blue-gray with ambient light pools (the "milky
-// waves" look) — stacked radial gradients, no extra DOM needed.
+// MONTERO FROST canvas — darker light-gray with dim ambient light pools.
+// The gray depth is what makes the glass read as glass.
 export const mainBg = [
-  'radial-gradient(1000px 520px at 12% 6%, rgba(255,255,255,0.95), transparent 60%)',
-  'radial-gradient(1200px 640px at 90% 24%, rgba(203,216,240,0.55), transparent 65%)',
-  'radial-gradient(1100px 720px at 26% 100%, rgba(210,222,245,0.6), transparent 62%)',
-  'linear-gradient(180deg, #eef1f7 0%, #e9edf5 100%)',
+  'radial-gradient(900px 480px at 14% 8%, rgba(255,255,255,0.55), transparent 60%)',
+  'radial-gradient(1000px 560px at 88% 26%, rgba(178,192,218,0.5), transparent 65%)',
+  'linear-gradient(180deg, #dde1e9 0%, #d3d8e2 100%)',
 ].join(', ')
 
-// Frosted panel (sidebar, sheets) — floats over the canvas.
+// Frosted panel (sidebar, rails, sheets) — translucent, floating.
+// The inset top highlight is the "light on the glass rim" cue.
 export const glass: CSSProperties = {
-  background: 'rgba(255,255,255,0.6)',
-  backdropFilter: 'blur(28px) saturate(170%)',
-  WebkitBackdropFilter: 'blur(28px) saturate(170%)',
-  borderRadius: '24px',
-  border: '1px solid rgba(255,255,255,0.75)',
-  boxShadow: '0 18px 44px rgba(23,32,64,0.08)',
+  background: 'rgba(255,255,255,0.42)',
+  backdropFilter: 'blur(30px) saturate(170%)',
+  WebkitBackdropFilter: 'blur(30px) saturate(170%)',
+  borderRadius: '22px',
+  border: '1px solid rgba(255,255,255,0.65)',
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.7), 0 26px 60px rgba(23,32,64,0.16)',
 }
 
-// Card — near-white glass bubble with a soft, wide drop shadow.
+// Card — frosted floating bubble: half-transparent, inner rim light,
+// deep soft drop shadow.
 export const card: CSSProperties = {
-  background: 'rgba(255,255,255,0.78)',
-  backdropFilter: 'blur(24px) saturate(160%)',
-  WebkitBackdropFilter: 'blur(24px) saturate(160%)',
+  background: 'rgba(255,255,255,0.5)',
+  backdropFilter: 'blur(28px) saturate(170%)',
+  WebkitBackdropFilter: 'blur(28px) saturate(170%)',
   borderRadius: '20px',
-  border: '1px solid rgba(255,255,255,0.85)',
-  boxShadow: '0 2px 6px rgba(23,32,64,0.04), 0 18px 44px rgba(23,32,64,0.07)',
+  border: '1px solid rgba(255,255,255,0.6)',
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.75), 0 3px 8px rgba(23,32,64,0.06), 0 26px 60px rgba(23,32,64,0.14)',
+}
+
+// THE VOICE — ultralight tracked display type for page titles ("Good evening,
+// Janeth", tab titles). Locked treatment #6 from the type lab.
+export const voiceTitle: CSSProperties = {
+  fontFamily: '"Segoe UI", -apple-system, system-ui, sans-serif',
+  fontWeight: 200,
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+  color: '#16203a',
+}
+
+// Small tracked labels (stat-card labels, section eyebrows, nav group labels).
+export const voiceLabel: CSSProperties = {
+  fontFamily: '"Segoe UI", -apple-system, system-ui, sans-serif',
+  fontWeight: 300,
+  letterSpacing: '0.2em',
+  textTransform: 'uppercase',
 }
 
 // Primary action — flat iOS-style fill of the active business's primary color

@@ -26,7 +26,7 @@ export function DecodeText({ text, style }: { text: string; style?: CSSPropertie
     }
     played.add(text)
 
-    const DURATION = 700
+    const DURATION = 850
     const start = performance.now()
 
     const tick = (now: number) => {
