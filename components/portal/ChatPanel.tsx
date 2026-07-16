@@ -18,7 +18,7 @@ const STARTERS = [
 ]
 
 function TypeOut({ msg }: { msg: ChatMessage }) {
-  const shouldType = !typedIds.has(msg.id) && msg.role === 'assistant'
+  const shouldType = !msg.noType && !typedIds.has(msg.id) && msg.role === 'assistant'
   const [shown, setShown] = useState(shouldType ? '' : msg.content)
 
   useEffect(() => {

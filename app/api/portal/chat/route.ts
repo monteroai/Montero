@@ -37,6 +37,26 @@ Contact info — STRICT RULES:
 - NEVER invent personal emails like "emilio@…" or any other variant. Emilio's name appears in your context, but his personal email is NOT public. If you need to point the client at a human, say "Use the Talk to Emilio button below this chat" — that's the escalation flow built into the portal.
 - If asked for a phone number or any other contact channel, say you don't have one and direct them to the Talk to Emilio button or ai@montero.cool.`
 
+// GET /api/portal/chat?business_id=xxx — the caller's own saved thread for
+// that business. Keys are derived from the session server-side.
+export async function GET(req: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const businessId = new URL(req.url).searchParams.get('business_id')
+  if (!businessId) return NextResponse.json({ messages: [] })
+
+  const { data } = await adminClient()
+    .from('chat_sessions')
+    .select('messages')
+    .eq('org_id', businessId)
+    .eq('user_email', user.id)
+    .maybeSingle()
+
+  return NextResponse.json({ messages: (data?.messages as unknown[]) || [] })
+}
+
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient()
@@ -204,6 +224,34 @@ export async function POST(req: NextRequest) {
     })
 
     const text = reply.content[0]?.type === 'text' ? reply.content[0].text : ''
+
+    // Persist the thread — one row per (user, business), reusing chat_sessions
+    // (org_id = business id, user_email = auth user id). Server-derived keys
+    // only; an admin previewing a client's business saves under their OWN user
+    // id, so previews never surface in the client's account. Best-effort.
+    if (activeBusiness) {
+      try {
+        const store = adminClient()
+        const fullThread = [...messages, { role: 'assistant', content: text }]
+        const { data: existing } = await store
+          .from('chat_sessions')
+          .select('id')
+          .eq('org_id', activeBusiness.id)
+          .eq('user_email', user.id)
+          .maybeSingle()
+        if (existing) {
+          await store.from('chat_sessions')
+            .update({ messages: fullThread, updated_at: new Date().toISOString() })
+            .eq('id', existing.id)
+        } else {
+          await store.from('chat_sessions')
+            .insert({ org_id: activeBusiness.id, user_email: user.id, messages: fullThread })
+        }
+      } catch (persistErr) {
+        console.error('[portal/chat] thread persist failed:', persistErr instanceof Error ? persistErr.message : persistErr)
+      }
+    }
+
     return NextResponse.json({ reply: text })
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : 'Chat failed'

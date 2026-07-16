@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode } from 'react'
 import { useBusiness } from './BusinessContext'
 
 // One assistant conversation PER BUSINESS, shared between the Assistant tab
@@ -11,6 +11,8 @@ export interface ChatMessage {
   id: string
   role: 'user' | 'assistant'
   content: string
+  // history loaded from the server renders instantly — no re-typing old replies
+  noType?: boolean
 }
 
 interface ChatContextValue {
@@ -39,6 +41,29 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({})
   const [escalatedMap, setEscalatedMap] = useState<Record<string, boolean>>({})
   const [railHidden, setRailHidden] = useState(false)
+  const historyFetched = useRef<Set<string>>(new Set())
+
+  // Load the saved thread for the active business once per session.
+  useEffect(() => {
+    if (!activeBusinessId || historyFetched.current.has(activeBusinessId)) return
+    historyFetched.current.add(activeBusinessId)
+    fetch(`/api/portal/chat?business_id=${activeBusinessId}`)
+      .then(r => r.json())
+      .then(d => {
+        const saved = (Array.isArray(d.messages) ? d.messages : []) as Array<{ role: 'user' | 'assistant'; content: string }>
+        if (saved.length === 0) return
+        setThreads(prev => {
+          if (prev[activeBusinessId]?.length) return prev // don't clobber an in-progress chat
+          return {
+            ...prev,
+            [activeBusinessId]: saved.map((m, i) => ({
+              id: `${activeBusinessId}-h${i}`, role: m.role, content: m.content, noType: true,
+            })),
+          }
+        })
+      })
+      .catch(() => {})
+  }, [activeBusinessId])
 
   const messages = threads[bizKey] || [
     { id: `${bizKey}-greet`, role: 'assistant' as const, content: greetingFor(activeBusiness?.business_name) },
