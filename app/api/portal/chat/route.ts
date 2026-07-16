@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 
 interface ChatMessage {
   role: 'user' | 'assistant'
@@ -70,19 +71,44 @@ export async function POST(req: NextRequest) {
       businesses = data || []
     }
 
-    const activeBusiness = businesses.find(b => b.id === activeBusinessId) || businesses[0] || null
+    // ADMIN: may select ANY client's business in the header switcher — resolve
+    // the active business across all clients and read its data with the
+    // service role (RLS would hide other clients' rows from the user session).
+    // Non-admins stay hard-scoped to their own businesses: nothing changes.
+    const isAdmin = Boolean(client?.is_admin)
+    let adminAllBusinesses: Array<Record<string, unknown>> = []
+    let foreignOwner: string | null = null
+    if (isAdmin) {
+      const { data } = await adminClient()
+        .from('portal_businesses')
+        .select('id, business_name, industry, business_phone, business_email, description, client_id, portal_clients(owner_name)')
+        .eq('is_archived', false)
+      adminAllBusinesses = data || []
+    }
+
+    let activeBusiness = businesses.find(b => b.id === activeBusinessId) || null
+    if (!activeBusiness && isAdmin && activeBusinessId) {
+      const foreign = adminAllBusinesses.find(b => b.id === activeBusinessId)
+      if (foreign) {
+        activeBusiness = foreign
+        const oc = foreign.portal_clients as { owner_name?: string } | null
+        foreignOwner = oc?.owner_name || 'another client'
+      }
+    }
+    if (!activeBusiness) activeBusiness = businesses[0] || null
 
     // For active business: fetch automations + recent activity
+    const db = isAdmin ? adminClient() : supabase
     let automations: Array<Record<string, unknown>> = []
     let interactions: Array<Record<string, unknown>> = []
     if (activeBusiness) {
       const [{ data: a }, { data: i }] = await Promise.all([
-        supabase
+        db
           .from('portal_automations')
           .select('friendly_name, description, category, active, last_status, last_run')
           .eq('business_id', activeBusiness.id)
           .order('sort_order'),
-        supabase
+        db
           .from('portal_interactions')
           .select('type, summary, flagged, flag_reason, created_at')
           .eq('business_id', activeBusiness.id)
@@ -114,6 +140,21 @@ export async function POST(req: NextRequest) {
       ctx.push(`</all_businesses>`)
     } else {
       ctx.push(`<businesses>No businesses set up yet.</businesses>`)
+    }
+
+    if (isAdmin && adminAllBusinesses.length > 0) {
+      ctx.push(`<admin_platform_businesses note="visible to you ONLY because this account is Montero admin — clients never see other clients' businesses">`)
+      for (const b of adminAllBusinesses) {
+        const oc = b.portal_clients as { owner_name?: string } | null
+        const tag = b.id === activeBusiness?.id ? ' [ACTIVE]' : ''
+        ctx.push(`- ${b.business_name}${tag}${b.industry ? ` (${b.industry})` : ''} — owner: ${oc?.owner_name || 'unknown'}`)
+      }
+      ctx.push(`</admin_platform_businesses>`)
+    }
+
+    if (foreignOwner) {
+      ctx.push(`<admin_viewing_as note="The ACTIVE business belongs to client ${foreignOwner}, not to the admin asking. Answer using that business's data below, exactly as that client's own assistant would — this is the admin previewing the client's experience. The client cannot see this conversation.">`)
+      ctx.push(`</admin_viewing_as>`)
     }
 
     if (activeBusiness) {
