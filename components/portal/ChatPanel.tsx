@@ -73,7 +73,12 @@ export function ChatPanel({ variant }: { variant: 'page' | 'rail' }) {
     <div style={{
       display: 'flex', flexDirection: 'column', gap: '10px', minHeight: 0,
       flex: 1, width: '100%',
-      ...(variant === 'page' ? { maxWidth: '640px', margin: '0 auto', height: 'min(640px, 74vh)' } : {}),
+      // Both variants get a FIXED frame — the thread scrolls internally and the
+      // panel never stretches with page content. Without this the rail grew to
+      // match whatever the tab rendered (long storyboard lists especially).
+      ...(variant === 'page'
+        ? { maxWidth: '640px', margin: '0 auto', height: 'min(640px, 74vh)' }
+        : { height: 'min(620px, 72vh)', flex: '0 0 auto' }),
     }}>
       <style>{`
         .mchat-thread { scrollbar-width: thin; scrollbar-color: rgba(23,32,64,.22) transparent; }

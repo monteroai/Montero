@@ -123,3 +123,46 @@ export async function PATCH(request: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ storyboard: board })
 }
+
+// DELETE ?business_id=xxx&storyboard_id=yyy — admin only, permanent.
+// Removes the entry from index.json AND deletes its frame files from storage.
+// A client who could see it (approved) loses access immediately.
+export async function DELETE(request: NextRequest) {
+  const params = new URL(request.url).searchParams
+  const business_id = params.get('business_id')
+  const storyboard_id = params.get('storyboard_id')
+  if (!business_id || !storyboard_id) {
+    return NextResponse.json({ error: 'business_id and storyboard_id required' }, { status: 400 })
+  }
+
+  const access = await resolveAccess(business_id)
+  if ('error' in access) return access.error
+  if (!access.isAdmin) return NextResponse.json({ error: 'Admin only' }, { status: 403 })
+
+  const boards = await readIndex(business_id)
+  const board = boards.find(b => b.id === storyboard_id)
+  if (!board) return NextResponse.json({ error: 'Storyboard not found' }, { status: 404 })
+
+  // Drop the index entry first — if frame cleanup fails we've still revoked
+  // access rather than leaving a half-deleted board visible to a client.
+  const remaining = boards.filter(b => b.id !== storyboard_id)
+  const { error: indexErr } = await writeIndex(business_id, remaining)
+  if (indexErr) return NextResponse.json({ error: indexErr.message }, { status: 500 })
+
+  // Best-effort removal of the frame objects (folder is {business}/{storyboard}/).
+  let framesRemoved = 0
+  try {
+    const { data: objects } = await adminClient()
+      .storage.from(BUCKET)
+      .list(`${business_id}/${storyboard_id}`, { limit: 200 })
+    const paths = (objects || []).map(o => `${business_id}/${storyboard_id}/${o.name}`)
+    if (paths.length) {
+      const { error: rmErr } = await adminClient().storage.from(BUCKET).remove(paths)
+      if (!rmErr) framesRemoved = paths.length
+    }
+  } catch {
+    // index entry is already gone; orphaned files are harmless
+  }
+
+  return NextResponse.json({ deleted: storyboard_id, frames_removed: framesRemoved, remaining: remaining.length })
+}

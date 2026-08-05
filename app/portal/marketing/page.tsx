@@ -169,10 +169,11 @@ function Lightbox({ frames, index, onClose, onNav }: {
   )
 }
 
-function StoryboardCard({ sb, isAdmin, onToggle, busy, onEnlarge }: {
+function StoryboardCard({ sb, isAdmin, onToggle, onDelete, busy, onEnlarge }: {
   sb: Storyboard
   isAdmin: boolean
   onToggle: (sb: Storyboard) => void
+  onDelete: (sb: Storyboard) => void
   busy: boolean
   onEnlarge: (frames: StoryboardFrame[], idx: number) => void
 }) {
@@ -191,13 +192,30 @@ function StoryboardCard({ sb, isAdmin, onToggle, busy, onEnlarge }: {
           </span>
         )}
         {isAdmin && (
-          <button
-            onClick={() => onToggle(sb)}
-            disabled={busy}
-            style={{ ...(sb.status === 'approved' ? secondaryButton : gradientButton), marginLeft: 'auto', padding: '7px 14px', fontSize: '12px', opacity: busy ? 0.5 : 1 }}
-          >
-            {sb.status === 'approved' ? 'Pull back to draft' : 'Approve → show client'}
-          </button>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={() => onToggle(sb)}
+              disabled={busy}
+              style={{ ...(sb.status === 'approved' ? secondaryButton : gradientButton), padding: '7px 14px', fontSize: '12px', opacity: busy ? 0.5 : 1 }}
+            >
+              {sb.status === 'approved' ? 'Pull back to draft' : 'Approve → show client'}
+            </button>
+            <button
+              onClick={() => onDelete(sb)}
+              disabled={busy}
+              title="Delete permanently"
+              aria-label={`Delete ${sb.title}`}
+              style={{
+                background: 'transparent', border: `1px solid ${colors.border}`, borderRadius: '10px',
+                width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: busy ? 'default' : 'pointer', color: colors.textMuted, opacity: busy ? 0.5 : 1, flexShrink: 0,
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6" />
+              </svg>
+            </button>
+          </div>
         )}
       </div>
       <p style={{ fontSize: '13px', color: colors.textMuted, lineHeight: 1.6, margin: '0 0 14px', maxWidth: '720px' }}>{sb.concept}</p>
@@ -206,11 +224,18 @@ function StoryboardCard({ sb, isAdmin, onToggle, busy, onEnlarge }: {
         {sb.frames.map(f => (
           <div key={f.idx} style={{ flex: '0 0 200px' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
+            {/* Frames are full-res 1024x1536 PNGs. Without lazy loading every
+                frame of every storyboard decodes on mount, which is what made
+                this tab crawl. Explicit dims also stop layout thrash on scroll. */}
             <img
               src={f.image}
               alt={`Frame ${f.idx} — tap to enlarge`}
+              width={200}
+              height={300}
+              loading="lazy"
+              decoding="async"
               onClick={() => onEnlarge(sb.frames, sb.frames.indexOf(f))}
-              style={{ width: '200px', aspectRatio: '2/3', objectFit: 'cover', borderRadius: '12px', border: `1px solid ${colors.border}`, display: 'block', cursor: 'zoom-in' }}
+              style={{ width: '200px', aspectRatio: '2/3', objectFit: 'cover', borderRadius: '12px', border: `1px solid ${colors.border}`, display: 'block', cursor: 'zoom-in', background: colors.inputBg, contentVisibility: 'auto' }}
             />
             <div style={{ padding: '8px 2px 0' }}>
               <div style={{ fontSize: '11px', fontWeight: 700, color: colors.navy }}>
@@ -283,6 +308,24 @@ export default function MarketingPage() {
           action: sb.status === 'approved' ? 'unapprove' : 'approve',
         }),
       })
+      if (res.ok) loadStoryboards()
+    } finally {
+      setToggling(false)
+    }
+  }
+
+  async function deleteStoryboard(sb: Storyboard) {
+    if (!activeBusinessId) return
+    const warning = sb.status === 'approved'
+      ? `Delete "${sb.title}"?\n\nThis is APPROVED — the client can currently see it, and will lose access immediately.\n\nThe storyboard and all ${sb.frames.length} frames are permanently removed. This cannot be undone.`
+      : `Delete "${sb.title}"?\n\nThe storyboard and all ${sb.frames.length} frames are permanently removed. This cannot be undone.`
+    if (!window.confirm(warning)) return
+    setToggling(true)
+    try {
+      const res = await fetch(
+        `/api/portal/storyboards?business_id=${activeBusinessId}&storyboard_id=${encodeURIComponent(sb.id)}`,
+        { method: 'DELETE' },
+      )
       if (res.ok) loadStoryboards()
     } finally {
       setToggling(false)
@@ -367,6 +410,7 @@ export default function MarketingPage() {
                 isAdmin={isAdminView}
                 onToggle={toggleApproval}
                 busy={toggling}
+                onDelete={deleteStoryboard}
                 onEnlarge={(frames, index) => setLightbox({ frames, index })}
               />
             ))

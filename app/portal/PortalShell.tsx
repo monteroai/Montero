@@ -45,6 +45,9 @@ function ChatRail() {
             ...glass,
             width: '324px', flexShrink: 0, padding: '14px',
             flexDirection: 'column', gap: '10px', minHeight: 0,
+            // Sticky + flex-start so the rail holds its own size and stays put
+            // as the page scrolls, mirroring the left tab column.
+            position: 'sticky', top: '18px', alignSelf: 'flex-start',
             animation: 'mchatRailIn .45s cubic-bezier(.16,1,.3,1)',
           }}
         >
