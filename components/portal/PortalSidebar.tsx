@@ -103,7 +103,6 @@ export function PortalSidebar({ open, onClose }: PortalSidebarProps) {
           width: '220px', padding: '16px 12px',
           display: 'flex', flexDirection: 'column', gap: '4px',
           overflowY: 'auto',
-          willChange: 'transform', transform: 'translateZ(0)',
           // Mobile: fixed overlay sidebar
           ...(typeof window !== 'undefined' && window.innerWidth < 769
             ? {
@@ -112,7 +111,14 @@ export function PortalSidebar({ open, onClose }: PortalSidebarProps) {
                 transform: open ? 'translateX(0)' : 'translateX(-100%)',
                 transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
               }
-            : {}),
+            : {
+                // Desktop: fixed-size furniture like the right rail. Without
+                // sticky + flex-start the flex row stretches it to match page
+                // content, so it grew on long tabs instead of holding still.
+                position: 'sticky', top: '18px', alignSelf: 'flex-start',
+                maxHeight: 'calc(100vh - 36px)',
+                transform: 'translateZ(0)', // own GPU layer; mobile uses transform for the slide
+              }),
         }}
       >
         {/* Mobile close button */}

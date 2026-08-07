@@ -1,0 +1,49 @@
+{
+  "business_id": "612e5cd6-919b-4ece-8c35-5e036964d595",
+  "id": "sb-sfd-drawn-v1",
+  "title": "Drawn From Memory",
+  "concept": "A child's crayon drawing of her family — everyone grinning with enormous teeth — slowly renders into a real photograph of that same family walking out of the practice. The transformation IS the hook: it borrows the sketch-to-real mechanic that performs on IG right now, but the crayon drawing is thematically native to a FAMILY dental practice rather than a gimmick. Ends on the idea that a kid who isn't scared of the dentist grows into an adult who isn't either. 9:16, no voiceover, on-screen text only.",
+  "format": "9:16 reel · ~18s · sketch-to-real transformation",
+  "audio": {
+    "music": "Single soft piano note repeating under the crayon frames, joined by warm strings the moment photoreal detail appears. No lyrics, no drop.",
+    "voiceover": "None — the transformation carries it.",
+    "sfx": "Crayon-on-paper scratch at open; a low airy 'bloom' swell as each render step lands; quiet room tone and a door chime at the reveal; nothing on the end card."
+  },
+  "frames": [
+    {
+      "idx": 1,
+      "duration": "0-3s",
+      "story": "A kid's crayon drawing taped to a fridge: mom, dad, kid, all with huge square teeth. Handwritten at the top: MY FAMILY.",
+      "image_prompt": "Overhead phone photo of a child's crayon drawing on slightly buckled white printer paper, held to a stainless fridge by two mismatched magnets. The drawing shows three stick-style figures holding hands, each with an oversized grin of big square white teeth drawn in heavy waxy crayon. Handwritten in wobbly child's capitals across the top: MY FAMILY. Visible crayon texture and paper tooth, one corner slightly torn, soft kitchen window light from the left, faint fingerprint smudge on the fridge. Shot on an iPhone, natural light, slight lens softness. Vertical composition.",
+      "motion_prompt": "Locked overhead shot. Paper breathes very slightly as if from a passing draft, kitchen light shifts a touch warmer. Hold. Audio: crayon scratch, then quiet."
+    },
+    {
+      "idx": 2,
+      "duration": "3-7s",
+      "story": "The drawing starts to change. Crayon lines thicken into real edges; flat color deepens into fabric and skin.",
+      "image_prompt": "The same child's crayon family drawing, but the lower third of the image has begun turning into a real photograph: crayon strokes thickening into actual fabric weave, flat waxy color deepening into real skin tone and denim, while the top two thirds remain unmistakably wax crayon on paper. A soft horizontal boundary where the two states meet, with crayon flecks lifting off the paper near the seam. Kitchen window light continues across both halves consistently. Vertical composition.",
+      "motion_prompt": "The photoreal boundary creeps slowly upward across the frame, crayon flecks drifting off the seam like dust. No camera move. Audio: low airy bloom swell."
+    },
+    {
+      "idx": 3,
+      "duration": "7-11s",
+      "story": "The split hits the faces. Half crayon grin, half real smile. The money shot.",
+      "image_prompt": "Extreme close-up on the faces of the family, split exactly down the middle of the frame: the left half is still a child's heavy crayon drawing with a huge square-toothed grin on paper, the right half is a real photograph of a mother and daughter mid-laugh in warm daylight, real skin texture, real teeth, catchlights in the eyes. The seam between the two halves is clean and vertical with a faint shimmer. Vertical composition.",
+      "motion_prompt": "Hold on the split, the seam shimmering. The real half blinks and the laugh continues a fraction; the crayon half stays perfectly still. Audio: strings enter."
+    },
+    {
+      "idx": 4,
+      "duration": "11-15s",
+      "story": "Fully real now: the family walking out of the practice, the kid still holding her drawing.",
+      "image_prompt": "A candid photograph of a mother, father and young daughter walking out through the glass door of a small suburban dental practice into late afternoon sun. The girl, about six, holds a crayon drawing in one hand and is showing her teeth in a proud exaggerated grin. Unposed, mid-stride, slight motion blur on the girl's hand, real sun flare across the glass, ordinary reception desk visible softly behind them. Shot on a 35mm lens at f2, natural light only, minor grain. Vertical composition.",
+      "motion_prompt": "Handheld follow as they step out, sun flare sweeping the lens, the drawing fluttering in the girl's hand. Audio: door chime, ambient street, music settles warm."
+    },
+    {
+      "idx": 5,
+      "duration": "15-18s",
+      "story": "End card: a kid who isn't scared of the dentist becomes an adult who isn't either.",
+      "image_prompt": "A clean minimal end card on a soft warm off-white background with very subtle paper texture. Centered text in an elegant modern serif reading exactly: \"Kids who aren't scared of the dentist become adults who aren't either.\" Below it, smaller and letter-spaced in a clean sans serif: SMILE FAMILY DENTAL CARE — UNION, NJ. A single small crayon-drawn tooth doodle sits beneath the type. Generous margins, no other decoration. Vertical composition.",
+      "motion_prompt": "Type fades up line by line, the crayon tooth doodle draws itself in a single quick stroke last. Audio: music resolves, then silence."
+    }
+  ]
+}

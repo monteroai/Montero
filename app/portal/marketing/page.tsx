@@ -169,13 +169,131 @@ function Lightbox({ frames, index, onClose, onNav }: {
   )
 }
 
-function StoryboardCard({ sb, isAdmin, onToggle, onDelete, busy, onEnlarge }: {
+// Full-screen "read the reel as a story" view. The frame strip is fine for
+// scanning; this is for judging whether the thing actually holds together as a
+// narrative — one beat per row, big frame, what happens, and (for admins) the
+// motion direction that turns the still into a shot.
+function StoryView({ sb, isAdmin, onClose }: {
+  sb: Storyboard
+  isAdmin: boolean
+  onClose: () => void
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [onClose])
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(8,12,24,0.92)', backdropFilter: 'blur(18px)',
+        overflowY: 'auto', padding: '0 0 60px',
+      }}
+    >
+      <div onClick={e => e.stopPropagation()} style={{ maxWidth: '860px', margin: '0 auto', padding: '0 20px' }}>
+        <div style={{
+          position: 'sticky', top: 0, zIndex: 2, padding: '22px 0 16px',
+          background: 'linear-gradient(180deg, rgba(8,12,24,0.97) 70%, rgba(8,12,24,0))',
+          display: 'flex', alignItems: 'flex-start', gap: '16px',
+        }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h2 style={{ margin: 0, color: '#fff', fontSize: '22px', fontWeight: 300, letterSpacing: '.06em', textTransform: 'uppercase' }}>{sb.title}</h2>
+            <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.55)', fontSize: '12px', letterSpacing: '.14em', textTransform: 'uppercase' }}>
+              {sb.format} · {sb.frames.length} beats
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Close story view"
+            style={{
+              flexShrink: 0, width: '38px', height: '38px', borderRadius: '999px',
+              background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.16)',
+              color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          </button>
+        </div>
+
+        <p style={{ color: 'rgba(255,255,255,0.72)', fontSize: '14px', lineHeight: 1.7, margin: '0 0 30px' }}>{sb.concept}</p>
+
+        {sb.frames.map((f, i) => (
+          <div
+            key={f.idx}
+            style={{
+              display: 'flex', gap: '22px', alignItems: 'flex-start',
+              padding: '24px 0',
+              borderTop: i === 0 ? 'none' : '1px solid rgba(255,255,255,0.08)',
+              flexWrap: 'wrap',
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={f.image}
+              alt={`Beat ${f.idx}`}
+              width={230}
+              height={345}
+              loading="lazy"
+              decoding="async"
+              style={{
+                width: '230px', aspectRatio: '2/3', objectFit: 'cover', borderRadius: '14px',
+                flexShrink: 0, background: 'rgba(255,255,255,0.06)', display: 'block',
+              }}
+            />
+            <div style={{ flex: 1, minWidth: '260px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                <span style={{
+                  width: '26px', height: '26px', borderRadius: '999px', flexShrink: 0,
+                  background: 'rgba(255,255,255,0.12)', color: '#fff', fontSize: '12px', fontWeight: 700,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>{f.idx}</span>
+                {f.duration && (
+                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px', letterSpacing: '.16em', textTransform: 'uppercase' }}>{f.duration}</span>
+                )}
+              </div>
+              <p style={{ color: 'rgba(255,255,255,0.92)', fontSize: '15px', lineHeight: 1.65, margin: 0 }}>{f.story}</p>
+              {isAdmin && f.motion_prompt && (
+                <p style={{
+                  color: 'rgba(255,255,255,0.62)', fontSize: '12px', lineHeight: 1.6, margin: '12px 0 0',
+                  background: 'rgba(255,255,255,0.06)', borderRadius: '10px', padding: '10px 12px',
+                }}>
+                  <strong style={{ color: 'rgba(255,255,255,0.85)' }}>Motion:</strong> {f.motion_prompt}
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
+
+        {isAdmin && sb.audio && (
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '22px', marginTop: '6px' }}>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px', letterSpacing: '.16em', textTransform: 'uppercase', margin: '0 0 10px' }}>Audio direction</p>
+            {(['music', 'voiceover', 'sfx'] as const).map(k => sb.audio?.[k] && (
+              <p key={k} style={{ color: 'rgba(255,255,255,0.72)', fontSize: '13px', lineHeight: 1.6, margin: '0 0 8px' }}>
+                <strong style={{ color: 'rgba(255,255,255,0.9)', textTransform: 'capitalize' }}>{k}:</strong> {sb.audio[k]}
+              </p>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function StoryboardCard({ sb, isAdmin, onToggle, onDelete, busy, onEnlarge, onReadStory }: {
   sb: Storyboard
   isAdmin: boolean
   onToggle: (sb: Storyboard) => void
   onDelete: (sb: Storyboard) => void
   busy: boolean
   onEnlarge: (frames: StoryboardFrame[], idx: number) => void
+  onReadStory: (sb: Storyboard) => void
 }) {
   return (
     <div style={{ ...card, padding: '20px' }}>
@@ -218,7 +336,17 @@ function StoryboardCard({ sb, isAdmin, onToggle, onDelete, busy, onEnlarge }: {
           </div>
         )}
       </div>
-      <p style={{ fontSize: '13px', color: colors.textMuted, lineHeight: 1.6, margin: '0 0 14px', maxWidth: '720px' }}>{sb.concept}</p>
+      <p style={{ fontSize: '13px', color: colors.textMuted, lineHeight: 1.6, margin: '0 0 12px', maxWidth: '720px' }}>{sb.concept}</p>
+
+      <button
+        onClick={() => onReadStory(sb)}
+        style={{ ...secondaryButton, padding: '8px 14px', fontSize: '12px', marginBottom: '14px', display: 'inline-flex', alignItems: 'center', gap: '7px' }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+        </svg>
+        Read as story
+      </button>
 
       <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px' }}>
         {sb.frames.map(f => (
@@ -281,6 +409,7 @@ export default function MarketingPage() {
   const [isAdminView, setIsAdminView] = useState(false)
   const [toggling, setToggling] = useState(false)
   const [lightbox, setLightbox] = useState<{ frames: StoryboardFrame[]; index: number } | null>(null)
+  const [storyView, setStoryView] = useState<Storyboard | null>(null)
 
   const loadStoryboards = useCallback(() => {
     if (!activeBusinessId) { setStoryboards([]); return }
@@ -411,6 +540,7 @@ export default function MarketingPage() {
                 onToggle={toggleApproval}
                 busy={toggling}
                 onDelete={deleteStoryboard}
+                onReadStory={setStoryView}
                 onEnlarge={(frames, index) => setLightbox({ frames, index })}
               />
             ))
@@ -464,6 +594,10 @@ export default function MarketingPage() {
           onClose={() => setLightbox(null)}
           onNav={idx => setLightbox({ frames: lightbox.frames, index: idx })}
         />
+      )}
+
+      {storyView && (
+        <StoryView sb={storyView} isAdmin={isAdminView} onClose={() => setStoryView(null)} />
       )}
     </>
   )

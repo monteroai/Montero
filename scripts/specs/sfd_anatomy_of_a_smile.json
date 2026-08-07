@@ -1,0 +1,49 @@
+{
+  "business_id": "612e5cd6-919b-4ece-8c35-5e036964d595",
+  "id": "sb-sfd-anatomy-v1",
+  "title": "Anatomy of a Smile",
+  "concept": "Dental imagery shot like a luxury product ad — extreme macro, water, glass, light, polished steel. No faces until the final beat, which removes all uncanny-valley risk and lets the realism go as far as it can. This is the 'things the average person doesn't think to make a video of' angle: nobody expects a dental practice to look like a perfume commercial. Doubles as a portfolio piece for Montero. 9:16, no dialogue.",
+  "format": "9:16 reel · ~16s · macro / ultra-realism",
+  "audio": {
+    "music": "Sparse ambient pad, single sustained tone, slow build. Feels expensive, not clinical.",
+    "voiceover": "None.",
+    "sfx": "Designed and deliberate: a single water droplet impact, the soft ring of steel set on steel, a breath of air, a faint high shimmer on the light-through-water frame. Silence between each — the gaps are the point."
+  },
+  "frames": [
+    {
+      "idx": 1,
+      "duration": "0-3s",
+      "story": "A single water droplet hits a surface in extreme slow motion. Pure texture, no context yet.",
+      "image_prompt": "Extreme macro photograph of one water droplet striking a wet polished white ceramic surface, frozen at the instant of impact with a perfect crown of micro-droplets rising from it. Cool daylight from a large soft source above, deep black background falling off behind. Visible surface tension, tiny bubbles, a faint mineral speckle on the ceramic. Shot on a 100mm macro lens at f8, focus-stacked, natural colour. Vertical composition.",
+      "motion_prompt": "Very slow motion, the crown rising and collapsing back into a ripple. Camera perfectly still. Audio: one clean droplet impact, then silence."
+    },
+    {
+      "idx": 2,
+      "duration": "3-7s",
+      "story": "Instruments laid out like fine jewellery — brushed steel, precise spacing, shallow focus.",
+      "image_prompt": "Overhead macro photograph of three stainless steel dental instruments laid in precise parallel on a matte charcoal linen cloth, spaced like watchmaker's tools. Brushed metal grain visible along each handle, one instrument catching a long specular highlight, the others falling into soft focus. Single large softbox from the upper left, deep shadow to the right. Shot on a 100mm macro at f2.8, shallow depth of field, no props, no clutter. Vertical composition.",
+      "motion_prompt": "Slow lateral drift right to left, the specular highlight travelling along the steel as the camera moves. Audio: soft ring of steel touching steel, then quiet."
+    },
+    {
+      "idx": 3,
+      "duration": "7-11s",
+      "story": "Light through water through glass — abstract, cool, unmistakably clean.",
+      "image_prompt": "Macro photograph looking through a plain glass tumbler of still water on a white surface, hard backlight refracting through the water into a clean caustic pattern of light on the surface behind it. Condensation beads on the outside of the glass, one slow bead beginning to run. Cool blue-white light, deep clean whites, no colour cast. Shot on a 100mm macro at f5.6, natural refraction, no filters. Vertical composition.",
+      "motion_prompt": "The condensation bead runs slowly down the glass; the caustic light pattern shifts and breathes as the water settles. Audio: faint high shimmer."
+    },
+    {
+      "idx": 4,
+      "duration": "11-14s",
+      "story": "The first human beat: a real, unposed smile in warm light. Everything cold turns warm.",
+      "image_prompt": "Close-up candid photograph of a woman in her thirties mid-laugh, looking slightly off camera, natural teeth, no makeup styling, fine skin texture and a few freckles visible. Warm late-afternoon window light from the left, soft shadow on the right side of her face, plain out-of-focus interior behind her. Unposed, caught between expressions, genuine crinkle at the eyes. Shot on an 85mm lens at f1.8, natural light only, fine grain. Vertical composition.",
+      "motion_prompt": "The laugh continues and softens; she glances toward camera at the very end. Slight handheld drift. Audio: warm ambience arrives, music opens up."
+    },
+    {
+      "idx": 5,
+      "duration": "14-16s",
+      "story": "End card, quiet and confident.",
+      "image_prompt": "Minimal end card on a deep charcoal background with an extremely subtle vertical gradient. Centered text in a refined light-weight serif reading exactly: \"Care worth showing off.\" Below it, small and widely letter-spaced in a clean sans serif: SMILE FAMILY DENTAL CARE — UNION, NJ. Nothing else in frame, very generous margins, faint film grain. Vertical composition.",
+      "motion_prompt": "Type fades up slowly, grain shimmering, gradient breathing once. Audio: single sustained tone resolving to silence."
+    }
+  ]
+}
