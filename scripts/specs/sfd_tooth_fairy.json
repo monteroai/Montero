@@ -1,0 +1,56 @@
+{
+  "business_id": "612e5cd6-919b-4ece-8c35-5e036964d595",
+  "id": "sb-sfd-fairy-v1",
+  "title": "Tooth Fairy Logistics",
+  "concept": "The tooth fairy runs a courier company. Dispatch board, pickup routes, a warehouse of neatly filed baby teeth, a clipboard, a hi-vis vest. Flat vector motion graphics — bold shapes, confident colour, thick clean outlines. This is the 'nobody thinks to make this' slot: genuinely funny, entirely family-safe, and completely unexpected from a dental practice. Ends by handing the joke back to the client: she handles pickup, the practice handles everything before that.",
+  "format": "9:16 reel · ~18s · flat vector motion graphics",
+  "audio": {
+    "music": "Bright bouncy marimba and upright bass, workplace-comedy energy. Tight and quick.",
+    "voiceover": "None — the signage in frame does the talking.",
+    "sfx": "Office foley played for laughs: a clipboard click, a rubber stamp thud, a dispatch radio blip, a forklift reverse beep at fairy scale."
+  },
+  "frames": [
+    {
+      "idx": 1,
+      "duration": "0-3s",
+      "story": "A dispatch office at night. A wall board of pickup routes, all pins in kids' bedrooms.",
+      "image_prompt": "Flat vector illustration of a small dispatch office at night, seen straight on. A large wall map covered in route pins and string, a desk with a radio, a mug, and a clipboard. Bold geometric shapes, thick clean outlines, no gradients, limited palette of deep navy, warm cream, soft pink and a single bright yellow accent. Simple flat shadows, no texture, no photorealism. Vertical composition, no text.",
+      "motion_prompt": "Route strings draw themselves across the map pin by pin; the radio light blinks. Everything else holds still. Audio: dispatch radio blip."
+    },
+    {
+      "idx": 2,
+      "duration": "3-6s",
+      "story": "The fairy clocks in — wings, hi-vis vest, clipboard. All business.",
+      "image_prompt": "Flat vector illustration of a small fairy character wearing a high-visibility safety vest over her dress, translucent wings, holding a clipboard and a pen, standing beside a punch clock on the wall. Bold geometric shapes, thick clean outlines, no gradients, limited palette of deep navy, warm cream, soft pink and bright yellow. Confident simple character design, flat shadows. Vertical composition, no text.",
+      "motion_prompt": "She ticks one box on the clipboard; wings buzz in a short loop; punch clock hand advances one notch. Audio: clipboard click, stamp thud."
+    },
+    {
+      "idx": 3,
+      "duration": "6-9s",
+      "story": "The warehouse: aisles of tiny labelled drawers, every one a filed baby tooth.",
+      "image_prompt": "Flat vector illustration of a warehouse interior with tall aisles of small square drawers stretching into perspective, each drawer bearing a tiny simple tooth icon on its front. A narrow walkway down the centre, overhead lamps as simple circles. Bold geometric shapes, thick clean outlines, no gradients, limited palette of deep navy, warm cream, soft pink and bright yellow. Vertical composition, no text.",
+      "motion_prompt": "Camera pushes slowly down the aisle, drawers sliding past in parallel layers. One drawer pops open and shut. Audio: marimba enters, forklift reverse beep."
+    },
+    {
+      "idx": 4,
+      "duration": "9-12s",
+      "story": "A delivery: coin left, tooth collected, transaction logged. Perfectly routine.",
+      "image_prompt": "Flat vector illustration of a child's bedroom at night seen from the side, a small fairy in a hi-vis vest placing a single round coin under a pillow while lifting a tiny tooth away with the other hand. Sleeping child shape simplified under a blanket, window with a simple moon. Bold geometric shapes, thick clean outlines, no gradients, limited palette of deep navy, warm cream, soft pink and bright yellow. Vertical composition, no text.",
+      "motion_prompt": "The coin slides under the pillow, the tooth lifts away in a short arc, a small checkmark stamps into frame. Audio: stamp thud, music beat lands."
+    },
+    {
+      "idx": 5,
+      "duration": "12-15s",
+      "story": "Back at dispatch: the board flips to ALL ROUTES CLEAR. Job done.",
+      "image_prompt": "Flat vector illustration of the dispatch office wall board now clear of pins, with a large simple status panel showing exactly the words ALL ROUTES CLEAR in bold clean sans serif letters. The fairy in her hi-vis vest gives a small thumbs up in the foreground. Bold geometric shapes, thick clean outlines, no gradients, limited palette of deep navy, warm cream, soft pink and bright yellow. Vertical composition.",
+      "motion_prompt": "Status panel letters snap into place one word at a time; thumbs up pops with a small squash-and-stretch. Audio: music button, radio blip."
+    },
+    {
+      "idx": 6,
+      "duration": "15-18s",
+      "story": "End card — the handoff joke.",
+      "image_prompt": "Minimal end card, flat vector style on a deep navy background. Centered text in a clean bold sans serif reading exactly: \"She handles pickup. We handle everything before that.\" Below it, smaller and widely letter-spaced in warm cream: SMILE FAMILY DENTAL CARE — UNION, NJ. A single small flat-vector tooth icon in bright yellow sits beneath the type. Generous margins. Vertical composition.",
+      "motion_prompt": "Type snaps up line by line on the beat; the tooth icon spins once and settles. Audio: final marimba hit, silence."
+    }
+  ]
+}

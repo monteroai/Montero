@@ -10,12 +10,18 @@ import { sendEmail } from '@/lib/portal/email'
 
 const FORM_TO_BUSINESS: Record<string, string | undefined> = {
   'consulting-intake': process.env.CONSULTING_BUSINESS_ID,
+  'sfd-intake': process.env.SFD_BUSINESS_ID,
 }
 
 const ALLOWED_ORIGINS = new Set<string>([
   'https://smileconsultingplaceholder.netlify.app',
   'https://smilemanagementconsultingsnj.com',
   'https://www.smilemanagementconsultingsnj.com',
+  // Smile Family Dental — the .netlify.app stays listed after the custom
+  // domain cuts over so the staging URL keeps working for testing.
+  'https://smilefamilydentalcare.netlify.app',
+  'https://smilefamilydentalcarenj.com',
+  'https://www.smilefamilydentalcarenj.com',
 ])
 
 type LeadFields = {

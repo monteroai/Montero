@@ -1,0 +1,63 @@
+{
+  "business_id": "612e5cd6-919b-4ece-8c35-5e036964d595",
+  "id": "sb-sfd-tiny-v1",
+  "title": "The Tiny Practice",
+  "concept": "A dollhouse cutaway of the entire practice rendered as a premium scale miniature, camera gliding room to room in one continuous move. Reception, the kid's corner, an operatory mid-appointment, sterilization — tiny people going about an ordinary day. Reads as studio-made rather than generated, carries zero uncanny-valley risk, and it actually shows the whole practice, which is the job a dental ad has to do. Swap the sign and it resells to any dental client.",
+  "format": "9:16 reel · ~20s · isometric miniature",
+  "audio": {
+    "music": "Light plucked strings with a music-box quality, curious and unhurried. Builds slightly at the pull-back.",
+    "voiceover": "None.",
+    "sfx": "Miniature-scale foley: a tiny door latch, a small chair swivel, a soft paper shuffle. Everything one size too small, which is the joke."
+  },
+  "frames": [
+    {
+      "idx": 1,
+      "duration": "0-3s",
+      "story": "The whole practice as a miniature building on a table, morning light raking across it.",
+      "image_prompt": "A highly detailed architectural scale model of a small single-storey suburban dental practice, photographed as a tabletop miniature with tilt-shift shallow focus. Warm morning sidelight rakes across a tiny brick facade, miniature shrubs, a small parking sign, a hand-painted shopfront sign reading SMILE FAMILY DENTAL. Visible model-making craft: slightly soft paint edges, real material texture, a faint seam in the baseboard. Shot on a macro lens at f4 with soft studio lighting, deep clean background falling to grey. Vertical composition, no people.",
+      "motion_prompt": "Slow push in toward the front door, tilt-shift blur band drifting with the move. No cuts. Audio: music box opens, distant tiny ambience."
+    },
+    {
+      "idx": 2,
+      "duration": "3-6s",
+      "story": "Camera glides through the front wall, revealing the cutaway interior.",
+      "image_prompt": "A cutaway dollhouse view of a miniature dental practice with the front wall removed, showing two rooms side by side in cross-section like an architectural model. Miniature furniture, tiny framed pictures, a small reception desk, warm interior lamps glowing at model scale. Tilt-shift macro photography of a physical scale model, soft studio lighting from above, visible craft texture in the materials. Vertical composition, no people.",
+      "motion_prompt": "Continuous glide forward through the missing wall into the interior, parallax between the room layers. Strictly no cut. Audio: tiny door latch."
+    },
+    {
+      "idx": 3,
+      "duration": "6-9s",
+      "story": "Reception. A tiny figure checks in. Plants, a warm lamp, an ordinary morning.",
+      "image_prompt": "Miniature model reception area of a dental practice in cutaway, with a small painted figurine standing at a tiny reception desk and a second figurine seated behind it. Miniature potted plants, a working-looking desk lamp casting warm light, a minute stack of paper. Tilt-shift macro photograph of a physical scale model, shallow focus falling off behind, soft warm studio lighting. Vertical composition.",
+      "motion_prompt": "Slow lateral drift right across the reception desk, focus racking gently from the figurine to the lamp. Audio: soft paper shuffle."
+    },
+    {
+      "idx": 4,
+      "duration": "9-12s",
+      "story": "The kid's corner: toy box, small chair, a dropped crayon on the floor.",
+      "image_prompt": "A miniature children's waiting corner inside a dollhouse-scale dental practice: a tiny toy box with the lid ajar, two small child-sized chairs, a rug, and a single dropped crayon lying on the miniature floor. Warm light from a small window, tilt-shift macro photograph of a physical scale model, shallow depth of field, visible material texture and slight handmade imperfection. Vertical composition, no people.",
+      "motion_prompt": "Gentle drift downward toward the dropped crayon, which stays sharp as the room softens. Audio: music box motif repeats one note higher."
+    },
+    {
+      "idx": 5,
+      "duration": "12-15s",
+      "story": "An operatory mid-appointment. Calm, unhurried, entirely ordinary.",
+      "image_prompt": "A miniature dental operatory in cutaway cross-section: a tiny dental chair reclined, a small overhead light on its articulated arm, a figurine in scrubs seated beside a patient figurine, miniature cabinets along the back wall. Everything at model scale with visible craft texture. Tilt-shift macro photograph of a physical scale model, cool daylight mixed with a warm lamp, shallow focus. Vertical composition.",
+      "motion_prompt": "Slow arc around the chair, the overhead lamp catching a highlight as the camera passes. Audio: small chair swivel, music warms."
+    },
+    {
+      "idx": 6,
+      "duration": "15-18s",
+      "story": "Pull back — the whole cutaway practice revealed at once, every room alive.",
+      "image_prompt": "Wide view of a complete cutaway dollhouse model of a dental practice, all four rooms visible at once in cross-section: reception, children's corner, operatory, and a small sterilization room, each lit with its own tiny warm lamp. Miniature figurines placed throughout. Photographed as a physical scale model on a neutral surface, tilt-shift macro, soft even studio lighting, deep grey background. Vertical composition.",
+      "motion_prompt": "Smooth continuous pull back and slight rise, the whole model settling into frame. Audio: music resolves, all tiny ambience blends."
+    },
+    {
+      "idx": 7,
+      "duration": "18-20s",
+      "story": "End card.",
+      "image_prompt": "Minimal end card on a soft warm grey background with subtle paper texture. Centered text in an elegant light-weight serif reading exactly: \"A whole practice. One appointment at a time.\" Below it, small and widely letter-spaced in clean sans serif: SMILE FAMILY DENTAL CARE — UNION, NJ. Generous margins, nothing else in frame. Vertical composition.",
+      "motion_prompt": "Type fades up, background texture breathes once. Audio: final music-box note, silence."
+    }
+  ]
+}

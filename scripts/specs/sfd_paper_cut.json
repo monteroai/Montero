@@ -1,0 +1,56 @@
+{
+  "business_id": "612e5cd6-919b-4ece-8c35-5e036964d595",
+  "id": "sb-sfd-paper-v1",
+  "title": "Paper Cut Practice",
+  "concept": "Everything built from cut paper in layered dioramas — paper teeth, paper chairs, paper people — with visible paper edges, soft drop shadows between layers, and a slight handmade wobble between frames. The craft is the message: tactile and warm, and the handmade quality reads as care, which is exactly what a family practice sells. Cheapest of the animated directions to keep visually consistent across a whole series.",
+  "format": "9:16 reel · ~18s · layered paper craft / stop-motion",
+  "audio": {
+    "music": "Solo acoustic guitar, fingerpicked, unhurried. Feels handmade to match the visuals.",
+    "voiceover": "None.",
+    "sfx": "Paper foley throughout — a sheet sliding, scissors closing once, a soft page turn on each layer change. The paper sounds are the whole sound design."
+  },
+  "frames": [
+    {
+      "idx": 1,
+      "duration": "0-3s",
+      "story": "A paper tooth, alone, centre frame. Simple and inviting.",
+      "image_prompt": "A single tooth shape cut from thick cream paper, resting on a layered paper background of two tones, photographed straight on. Visible cut edges with slight paper thickness, soft drop shadow beneath the tooth, matte uncoated paper texture with faint fibre. Even soft studio lighting from above. Handmade craft feel, slightly imperfect scissor cuts. Vertical composition, no text.",
+      "motion_prompt": "The tooth rocks once and settles; its drop shadow shifts with it. Slight stop-motion stutter, not smooth. Audio: scissors close once."
+    },
+    {
+      "idx": 2,
+      "duration": "3-7s",
+      "story": "Paper layers build a waiting room around it, one sheet at a time.",
+      "image_prompt": "A layered cut-paper diorama of a dental waiting room seen straight on: paper chairs in a row, a paper plant, a paper window with paper light rays, built from four or five distinct depth layers in cream, sage green, soft coral and warm grey. Visible paper edges and thickness on every layer, soft shadows falling between layers. Even soft studio lighting, matte paper texture. Vertical composition, no text.",
+      "motion_prompt": "Layers slide in from the edges one at a time, each landing with a small settle. Stop-motion cadence. Audio: paper sliding, page turns."
+    },
+    {
+      "idx": 3,
+      "duration": "7-11s",
+      "story": "A paper family arrives — three cut-paper figures, holding paper hands.",
+      "image_prompt": "Three simple cut-paper human figures of different heights holding hands, standing in a layered paper waiting room diorama. The figures are flat paper shapes in coral, sage and cream with simple cut features, each casting a soft shadow onto the layer behind. Visible scissor-cut edges, matte paper texture, even soft studio lighting. Vertical composition, no text.",
+      "motion_prompt": "The three figures walk in from the left in stop-motion steps, the smallest one hopping once. Audio: guitar enters, paper steps."
+    },
+    {
+      "idx": 4,
+      "duration": "11-14s",
+      "story": "The smallest figure's paper smile unfolds — bigger than the rest of the face.",
+      "image_prompt": "Close-up of a small cut-paper child figure whose paper smile is an oversized separate piece of white paper, comically wide, layered on top of the face shape. Visible paper edges and a soft shadow under the smile piece, warm cream and coral palette, matte paper texture, even soft lighting. Handmade and charming rather than polished. Vertical composition, no text.",
+      "motion_prompt": "The oversized paper smile unfolds outward in two stop-motion steps and holds. Audio: page turn, guitar lifts."
+    },
+    {
+      "idx": 5,
+      "duration": "14-16s",
+      "story": "Pull back — the whole paper practice, every layer visible.",
+      "image_prompt": "Wide view of a complete layered cut-paper diorama of a small dental practice: paper building facade, paper sign, paper trees either side, paper figures at the door, built from six visible depth layers in cream, sage, coral and warm grey. Strong soft shadows between layers showing the physical depth, matte paper texture, even studio lighting. Vertical composition, no text.",
+      "motion_prompt": "Smooth pull back revealing all layers, parallax between them making the depth obvious. Audio: guitar resolves, final page turn."
+    },
+    {
+      "idx": 6,
+      "duration": "16-18s",
+      "story": "End card, cut from paper like everything else.",
+      "image_prompt": "Minimal end card made of cut paper: a warm cream paper background with the words \"Handled with care.\" formed as clean dark grey letters printed on a slightly raised paper panel casting a soft shadow. Below, smaller and widely letter-spaced: SMILE FAMILY DENTAL CARE — UNION, NJ. A tiny cut-paper tooth sits beneath the type. Matte paper texture, even soft lighting. Vertical composition.",
+      "motion_prompt": "The paper panel settles into place, tiny tooth drops in last. Audio: final guitar note, silence."
+    }
+  ]
+}
