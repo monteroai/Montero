@@ -62,6 +62,9 @@ p{margin:0}
 #story p{font-size:16px;line-height:1.4}
 #story .row{display:flex;gap:8px;justify-content:flex-end;align-items:center}
 #story .row .ib{font-size:14px;color:var(--muted)}
+#story .shead{display:flex;justify-content:space-between;align-items:center}
+#story .xt{all:unset;cursor:pointer;font:600 13px/1 var(--body);color:var(--muted);padding:4px 2px;text-decoration:underline}
+#story .xt:focus-visible{outline:2px solid var(--gold)}
 #phone:has(#reel) #story{top:calc(8px + env(safe-area-inset-top,0px));bottom:auto}
 #screen.story{padding-bottom:190px}
 #screen.story:has(.browser){padding-bottom:0;overflow:hidden}
@@ -365,7 +368,7 @@ const STORIES = {
   ],
   rest: [
     { say: "Her website opens. Tap Take the Health Check.", hl: ['site', 'a.btn-line[href="#check"]'], wait: 'hc', clickWait: true },
-    { say: 'Answer the 8 questions. Tap the answer that fits. It moves to the next question by itself.', hl: ['site', '#quizcard'], wait: 'qdone' },
+    { say: 'Answer the 8 questions. Tap the answer that fits. It moves to the next question by itself.', hl: ['site', '#quizcard'], scrollTo: ['site', '#quizcard'], wait: 'qdone' },
     { say: 'Type any name, office name and email. Pretend, nothing is sent.', hl: ['site', '#f-name'], wait: 'filled', fill: true },
     { say: 'Tap See my results.', hl: ['site', '#qnext'], wait: 'quiz' },
     { say: 'Your score shows up on her website right away. Tap Next.', hl: ['site', '#result'], scrollTo: ['site', '#result'], next: true },
@@ -413,7 +416,7 @@ function stepIn() {
   const st = ST.steps[ST.i]; unglow();
   if (st.fx) st.fx(); if (st.go) st.go();
   let b = $('#story'); if (!b) { b = document.createElement('div'); b.id = 'story'; $('#phone').appendChild(b) }
-  b.innerHTML = `<span class="sn">Step ${ST.i + 1} of ${ST.steps.length}</span><p>${esc(st.say)}</p><div class="row"><button class="ib" onclick="endStory(true)">Stop</button>${st.hl ? '<button class="ib" onclick="lost()">I can\'t find it</button>' : ''}${st.next ? `<button class="btn sm" onclick="${st.last ? 'endStory()' : 'storyNext()'}">${st.last ? 'Finish' : 'Next'}</button>` : ''}</div>`;
+  b.innerHTML = `<div class="shead"><span class="sn">Step ${ST.i + 1} of ${ST.steps.length}</span><button class="xt" onclick="endStory(true)">Exit tour</button></div><p>${esc(st.say)}</p><div class="row">${st.hl && !st.next ? '<button class="btn alt sm" onclick="lost()">Show me where to tap</button>' : ''}${st.next ? `<button class="btn sm" onclick="${st.last ? 'endStory()' : 'storyNext()'}">${st.last ? 'Finish' : 'Next'}</button>` : ''}</div>`;
   $('#screen').classList.add('story'); $('#phone').style.setProperty('--cap', (b.offsetHeight + 16) + 'px');
   setTimeout(() => glow(st, 0), 250);
 }

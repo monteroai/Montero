@@ -1078,8 +1078,8 @@ function show(i){
 }
 function updateNav(){
   qback.disabled = step===0;
-  if(step<N){ qnext.textContent="Next"; qnext.disabled = answers[QUESTIONS[step].key]===undefined; qnext.style.opacity = qnext.disabled?.45:1; }
-  else { qnext.textContent="See my results"; qnext.disabled=false; qnext.style.opacity=1; }
+  if(step<N){ qnext.textContent="Next"; qnext.disabled = answers[QUESTIONS[step].key]===undefined; qnext.style.opacity = 1; qnext.style.visibility = qnext.disabled ? "hidden" : "visible"; }
+  else { qnext.textContent="See my results"; qnext.disabled=false; qnext.style.opacity=1; qnext.style.visibility="visible"; }
 }
 function go(i){
   step = Math.max(0, Math.min(N, i)); show(step);
