@@ -14,7 +14,7 @@
   --display:"Archivo",system-ui,sans-serif;--body:"Source Sans 3",system-ui,sans-serif}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{background:#20242e;font:16px/1.45 var(--body);color:var(--ink)}
+body{background:#e7e2d8;font:16px/1.45 var(--body);color:var(--ink)}
 #phone{position:relative;width:100%;height:100%;background:var(--white);overflow:hidden;display:flex;flex-direction:column}
 @media (min-width:600px){body{display:flex;align-items:center;justify-content:center;padding:20px}
   #phone{width:400px;height:min(860px,calc(100vh - 40px));border-radius:42px;border:12px solid #0b0d12;box-shadow:0 30px 80px rgba(0,0,0,.5)}}
@@ -37,9 +37,9 @@ p{margin:0}
 .btn.sm{padding:10px 12px;font-size:15px;border-radius:9px}
 
 /* home */
-.home{background:linear-gradient(180deg,#1b2a4a,#0f1a30);min-height:100%;padding:18px 16px 24px;color:#fff;display:flex;flex-direction:column;gap:18px}
-.home h1{color:#fff}
-.guide{background:rgba(255,255,255,.1);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.home{background:var(--cream);min-height:100%;padding:22px 16px 28px;color:var(--ink);display:flex;flex-direction:column;gap:18px}
+.home h1{color:var(--navy)}
+.guide{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px}
 .guide b{font-family:var(--display)}
 .guide ol{margin:0;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:7px}
 .guide li button{all:unset;cursor:pointer;box-sizing:border-box;display:grid;grid-template-columns:26px 1fr 12px;gap:8px;align-items:center;font-size:15.5px;width:100%;padding:4px 0}
@@ -47,11 +47,34 @@ p{margin:0}
 .tick{width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,.6);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
 .tick.on{background:#5fbf7a;border-color:#5fbf7a}
 .apps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px 10px}
-.app{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-size:13.5px;line-height:1.2;color:#fff;position:relative}
+.app{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-size:13.5px;line-height:1.2;color:var(--ink);position:relative}
 .ico{width:62px;height:62px;border-radius:16px;display:flex;align-items:center;justify-content:center}
 .ico svg{width:32px;height:32px}
 .badge{position:absolute;top:-4px;right:calc(50% - 38px);background:var(--red);color:#fff;font:700 12px/1 var(--body);min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 5px}
-.who{font-size:13px;opacity:.75;text-align:center}
+.who{font-size:13px;color:var(--muted);text-align:center}
+.start{display:flex;flex-direction:column;gap:10px}
+.start .btn small{display:block;font:600 14px/1.3 var(--body);opacity:.8;margin-top:3px}
+.or{font:700 12px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center}
+
+/* story caption */
+#story{position:absolute;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:15;background:var(--white);border:2px solid var(--navy);border-radius:16px;box-shadow:0 10px 30px rgba(20,33,61,.25);padding:12px 14px;display:flex;flex-direction:column;gap:9px}
+#story .sn{font:700 12px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+#story p{font-size:16px;line-height:1.4}
+#story .row{display:flex;gap:8px;justify-content:flex-end;align-items:center}
+#story .row .ib{font-size:14px;color:var(--muted)}
+#phone:has(#reel) #story{top:calc(8px + env(safe-area-inset-top,0px));bottom:auto;opacity:.97}
+#screen.story{padding-bottom:190px}
+#screen.story:has(.lock){padding-bottom:0}#screen.story .lock{padding-bottom:200px}
+
+/* lock screen */
+.lock{min-height:100%;background:linear-gradient(180deg,#cfd9e6,#efe6d6);padding:44px 14px 24px;display:flex;flex-direction:column;gap:10px}
+.lock .time{font:800 64px/1 var(--display);color:var(--navy);text-align:center}
+.lock .date{text-align:center;color:var(--navy);font-weight:600;margin-bottom:22px}
+.lock .later{text-align:center;font:700 13px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.lnote{all:unset;cursor:pointer;box-sizing:border-box;background:rgba(255,255,255,.88);border-radius:18px;padding:12px 14px;display:grid;grid-template-columns:38px 1fr;gap:10px;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.lnote .ico{width:38px;height:38px;border-radius:10px}.lnote .ico svg{width:20px;height:20px}
+.lnote b{display:block;font-size:15px}.lnote span{display:block;font-size:14.5px;color:#333}
+.lnote:focus-visible{outline:3px solid var(--gold)}
 
 /* banner notification */
 #top[hidden]{display:none}
@@ -81,7 +104,7 @@ p{margin:0}
 .post-h{display:flex;align-items:center;gap:10px;padding:10px 12px}
 .post-h .avatar{width:34px;height:34px;font-size:13px;border-width:2px}
 .post-h div{font-size:14px;line-height:1.2}.post-h small{color:var(--muted)}
-.post video,.post img{width:100%;display:block;background:#000;aspect-ratio:9/16;object-fit:cover;max-height:520px}
+.post video,.post img{width:100%;display:block;background:#000;aspect-ratio:1/1;object-fit:cover;max-width:100%}
 .cta{display:flex;justify-content:space-between;align-items:center;background:var(--navy);color:#fff;padding:11px 14px;font-weight:700;cursor:pointer}
 .cap{padding:8px 12px;font-size:14.5px}
 .icons{display:flex;gap:16px;padding:8px 12px}.icons svg{width:26px;height:26px;cursor:pointer}
@@ -249,13 +272,14 @@ let noteT;
 function notify(appName, from, text) {
   const here = ROLE[app.name], there = ROLE[appName];
   if (here && there && here !== there) return;   // other person's phone: badge only
+  if (ST) { if (app.name === appName) render(); return }   // story mode: the lock screen shows it
   const n = $('#note'); const ico = APPS.find((a) => a.id === appName);
   n.innerHTML = `<span class="ico" style="background:${ico.bg}">${ico.icon}</span><div><b>${esc(from)}</b>${esc(text)}</div>`;
   n.onclick = () => { n.classList.remove('on'); go(appName) };
   n.classList.add('on'); clearTimeout(noteT); noteT = setTimeout(() => n.classList.remove('on'), 4200);
   if (app.name === appName) render();
 }
-function mark(k) { S.done[k] = true }
+function mark(k) { S.done[k] = true; storyEvent(k) }
 
 // ---------- apps
 const APPS = [
@@ -274,7 +298,7 @@ const GUIDE = [
   ['manage', 'Open your email, tap Manage, then Call booked', "go('jmail')"],
   ['call', 'Call Maya, your phone assistant', "go('phone')"],
 ];
-function go(name, arg) { app.name = name; app.arg = arg; render(); $('#screen').scrollTop = 0 }
+function go(name, arg) { closeReel(); const sh = $('#sheet'); if (sh) sh.remove(); app.name = name; app.arg = arg; render(); $('#screen').scrollTop = 0 }
 const ROLE = { ig: 'd', web: 'd', dmail: 'd', dmsg: 'd', jmail: 'j', jmsg: 'j', manage: 'j' };
 function topbar(title, backTo) {
   const r = ROLE[app.name];
@@ -305,14 +329,64 @@ function link(href) {
 function toast(t) { const n = $('#note'); n.innerHTML = `<div style="white-space:normal">${esc(t)}</div>`; n.onclick = () => n.classList.remove('on'); n.classList.add('on'); clearTimeout(noteT); noteT = setTimeout(() => n.classList.remove('on'), 4200) }
 
 const VIEWS = {};
+// ----- lock screen: the dentist's new emails as phone notifications
+VIEWS.lock = (label) => {
+  $('#top').hidden = true;
+  const ico = APPS.find((a) => a.id === 'dmail');
+  const fresh = S.dmail.map((m, i) => [m, i]).filter(([m]) => !m.read);
+  const t = new Date(); const time = t.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(/\s?[AP]M/, '');
+  return `<div class="lock"><div class="time">${time}</div><div class="date">${t.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
+   ${label ? `<div class="later">${esc(label)}</div>` : ''}
+   ${fresh.length ? fresh.map(([m, i]) => `<button class="lnote" onclick="go('dmsg',${i})"><span class="ico" style="background:${ico.bg}">${ico.icon}</span><span><b>Janeth Osinowo</b><span>${esc(m.subject)}</span></span></button>`).join('')
+     : '<p class="muted" style="text-align:center">No new notifications</p>'}</div>` };
+
+// ----- story mode: one caption at the bottom, the phone does the rest
+const meEmail = () => (dentist() || {}).email;
+const STORIES = {
+  ad: [
+    { go: () => go('ig', 'feed'), say: "You're a dentist, scrolling Instagram after a long day. Janeth's ad shows up in your feed. Tap the dark bar under the video.", wait: 'ad' },
+  ],
+  reel: [
+    { go: () => go('ig', 'profile'), say: "You come across Janeth's profile. Tap one of her videos.", wait: 'reel0' },
+    { say: 'Her video asks you to comment CHECK. Tap Comment, type CHECK, then tap Post.', wait: 'reel' },
+    { go: () => go('ig', 'dm'), say: 'You get a message from her right away. Tap Take the Health Check.', wait: 'dm' },
+  ],
+  rest: [
+    { say: 'Her website opens right at the free quiz. Tap one answer per question (it moves on by itself), then type any name and email.', wait: 'quiz' },
+    { go: () => go('lock', 'A minute later'), say: 'You put your phone down. A minute later, this shows up on your lock screen. Tap it.', wait: 'dread' },
+    { say: 'Your report, from Janeth, built from your own answers. Scroll down to read it, then tap Next.', next: true },
+    { fx: () => skipAhead(), go: () => go('lock', 'Two weekdays later'), say: "Two weekdays later. You haven't replied, so one short note follows. Tap it.", wait: 'dread' },
+    { say: "That is the last automatic email from the quiz. If you had replied, they would have stopped right away. Next: Janeth's side.", next: true },
+    { go: () => go('jmail'), say: 'Meanwhile, on Janeth\'s phone: she got an alert the moment you finished the quiz. Open it, scroll down, and tap the Manage button.', wait: 'manage0' },
+    { say: 'Janeth called you and you picked a time. She taps Call booked.', wait: 'booked' },
+    { go: () => go('lock', 'Right away'), say: "Back on the dentist's phone: the confirmation arrives right away. Tap it.", wait: 'dread' },
+    { say: 'It comes with the time of the call, and a reminder goes out the day before. Tap Next.', next: true },
+    { go: () => go('manage', meEmail()), say: 'After the call, Janeth taps how it went. Tap Client signed.', wait: 'signed' },
+    { go: () => go('lock', 'Right away'), say: 'The new client gets a welcome and the short list of what to send. Tap it.', wait: 'dread' },
+    { say: "That's the whole journey: ad, quiz, report, follow-up, call, new client. Tap Finish to look around on your own.", next: true, last: true },
+  ],
+};
+let ST = null;
+function story(kind) { ST = { steps: STORIES[kind].concat(STORIES.rest), i: 0 }; stepIn() }
+function stepIn() {
+  const st = ST.steps[ST.i]; if (st.fx) st.fx(); if (st.go) st.go();
+  let b = $('#story'); if (!b) { b = document.createElement('div'); b.id = 'story'; $('#phone').appendChild(b) }
+  b.innerHTML = `<span class="sn">Step ${ST.i + 1} of ${ST.steps.length}</span><p>${esc(st.say)}</p><div class="row"><button class="ib" onclick="endStory()">Exit</button>${st.go ? '<button class="ib" onclick="ST.steps[ST.i].go()">Show me again</button>' : ''}${st.next ? `<button class="btn sm" onclick="${st.last ? 'endStory()' : 'storyNext()'}">${st.last ? 'Finish' : 'Next'}</button>` : ''}</div>`;
+  $('#screen').classList.add('story');
+}
+function storyNext() { if (!ST) return; ST.i++; if (ST.i >= ST.steps.length) return endStory(); setTimeout(stepIn, 350) }
+function storyEvent(k) { if (ST && ST.steps[ST.i].wait === k) storyNext() }
+function endStory() { ST = null; const b = $('#story'); if (b) b.remove(); $('#screen').classList.remove('story'); go('home') }
 VIEWS.home = () => {
   $('#top').hidden = true;
   const badge = { ig: S.unread.ig, dmail: S.unread.dmail, jmail: S.unread.jmail };
   return `<div class="home">
-   <div><h1>Your test drive</h1><p style="opacity:.85;margin-top:6px">Pretend you are a dentist who finds you on Instagram. Nothing is sent to anyone.</p></div>
-   <div class="guide"><b>Tap each step, in order</b><ol>${GUIDE.map(([k, t, g], i) => `<li><button onclick="${g}"><span class="tick ${S.done[k] ? 'on' : ''}">${S.done[k] ? '&#10003;' : i + 1}</span><span>${t}</span><span>&rsaquo;</span></button></li>`).join('')}</ol></div>
+   <div><h1>Your test drive</h1><p class="muted" style="margin-top:6px">See exactly what a dentist sees, from the first ad to becoming your client. Nothing is sent to anyone.</p></div>
+   <div class="start"><button class="btn" onclick="story('ad')">Start: I'm a dentist who sees your ad<small>About 3 minutes, one step at a time</small></button>
+   <button class="btn alt" onclick="story('reel')">Another way in: a dentist comments on your reel</button></div>
+   <p class="or">Or look around on your own</p>
    <div class="apps">${APPS.map((a) => `<button class="app" onclick="go('${a.id}')"><span class="ico" style="background:${a.bg}">${a.icon}</span>${a.label}${badge[a.id] ? `<span class="badge">${badge[a.id]}</span>` : ''}</button>`).join('')}</div>
-   <p class="who">The dentist's apps: Instagram, Her website, Dentist's email. Your app: Janeth's email.</p>
+   <p class="who">Instagram, the website and "Email" with a blue label are the dentist's phone. The gold label is your phone.</p>
   </div>` };
 
 // ----- Instagram
@@ -321,9 +395,9 @@ VIEWS.ig = (tab) => {
   S.unread.ig = tab === 'dm' ? 0 : S.unread.ig;
   const tabs = `<div class="tabs"><button class="${tab === 'profile' ? 'on' : ''}" onclick="go('ig','profile')">Her profile</button><button class="${tab === 'feed' ? 'on' : ''}" onclick="go('ig','feed')">Your feed</button><button class="${tab === 'dm' ? 'on' : ''}" onclick="go('ig','dm')">Messages${S.unread.ig ? ` (${S.unread.ig})` : ''}</button></div>`;
   if (tab === 'feed') return tabs + feed();
-  if (tab === 'dm') return tabs + dms();
+  if (tab === 'dm') { mark('dmview'); return tabs + dms() }
   return tabs + `<div class="ig-head"><div class="avatar">SM</div><div><h3>Smile Management &amp; Consulting</h3></div></div>
-   <div class="bio"><span>Dental practice back office: claims, credentialing, payroll, HR.</span><span>Run by Janeth Osinowo, RDH. New Jersey.</span><span>Free 2-minute Practice Health Check below.</span><a onclick="go('web')">smilemanagementconsultingsnj.com</a></div>
+   <div class="bio"><span>Dental practice back office: claims, credentialing, payroll, HR.</span><span>Run by Janeth Osinowo, RDH. New Jersey.</span><span>Free 1-minute Practice Health Check below.</span><a onclick="go('web')">smilemanagementconsultingsnj.com</a></div>
    <div class="ig-btns"><button class="f" onclick="toast('Following.')">Follow</button><button onclick="go('ig','dm')">Message</button></div>
    <div class="grid">${REELS.map((r, i) => `<button style="background-image:url('reels/${r.id}.jpg')" onclick="reel(${i})" aria-label="Play reel ${esc(r.title)}"><span>&#9654; ${esc(r.title)}</span></button>`).join('')}</div>`;
 };
@@ -331,8 +405,8 @@ function feed() {
   const r = REELS[0];
   return `<div class="post"><div class="post-h"><div class="avatar">SM</div><div><b>smilemanagementconsulting</b><br><small>Sponsored</small></div></div>
    <video src="reels/${r.id}.mp4" poster="reels/${r.id}.jpg" muted playsinline loop autoplay></video>
-   <div class="cta" onclick="mark('ad');go('web')"><span>Take the free Health Check</span><span>&rsaquo;</span></div>
-   <div class="cap"><b>smilemanagementconsulting</b> Denied claims, late payroll, credentialing that never ends. Take the free 2-minute Practice Health Check and see where your practice is leaking.</div></div>
+   <div class="cta" onclick="mark('ad');go('web','check')"><span>Take the free Health Check</span><span>&rsaquo;</span></div>
+   <div class="cap"><b>smilemanagementconsulting</b> Denied claims, late payroll, credentialing that never ends. Take the free 1-minute Practice Health Check and see where your practice is leaking.</div></div>
    <div class="pad"><p class="hint">This is what the paid ad looks like in a dentist's feed. Tapping the dark bar opens Janeth's website at the quiz.</p></div>`;
 }
 function reel(i) {
@@ -367,7 +441,7 @@ function postComment(i) {
   if (new RegExp('\\b' + KEYWORD + '\\b', 'i').test(t)) {
     S.comments[i].push({ her: true, t: 'Sent! Check your messages.' });
     if (!S.dmKeyword) { S.dmKeyword = true;
-      S.dms.push({ them: true, auto: true, t: 'Hi! Here is the free Practice Health Check. 8 quick questions, about 2 minutes, and your score goes straight to your email.', btn: ['Take the Health Check', 'web#check'] });
+      S.dms.push({ them: true, auto: true, t: 'Hi! Here is the free Practice Health Check. 8 quick taps, about a minute, and your score goes straight to your email.', btn: ['Take the Health Check', 'web#check'] });
       S.dmQR = ['Book a free call', 'Talk to Janeth'];
       S.unread.ig++; }
     mark('reel'); setTimeout(() => notify('ig', 'smilemanagementconsulting', 'Sent you a message'), 600);
@@ -389,7 +463,7 @@ function dmSend(t) {
   const k = t.toLowerCase();
   if (/book|call|time/.test(k)) S.dms.push({ them: true, auto: true, t: `Happy to set that up. The first call is free and takes 30 minutes. Call Maya, Janeth's assistant, any time at ${MAYA_SHOW}, or reply with your email and two times that work and Janeth will confirm.` });
   else if (/janeth|talk|person|human/.test(k)) { S.dms.push({ them: true, auto: true, t: 'Got it. Janeth will reply to you here personally, usually the same business day.' }); setTimeout(() => toast('Janeth gets a notice that someone wants her personally.'), 900) }
-  else if (/check|quiz|score|health/.test(k)) S.dms.push({ them: true, auto: true, t: 'Here it is: 8 quick questions, about 2 minutes.', btn: ['Take the Health Check', 'web#check'] });
+  else if (/check|quiz|score|health/.test(k)) S.dms.push({ them: true, auto: true, t: 'Here it is: 8 quick taps, about a minute.', btn: ['Take the Health Check', 'web#check'] });
   else { S.dms.push({ them: true, auto: true, t: 'Thanks for reaching out! What can we help with?' }); S.dmQR = ['Free Health Check', 'Book a free call', 'Talk to Janeth'] }
   render(); const sc = $('#screen'); sc.scrollTop = sc.scrollHeight;
 }
@@ -446,9 +520,9 @@ function act(a, email) {
   if (a === 'handling') { const n = stopContact(email, 'you took it from here'); $('#actok').innerHTML = `<p class="ok">${n ? 'Done. No more automatic emails will go to them.' : 'Nothing was running for them, so nothing changed.'}</p>`; return }
   const data = {};
   if (a === 'booked') { const dv = $('#cd').value, tv = $('#ct').value; if (!dv || !tv) { $('#actok').innerHTML = '<p class="ok">Pick the day and the time of the call, then press Call booked.</p>'; return }
-    const at = new Date(dv + 'T' + tv); data.call_iso = at.toISOString();
+    const at = new Date(dv + 'T' + tv); mark('booked'); data.call_iso = at.toISOString();
     data.call_time = at.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) + ' at ' + at.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit' }); mark('manage') }
-  start(ACT[a], S.contacts[email], data);
+  start(ACT[a], S.contacts[email], data); mark(a);
   $('#actok').innerHTML = `<p class="ok">Done. ${HINT[a]} Open the dentist's email to see it.</p>`;
 }
 
@@ -484,7 +558,7 @@ Hi Dr. [last name],
 
 I noticed you're hiring for a billing coordinator. When that seat is empty, claims usually start piling up past 30 days.
 
-I put together a free 2-minute Practice Health Check for owners in New Jersey. It scores eight back-office areas and tells you where I'd start: [link]
+I put together a free 1-minute Practice Health Check for owners in New Jersey. It scores eight back-office areas and tells you where I'd start: [link]
 
 Janeth Osinowo, RDH
 Smile Management and Consulting Solutions</div></div></div></section>
