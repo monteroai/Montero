@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<base href="/test/">
+<title>Smile Management: Test Drive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: a phone. On a real phone it fills the screen; on a computer it sits in a phone frame. Home screen = apps; each app = one screen. */
+:root{--navy:#14213d;--gold:#b08d4a;--cream:#efeae0;--paper:#faf8f3;--ink:#1d1d22;--muted:#6b6f7b;--line:#e3ded3;--white:#fff;--blue:#3b6fd8;--red:#c4453a;--green:#3f7a4c;
+  --display:"Archivo",system-ui,sans-serif;--body:"Source Sans 3",system-ui,sans-serif}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:#20242e;font:16px/1.45 var(--body);color:var(--ink)}
+#phone{position:relative;width:100%;height:100%;background:var(--white);overflow:hidden;display:flex;flex-direction:column}
+@media (min-width:600px){body{display:flex;align-items:center;justify-content:center;padding:20px}
+  #phone{width:400px;height:min(860px,calc(100vh - 40px));border-radius:42px;border:12px solid #0b0d12;box-shadow:0 30px 80px rgba(0,0,0,.5)}}
+.top{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;border-bottom:1px solid var(--line);background:var(--white);min-height:52px}
+.chip{font:700 11.5px/1 var(--body);letter-spacing:.05em;text-transform:uppercase;padding:5px 8px;border-radius:6px;white-space:nowrap}.chip.d{background:#e3ecfb;color:#2a55b0}.chip.j{background:#f3e9d4;color:#7a5c22}
+.top b{font:700 17px/1.2 var(--display);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ib{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:6px 8px;border-radius:8px;font-weight:600;color:var(--navy);font-size:16px}
+.ib:focus-visible,.btn:focus-visible,.app:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.ib svg{width:22px;height:22px}
+#screen{flex:1 1 auto;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;position:relative}
+.pad{padding:16px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance}
+h1{font-size:26px;line-height:1.15}h2{font-size:21px;line-height:1.2}h3{font-size:17px}
+p{margin:0}
+.muted{color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:12px}
+.btn{all:unset;box-sizing:border-box;cursor:pointer;display:block;text-align:center;background:var(--navy);color:#fff;font:700 17px/1.2 var(--body);padding:15px 14px;border-radius:12px}
+.btn.alt{background:var(--white);color:var(--navy);border:2px solid var(--navy)}
+.btn.gold{background:var(--gold)}
+.btn.sm{padding:10px 12px;font-size:15px;border-radius:9px}
+
+/* home */
+.home{background:linear-gradient(180deg,#1b2a4a,#0f1a30);min-height:100%;padding:18px 16px 24px;color:#fff;display:flex;flex-direction:column;gap:18px}
+.home h1{color:#fff}
+.guide{background:rgba(255,255,255,.1);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.guide b{font-family:var(--display)}
+.guide ol{margin:0;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+.guide li button{all:unset;cursor:pointer;box-sizing:border-box;display:grid;grid-template-columns:26px 1fr 12px;gap:8px;align-items:center;font-size:15.5px;width:100%;padding:4px 0}
+.guide li button:focus-visible{outline:2px solid var(--gold)}
+.tick{width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,.6);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.tick.on{background:#5fbf7a;border-color:#5fbf7a}
+.apps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px 10px}
+.app{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-size:13.5px;line-height:1.2;color:#fff;position:relative}
+.ico{width:62px;height:62px;border-radius:16px;display:flex;align-items:center;justify-content:center}
+.ico svg{width:32px;height:32px}
+.badge{position:absolute;top:-4px;right:calc(50% - 38px);background:var(--red);color:#fff;font:700 12px/1 var(--body);min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 5px}
+.who{font-size:13px;opacity:.75;text-align:center}
+
+/* banner notification */
+#top[hidden]{display:none}
+#note{visibility:hidden;position:absolute;left:8px;right:8px;top:8px;z-index:20;background:rgba(250,250,250,.97);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:11px 13px;display:flex;gap:10px;align-items:center;cursor:pointer;transform:translateY(-140%);transition:transform .35s}
+#note.on{transform:none;visibility:visible}
+#note .ico{width:38px;height:38px;border-radius:10px;flex:0 0 auto}
+#note .ico svg{width:20px;height:20px}
+#note div{min-width:0;font-size:14px}
+#note b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* instagram-style */
+.ig-head{display:grid;grid-template-columns:86px 1fr;gap:16px;align-items:center;padding:16px}
+.avatar{width:86px;height:86px;border-radius:50%;background:var(--navy);color:var(--gold);display:flex;align-items:center;justify-content:center;font:800 28px var(--display);border:3px solid #fff;box-shadow:0 0 0 2px var(--gold)}
+.stats{display:flex;gap:16px;font-size:14px}.stats b{display:block;font-size:17px;font-family:var(--display)}
+.bio{padding:0 16px 12px;font-size:15px;display:flex;flex-direction:column;gap:3px}
+.bio a{color:var(--blue);font-weight:600;cursor:pointer}
+.ig-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px 14px}
+.ig-btns button{all:unset;cursor:pointer;text-align:center;background:#efefef;border-radius:9px;padding:8px;font-weight:700;font-size:15px}
+.ig-btns button.f{background:var(--blue);color:#fff}
+.tabs{display:flex;border-top:1px solid var(--line)}
+.tabs button{all:unset;cursor:pointer;flex:1;text-align:center;padding:10px;font-weight:700;font-size:14px;color:var(--muted);border-bottom:2px solid transparent}
+.tabs button.on{color:var(--ink);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.grid button{all:unset;cursor:pointer;aspect-ratio:9/16;background:#000 center/cover no-repeat;position:relative;max-width:100%}
+.grid button span{position:absolute;left:6px;bottom:6px;color:#fff;font-size:12px;font-weight:700;text-shadow:0 1px 3px #000}
+.post{border-bottom:1px solid var(--line);padding-bottom:10px}
+.post-h{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.post-h .avatar{width:34px;height:34px;font-size:13px;border-width:2px}
+.post-h div{font-size:14px;line-height:1.2}.post-h small{color:var(--muted)}
+.post video,.post img{width:100%;display:block;background:#000;aspect-ratio:9/16;object-fit:cover;max-height:520px}
+.cta{display:flex;justify-content:space-between;align-items:center;background:var(--navy);color:#fff;padding:11px 14px;font-weight:700;cursor:pointer}
+.cap{padding:8px 12px;font-size:14.5px}
+.icons{display:flex;gap:16px;padding:8px 12px}.icons svg{width:26px;height:26px;cursor:pointer}
+
+/* reel viewer */
+.reel{position:absolute;inset:0;background:#000;z-index:10;display:flex;flex-direction:column}
+.reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.reel .rtop{position:relative;z-index:2;display:flex;justify-content:space-between;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 12px;color:#fff;font-weight:700}
+.reel .rtop button{all:unset;cursor:pointer;color:#fff;font-weight:700;padding:4px 8px;background:rgba(0,0,0,.35);border-radius:8px}
+.reel .side{position:absolute;right:10px;bottom:120px;z-index:2;display:flex;flex-direction:column;gap:18px;align-items:center;color:#fff;font-size:12px;font-weight:700}
+.reel .side button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))}
+.reel .side svg{width:30px;height:30px}
+.reel .rcap{position:absolute;left:12px;right:64px;bottom:24px;z-index:2;color:#fff;font-size:14.5px;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+.reel .rcap b{display:block;margin-bottom:3px}
+.sound{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;background:rgba(0,0,0,.6);color:#fff;border-radius:999px;padding:12px 18px;font-weight:700;cursor:pointer}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:12;background:#fff;border-radius:16px 16px 0 0;max-height:72%;display:flex;flex-direction:column}
+.sheet .sh{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);font-weight:700}
+.sheet .list{overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:12px;flex:1}
+.cm{display:grid;grid-template-columns:32px 1fr;gap:9px;font-size:14.5px}
+.cm .av{width:32px;height:32px;border-radius:50%;background:#d9d9de;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.cm .av.her{background:var(--navy);color:var(--gold)}
+.cm small{color:var(--muted);display:block}
+.pin{font-size:12px;color:var(--muted)}
+.compose{display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+.compose input{flex:1;min-width:0;font:16px var(--body);padding:10px 12px;border:1px solid var(--line);border-radius:20px}
+.compose button{all:unset;cursor:pointer;color:var(--blue);font-weight:700;padding:0 6px}
+.hint{background:#fff6dd;border:1px solid #ecd9a0;border-radius:10px;padding:9px 11px;font-size:14px}
+
+/* DMs */
+.thread{display:flex;flex-direction:column;gap:8px;padding:14px}
+.msg{max-width:80%;padding:9px 13px;border-radius:18px;font-size:15px}
+.msg.them{background:#efefef;align-self:flex-start}
+.msg.me{background:var(--blue);color:#fff;align-self:flex-end}
+.msg .mbtn{all:unset;cursor:pointer;display:block;margin-top:8px;background:#fff;color:var(--navy);text-align:center;font-weight:700;border-radius:10px;padding:9px;border:1px solid var(--line)}
+.qr{display:flex;flex-wrap:wrap;gap:8px;padding:0 14px 10px;justify-content:flex-end}
+.qr button{all:unset;cursor:pointer;border:1.5px solid var(--blue);color:var(--blue);border-radius:18px;padding:7px 12px;font-weight:700;font-size:14px}
+.auto{align-self:center;font-size:12px;color:var(--muted)}
+
+/* mail */
+.mrow{all:unset;cursor:pointer;display:grid;grid-template-columns:10px 1fr;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);width:100%;box-sizing:border-box}
+.mrow .dot{width:10px;height:10px;border-radius:50%;background:var(--blue);margin-top:6px}
+.mrow .dot.read{background:transparent}
+.mrow b{display:block;font-size:15px}.mrow span{display:block;font-size:14px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mrow.later{opacity:.55;cursor:default}
+.mhead{padding:12px 14px;border-bottom:1px solid var(--line);font-size:14px;display:flex;flex-direction:column;gap:2px}
+.mhead b{font-size:17px;font-family:var(--display)}
+iframe.mail{width:100%;border:0;display:block;min-height:300px;background:#efeae0}
+.empty{padding:40px 20px;text-align:center;color:var(--muted)}
+.sect{padding:10px 14px 6px;font:700 12px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ff{margin:12px 14px;display:flex;flex-direction:column;gap:8px}
+
+/* website */
+.browser{display:flex;flex-direction:column;height:100%}
+.urlbar{flex:0 0 auto;background:#f1f1f3;margin:8px 10px;border-radius:10px;padding:7px 12px;font-size:14px;color:#333;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.browser iframe{flex:1;border:0;width:100%}
+
+/* manage */
+.card{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.kv{display:grid;grid-template-columns:90px 1fr;gap:4px 10px;font-size:15px}.kv span{color:var(--muted)}
+label{font-weight:600;font-size:15px;display:flex;flex-direction:column;gap:5px}
+input[type=date],input[type=time]{font:16px var(--body);padding:10px;border:1px solid var(--line);border-radius:9px}
+.ok{background:#e8f3ea;color:#24502f;border-radius:10px;padding:10px 12px;font-size:15px}
+
+/* plan */
+.plan{padding:16px;display:flex;flex-direction:column;gap:18px}
+.plan section{display:flex;flex-direction:column;gap:8px}
+.plan ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.sample{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:15px;white-space:pre-line}
+.step{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start}
+.step i{font-style:normal;width:28px;height:28px;border-radius:50%;background:var(--gold);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+@media (prefers-reduced-motion:reduce){#note{transition:none}}
+</style>
+</head>
+<body>
+<div id="phone">
+  <div class="top" id="top"></div>
+  <div id="screen"></div>
+  <div id="note" role="status"></div>
+</div>
+
+<script src="engine.js"></script>
+<script>
+// ---------- facts (from clients/smc.json + the test line we set up). Change here only.
+const CLIENT = { name: 'Smile Management and Consulting Solutions', facts: { owner_first: 'Janeth', site: 'smilemanagementconsultingsnj.com',
+  checklist_url: 'checklist.pdf', address: '(your mailing address goes here)' }, test_mode: false };
+const MAYA_TEL = '+19082791144', MAYA_SHOW = '(908) 279-1144';
+const PACK = SMC.dentalConsulting;
+const REELS = [
+  { id: 'desk_claims_v5', title: 'Another claim denied', cap: 'Denied for a missing narrative. Again. Every denied claim is money you already earned.' },
+  { id: 'smc_not_for_this_v3', title: 'Not for this', cap: "You didn't open a practice to run payroll at midnight." },
+  { id: 'smc_call_in_v2', title: '7:42 AM', cap: '18 minutes until the first patient, and the day is already full.' },
+];
+const KEYWORD = 'CHECK';
+
+// ---------- icons (simple inline SVG, no emoji)
+const I = {
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 5l-7 7 7 7" fill="none"/></svg>',
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z" fill="none"/></svg>',
+  ig: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none"/><circle cx="12" cy="12" r="4" fill="none"/><circle cx="17.3" cy="6.7" r="1.2" fill="#fff"/></svg>',
+  web: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="8.5" fill="none"/><path d="M3.5 12h17M12 3.5c3 3 3 14 0 17M12 3.5c-3 3-3 14 0 17" fill="none"/></svg>',
+  mail: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="5.5" width="18" height="13" rx="2" fill="none"/><path d="M3.5 7l8.5 6 8.5-6" fill="none"/></svg>',
+  phone: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6.5 3.5l3 .5 1.5 4-2 1.5a11 11 0 005.5 5.5l1.5-2 4 1.5.5 3c0 1-1 2-2 2C11 19.5 4.5 13 4.5 5.5c0-1 1-2 2-2z" fill="none"/></svg>',
+  map: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M9 4l6 2 5-2v14l-5 2-6-2-5 2V6z M9 4v14 M15 6v14" fill="none"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3.5" y="4" width="17" height="16" rx="3" fill="none"/><path d="M10 8.5l5 3.5-5 3.5z" fill="#fff"/></svg>',
+  heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z" fill="none"/></svg>',
+  heartOn: '<svg viewBox="0 0 24 24" fill="#e0245e" stroke="#e0245e" stroke-width="2"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/></svg>',
+  comment: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12a8 8 0 01-11.6 7.1L4 20l1-4.2A8 8 0 1120 12z" fill="none"/></svg>',
+  send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z" fill="none"/></svg>',
+};
+
+// ---------- state
+const S = { done: {}, unread: { ig: 0, dmail: 0, jmail: 0 }, dmail: [], jmail: [], dms: [], dmQR: null, comments: {}, liked: {},
+            enr: [], contacts: {}, stack: [] };
+const app = { name: 'home' };
+const $ = (s) => document.querySelector(s);
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// ---------- the automation engine, in the browser (same flow + email code as the real one; timing is fast-forwarded with a button)
+const waitLabel = (w) => w.kind === 'now' ? 'Right away' : w.kind === 'business_days' ? (w.n === 1 ? '1 weekday later' : `${w.n} weekdays later`) : 'The day before the call';
+function ctxFor(enr) { const c = S.contacts[enr.email];
+  return { client: CLIENT, contact: { email: c.email, name: c.name, phone: c.phone || '' }, data: enr.data, first: SMC.firstName(c.name),
+    links: { unsubscribe: 'sim:unsub:' + c.email, site: CLIENT.facts.site, controls: 'sim:manage:' + c.email } } }
+function deliver(enr, step) {
+  const r = SMC.renderStep(step, ctxFor(enr), PACK);
+  const m = { subject: r.subject, html: r.html, when: waitLabel(step.wait), flow: enr.flow, email: enr.email, read: false, marketing: !!step.marketing };
+  if (step.to === 'owner') { S.jmail.unshift(m); S.unread.jmail++; notify('jmail', 'Janeth\'s email', r.subject) }
+  else { S.dmail.unshift(m); S.unread.dmail++; notify('dmail', 'Dentist\'s email', 'From Janeth: ' + r.subject) }
+}
+function runNow(enr) {   // send every step that is due "now"; stop at the first step that has to wait
+  const flow = PACK.flows[enr.flow];
+  while (enr.status === 'active' && enr.step < flow.steps.length) {
+    const st = flow.steps[enr.step];
+    if (st.wait.kind !== 'now' && !enr.forced) return;
+    enr.forced = false;
+    const skip = st.skipIf?.(ctxFor(enr));
+    if (!skip) deliver(enr, st);
+    enr.step++;
+  }
+  if (enr.step >= flow.steps.length) enr.status = 'done';
+}
+function start(flowId, contact, data) {
+  const flow = PACK.flows[flowId];
+  S.contacts[contact.email] = Object.assign(S.contacts[contact.email] || {}, contact);
+  if (flow.stops) S.enr.forEach((e) => { if (e.email === contact.email && flow.stops.includes(e.flow) && e.status === 'active') { e.status = 'stopped'; e.why = 'moved to the next stage' } });
+  S.enr.forEach((e) => { if (e.email === contact.email && e.flow === flowId && e.status === 'active') { e.status = 'stopped'; e.why = 'replaced' } });
+  const prev = S.contacts[contact.email].data || {};
+  const enr = { flow: flowId, email: contact.email, step: 0, status: 'active', data: Object.assign({}, prev, data) };
+  S.contacts[contact.email].data = enr.data;
+  S.enr.push(enr); runNow(enr);
+}
+function nextUp() { return S.enr.filter((e) => e.status === 'active').map((e) => ({ e, st: PACK.flows[e.flow].steps[e.step] })) }
+function skipAhead() { const due = nextUp(); due.forEach(({ e }) => { e.forced = true; runNow(e) }); return due.length }
+function stopContact(email, why) { let n = 0; S.enr.forEach((e) => { if (e.email === email && e.status === 'active') { e.status = 'stopped'; e.why = why; n++ } }); return n }
+
+// ---------- people the dentist-side forms create
+function dentist() { return Object.values(S.contacts).find((c) => c.me) }
+window.addEventListener('message', (ev) => {
+  const m = ev.data; if (!m || m.type !== 'smc-lead' || !PACK.flows[m.flow]) return;
+  const c = Object.assign({ me: true }, m.contact); c.email = String(c.email || '').trim().toLowerCase();
+  start(m.flow, c, m.data); mark(m.flow === 'health-check' ? 'quiz' : 'form');
+});
+
+// ---------- notifications + guide ticks
+let noteT;
+function notify(appName, from, text) {
+  const here = ROLE[app.name], there = ROLE[appName];
+  if (here && there && here !== there) return;   // other person's phone: badge only
+  const n = $('#note'); const ico = APPS.find((a) => a.id === appName);
+  n.innerHTML = `<span class="ico" style="background:${ico.bg}">${ico.icon}</span><div><b>${esc(from)}</b>${esc(text)}</div>`;
+  n.onclick = () => { n.classList.remove('on'); go(appName) };
+  n.classList.add('on'); clearTimeout(noteT); noteT = setTimeout(() => n.classList.remove('on'), 4200);
+  if (app.name === appName) render();
+}
+function mark(k) { S.done[k] = true }
+
+// ---------- apps
+const APPS = [
+  { id: 'ig', label: 'Instagram', bg: 'linear-gradient(45deg,#f2a33a,#e1306c,#833ab4)', icon: I.ig },
+  { id: 'web', label: 'Her website', bg: '#2f7d8c', icon: I.web },
+  { id: 'dmail', label: 'Dentist\'s email', bg: '#3b6fd8', icon: I.mail },
+  { id: 'jmail', label: 'Janeth\'s email', bg: '#b08d4a', icon: I.mail },
+  { id: 'phone', label: 'Call Maya', bg: '#3f7a4c', icon: I.phone },
+  { id: 'plan', label: 'How dentists find you', bg: '#5b4b8a', icon: I.map },
+];
+const GUIDE = [
+  ['reel', 'Watch a reel and comment CHECK', "go('ig')"],
+  ['dm', 'Open the message you get and tap the quiz', "go('ig','dm')"],
+  ['quiz', 'Answer the quiz on the website', "go('web','check')"],
+  ['dread', 'See the email the dentist gets', "go('dmail')"],
+  ['manage', 'Open your email, tap Manage, then Call booked', "go('jmail')"],
+  ['call', 'Call Maya, your phone assistant', "go('phone')"],
+];
+function go(name, arg) { app.name = name; app.arg = arg; render(); $('#screen').scrollTop = 0 }
+const ROLE = { ig: 'd', web: 'd', dmail: 'd', dmsg: 'd', jmail: 'j', jmsg: 'j', manage: 'j' };
+function topbar(title, backTo) {
+  const r = ROLE[app.name];
+  $('#top').innerHTML = `${backTo ? `<button class="ib" aria-label="Back" onclick="${backTo}">${I.back}</button>` : ''}<b>${title}</b>${r ? `<span class="chip ${r}">${r === 'd' ? "Dentist's phone" : 'Your phone'}</span>` : ''}<button class="ib" aria-label="Home" onclick="go('home')">${I.home}<span style="font-size:14px">Home</span></button>`;
+  $('#top').hidden = false;
+}
+function render() {
+  const r = VIEWS[app.name] || VIEWS.home; $('#screen').innerHTML = r(app.arg) || ''; afterRender();
+}
+function afterRender() {
+  document.querySelectorAll('iframe.mail[data-i]').forEach((f) => {
+    const list = f.dataset.box === 'j' ? S.jmail : S.dmail; const m = list[+f.dataset.i];
+    f.onload = () => { try { const d = f.contentDocument; f.style.height = d.documentElement.scrollHeight + 'px';
+      d.addEventListener('click', (ev) => { const a = ev.target.closest('a'); if (!a) return; ev.preventDefault(); link(a.getAttribute('href')) }) } catch (e) { f.style.height = '700px' } };
+    f.srcdoc = '<meta charset="utf-8"><meta name="viewport" content="width=device-width"><base href="' + location.origin + '/test/"><style>body{margin:0}</style>' + m.html;
+  });
+}
+function link(href) {
+  if (!href) return;
+  if (href.startsWith('sim:unsub:')) { const e = href.slice(10); S.enr.forEach((x) => { if (x.email === e && x.status === 'active' && PACK.flows[x.flow].public) { x.status = 'stopped'; x.why = 'unsubscribed' } });
+    S.contacts[e].unsub = true; toast('Unsubscribed. No more of these emails will go to this person.'); return }
+  if (href.startsWith('sim:manage:')) { mark('manage0'); return go('manage', href.slice(11)) }
+  if (/checklist\.pdf$/.test(href)) { window.open('checklist.pdf', '_blank'); return }
+  if (/^https?:\/\/(www\.)?smilemanagementconsultingsnj\.com/.test(href)) return go('web');
+  if (href.startsWith('https://calendar.google.com')) return toast('On a real phone this adds the call to Janeth\'s Google Calendar.');
+  if (/^https?:/.test(href)) window.open(href, '_blank');
+}
+function toast(t) { const n = $('#note'); n.innerHTML = `<div style="white-space:normal">${esc(t)}</div>`; n.onclick = () => n.classList.remove('on'); n.classList.add('on'); clearTimeout(noteT); noteT = setTimeout(() => n.classList.remove('on'), 4200) }
+
+const VIEWS = {};
+VIEWS.home = () => {
+  $('#top').hidden = true;
+  const badge = { ig: S.unread.ig, dmail: S.unread.dmail, jmail: S.unread.jmail };
+  return `<div class="home">
+   <div><h1>Your test drive</h1><p style="opacity:.85;margin-top:6px">Pretend you are a dentist who finds you on Instagram. Nothing is sent to anyone.</p></div>
+   <div class="guide"><b>Tap each step, in order</b><ol>${GUIDE.map(([k, t, g], i) => `<li><button onclick="${g}"><span class="tick ${S.done[k] ? 'on' : ''}">${S.done[k] ? '&#10003;' : i + 1}</span><span>${t}</span><span>&rsaquo;</span></button></li>`).join('')}</ol></div>
+   <div class="apps">${APPS.map((a) => `<button class="app" onclick="go('${a.id}')"><span class="ico" style="background:${a.bg}">${a.icon}</span>${a.label}${badge[a.id] ? `<span class="badge">${badge[a.id]}</span>` : ''}</button>`).join('')}</div>
+   <p class="who">The dentist's apps: Instagram, Her website, Dentist's email. Your app: Janeth's email.</p>
+  </div>` };
+
+// ----- Instagram
+VIEWS.ig = (tab) => {
+  tab = tab || 'profile'; topbar('Instagram', tab === 'profile' ? null : "go('ig','profile')");
+  S.unread.ig = tab === 'dm' ? 0 : S.unread.ig;
+  const tabs = `<div class="tabs"><button class="${tab === 'profile' ? 'on' : ''}" onclick="go('ig','profile')">Her profile</button><button class="${tab === 'feed' ? 'on' : ''}" onclick="go('ig','feed')">Your feed</button><button class="${tab === 'dm' ? 'on' : ''}" onclick="go('ig','dm')">Messages${S.unread.ig ? ` (${S.unread.ig})` : ''}</button></div>`;
+  if (tab === 'feed') return tabs + feed();
+  if (tab === 'dm') return tabs + dms();
+  return tabs + `<div class="ig-head"><div class="avatar">SM</div><div><h3>Smile Management &amp; Consulting</h3></div></div>
+   <div class="bio"><span>Dental practice back office: claims, credentialing, payroll, HR.</span><span>Run by Janeth Osinowo, RDH. New Jersey.</span><span>Free 2-minute Practice Health Check below.</span><a onclick="go('web')">smilemanagementconsultingsnj.com</a></div>
+   <div class="ig-btns"><button class="f" onclick="toast('Following.')">Follow</button><button onclick="go('ig','dm')">Message</button></div>
+   <div class="grid">${REELS.map((r, i) => `<button style="background-image:url('reels/${r.id}.jpg')" onclick="reel(${i})" aria-label="Play reel ${esc(r.title)}"><span>&#9654; ${esc(r.title)}</span></button>`).join('')}</div>`;
+};
+function feed() {
+  const r = REELS[0];
+  return `<div class="post"><div class="post-h"><div class="avatar">SM</div><div><b>smilemanagementconsulting</b><br><small>Sponsored</small></div></div>
+   <video src="reels/${r.id}.mp4" poster="reels/${r.id}.jpg" muted playsinline loop autoplay></video>
+   <div class="cta" onclick="mark('ad');go('web')"><span>Take the free Health Check</span><span>&rsaquo;</span></div>
+   <div class="cap"><b>smilemanagementconsulting</b> Denied claims, late payroll, credentialing that never ends. Take the free 2-minute Practice Health Check and see where your practice is leaking.</div></div>
+   <div class="pad"><p class="hint">This is what the paid ad looks like in a dentist's feed. Tapping the dark bar opens Janeth's website at the quiz.</p></div>`;
+}
+function reel(i) {
+  const r = REELS[i]; mark('reel0');
+  const box = document.createElement('div'); box.className = 'reel'; box.id = 'reel';
+  box.innerHTML = `<video src="reels/${r.id}.mp4" poster="reels/${r.id}.jpg" playsinline loop autoplay muted></video>
+   <div class="rtop"><button onclick="closeReel()">&larr; Back</button><span>Reels</span><span style="width:60px"></span></div>
+   <div class="sound" id="snd">Tap for sound</div>
+   <div class="side"><button onclick="like(${i},this)">${S.liked[i] ? I.heartOn : I.heart}<span>Like</span></button><button onclick="comments(${i})">${I.comment}<span>Comment</span></button><button onclick="toast('Shared.')">${I.send}<span>Share</span></button></div>
+   <div class="rcap"><b>smilemanagementconsulting</b>${esc(r.cap)} Comment ${KEYWORD} and I'll send you the free Practice Health Check.</div>`;
+  $('#phone').appendChild(box);
+  const v = box.querySelector('video'); $('#snd').onclick = () => { v.muted = false; v.play(); $('#snd').remove() };
+}
+function closeReel() { const b = $('#reel'); if (b) { b.querySelector('video').pause(); b.remove() } }
+function like(i, el) { S.liked[i] = !S.liked[i]; el.innerHTML = (S.liked[i] ? I.heartOn : I.heart) + '<span>Like</span>' }
+function comments(i) {
+  const old = $('#sheet'); if (old) old.remove();
+  const list = S.comments[i] = S.comments[i] || [];
+  const sh = document.createElement('div'); sh.className = 'sheet'; sh.id = 'sheet';
+  sh.innerHTML = `<div class="sh"><span>Comments</span><button class="ib" onclick="$('#sheet').remove()">Close</button></div>
+   <div class="list" id="clist">
+    <div class="cm"><span class="av her">SM</span><div><b>smilemanagementconsulting</b> Comment <b>${KEYWORD}</b> and I'll send you the free Practice Health Check in your messages.<small class="pin">Pinned</small></div></div>
+    ${list.map((c) => `<div class="cm"><span class="av ${c.her ? 'her' : ''}">${c.her ? 'SM' : 'You'}</span><div><b>${c.her ? 'smilemanagementconsulting' : 'you'}</b> ${esc(c.t)}${c.her ? '<small>Automatic reply</small>' : ''}</div></div>`).join('')}
+    ${list.length ? '' : `<p class="hint">Try it: type ${KEYWORD} below and press Post.</p>`}
+   </div>
+   <form class="compose" onsubmit="event.preventDefault();postComment(${i})"><input id="cin" autocomplete="off" placeholder="Add a comment..." aria-label="Comment"><button type="submit">Post</button></form>`;
+  $('#reel').appendChild(sh);
+}
+function postComment(i) {
+  const t = $('#cin').value.trim(); if (!t) return;
+  S.comments[i].push({ t });
+  if (new RegExp('\\b' + KEYWORD + '\\b', 'i').test(t)) {
+    S.comments[i].push({ her: true, t: 'Sent! Check your messages.' });
+    if (!S.dmKeyword) { S.dmKeyword = true;
+      S.dms.push({ them: true, auto: true, t: 'Hi! Here is the free Practice Health Check. 8 quick questions, about 2 minutes, and your score goes straight to your email.', btn: ['Take the Health Check', 'web#check'] });
+      S.dmQR = ['Book a free call', 'Talk to Janeth'];
+      S.unread.ig++; }
+    mark('reel'); setTimeout(() => notify('ig', 'smilemanagementconsulting', 'Sent you a message'), 600);
+  }
+  comments(i);
+}
+function dms() {
+  if (!S.dms.length) S.dmQR = S.dmQR || null;
+  const body = S.dms.map((m) => `${m.auto ? '<span class="auto">Automatic reply</span>' : ''}<div class="msg ${m.them ? 'them' : 'me'}">${esc(m.t)}${m.btn ? `<button class="mbtn" onclick="dmBtn('${m.btn[1]}')">${esc(m.btn[0])}</button>` : ''}</div>`).join('');
+  return `<div class="post-h" style="border-bottom:1px solid var(--line)"><div class="avatar">SM</div><div><b>smilemanagementconsulting</b><br><small>Smile Management &amp; Consulting</small></div></div>
+   <div class="thread">${body || '<p class="hint">No messages yet. Comment CHECK on a reel, or send a message below (try "hi" or "how much?").</p>'}</div>
+   ${S.dmQR ? `<div class="qr">${S.dmQR.map((q) => `<button onclick="dmSend('${q}')">${q}</button>`).join('')}</div>` : ''}
+   <form class="compose" onsubmit="event.preventDefault();dmSend($('#din').value)"><input id="din" autocomplete="off" placeholder="Message..." aria-label="Message"><button type="submit">Send</button></form>`;
+}
+function dmBtn(where) { if (where.startsWith('web')) { mark('dm'); go('web', where.split('#')[1]) } }
+function dmSend(t) {
+  t = String(t || '').trim(); if (!t) return;
+  S.dms.push({ t }); S.dmQR = null;
+  const k = t.toLowerCase();
+  if (/book|call|time/.test(k)) S.dms.push({ them: true, auto: true, t: `Happy to set that up. The first call is free and takes 30 minutes. Call Maya, Janeth's assistant, any time at ${MAYA_SHOW}, or reply with your email and two times that work and Janeth will confirm.` });
+  else if (/janeth|talk|person|human/.test(k)) { S.dms.push({ them: true, auto: true, t: 'Got it. Janeth will reply to you here personally, usually the same business day.' }); setTimeout(() => toast('Janeth gets a notice that someone wants her personally.'), 900) }
+  else if (/check|quiz|score|health/.test(k)) S.dms.push({ them: true, auto: true, t: 'Here it is: 8 quick questions, about 2 minutes.', btn: ['Take the Health Check', 'web#check'] });
+  else { S.dms.push({ them: true, auto: true, t: 'Thanks for reaching out! What can we help with?' }); S.dmQR = ['Free Health Check', 'Book a free call', 'Talk to Janeth'] }
+  render(); const sc = $('#screen'); sc.scrollTop = sc.scrollHeight;
+}
+
+// ----- website
+VIEWS.web = (anchor) => { topbar('Website');
+  return `<div class="browser"><div class="urlbar">smilemanagementconsultingsnj.com</div><iframe id="site" src="site.html${anchor ? '#' + anchor : ''}" title="Smile Management website"></iframe></div>` };
+
+// ----- mail (dentist + Janeth)
+function inbox(box) {
+  const list = box === 'j' ? S.jmail : S.dmail; const me = box === 'j';
+  const coming = nextUp().filter(({ e, st }) => (st.to === 'owner') === me && (me || S.contacts[e.email]?.me));
+  if (me) S.unread.jmail = 0; else S.unread.dmail = 0;
+  const rows = list.map((m, i) => `<button class="mrow" onclick="go('${me ? 'jmsg' : 'dmsg'}',${i})"><span class="dot ${m.read ? 'read' : ''}"></span><span><b>${me ? 'Your follow-up helper' : 'Janeth Osinowo'}</b><span>${esc(m.subject)}</span></span></button>`).join('');
+  return `${rows ? `<div class="sect">Inbox</div>${rows}` : `<div class="empty">${me ? 'Nothing yet. When a dentist takes the quiz, writes in, or calls Maya, you get an email here.' : 'Nothing yet. Take the quiz on her website (or send her a message there) and Janeth\'s emails land here.'}</div>`}
+   ${coming.length ? `<div class="sect">Coming up next</div>${coming.map(({ st, e }) => `<div class="mrow later"><span class="dot read"></span><span><b>${waitLabel(st.wait)}</b><span>${esc(st.subject(ctxFor(e)))}</span></span></div>`).join('')}
+   <div class="ff"><button class="btn alt sm" onclick="ff()">Skip ahead to the next email</button><p class="muted" style="font-size:13.5px">In real life these wait for the right weekday. This button skips the wait.</p></div>` : ''}`;
+}
+function ff() { const n = skipAhead(); if (!n) toast('Nothing is waiting.'); render() }
+VIEWS.dmail = () => { topbar('Email'); return inbox('d') };
+VIEWS.jmail = () => { topbar('Email'); return inbox('j') };
+function msgView(box, i) {
+  const list = box === 'j' ? S.jmail : S.dmail; const m = list[i]; if (!m) return '';
+  m.read = true; if (box === 'd') mark('dread');
+  const reply = box === 'd' ? `<div class="ff"><button class="btn sm" onclick="reply(${i})">Reply as the dentist</button><p class="muted" style="font-size:13.5px">Try it: the automatic emails stop, and Janeth gets your reply.</p></div>` : '';
+  return `<div class="mhead"><b>${esc(m.subject)}</b><span>${box === 'j' ? 'To: Janeth' : 'From: Janeth Osinowo'} · ${esc(m.when)}</span></div><iframe class="mail" data-box="${box}" data-i="${i}" sandbox="allow-same-origin allow-popups" title="Email"></iframe>${reply}`;
+}
+VIEWS.dmsg = (i) => { topbar('Email', "go('dmail')"); return msgView('d', i) };
+VIEWS.jmsg = (i) => { topbar('Email', "go('jmail')"); return msgView('j', i) };
+function reply(i) {
+  const m = S.dmail[i]; const n = stopContact(m.email, 'they replied');
+  const c = S.contacts[m.email];
+  const fwd = `<div style="background:#efeae0;padding:24px 12px;font-family:Helvetica,Arial,sans-serif"><div style="max-width:560px;margin:0 auto;background:#fff;border-radius:10px;padding:22px;font-size:15px;line-height:1.6;color:#1f1f24"><p style="color:#555;margin:0 0 12px">Automatic follow-ups to ${esc(c.email)} have stopped. Reply to this email to answer them directly.</p><hr><p style="margin:12px 0 0">Hi Janeth, thanks for this. Could we talk Thursday afternoon?<br><br>${esc(c.name)}</p></div></div>`;
+  S.jmail.unshift({ subject: `Reply from ${c.email}: Re: ${m.subject}`, html: fwd, when: 'Right away', email: m.email, read: false });
+  S.unread.jmail++;
+  toast(n ? 'Reply sent. The automatic follow-ups to this dentist stopped, and Janeth got the reply.' : 'Reply sent. Janeth got it.');
+  render();
+}
+
+// ----- Janeth's "Manage" page for one person (the same buttons the real page has)
+VIEWS.manage = (email) => { topbar('Manage', "go('jmail')");
+  const c = S.contacts[email]; if (!c) return '<div class="empty">Person not found.</div>';
+  const act = S.enr.filter((e) => e.email === email && e.status === 'active').map((e) => PACK.flows[e.flow].label);
+  const d = new Date(Date.now() + 2 * 864e5); const iso = d.toISOString().slice(0, 10);
+  return `<div class="pad stack"><div class="card"><h2>${esc(c.name || c.email)}</h2><div class="kv"><span>Practice</span><b>${esc(c.data?.practice || '')}</b><span>Email</span><b style="overflow-wrap:anywhere">${esc(c.email)}</b><span>Phone</span><b>${esc(c.phone || '')}</b><span>Right now</span><b>${act.length ? esc(act.join(', ')) : 'No automatic emails running'}</b></div></div>
+   <h3>Tap what happened</h3>
+   <div class="card"><label>Day of the call<input type="date" id="cd" value="${iso}"></label><label>Time<input type="time" id="ct" value="14:00"></label><button class="btn" onclick="act('booked','${esc(email)}')">Call booked</button></div>
+   <div class="stack"><button class="btn alt" onclick="act('noshow','${esc(email)}')">They missed the call</button><button class="btn alt" onclick="act('thinking','${esc(email)}')">Thinking it over</button><button class="btn alt" onclick="act('signed','${esc(email)}')">Client signed</button><button class="btn alt" onclick="act('diagnostic','${esc(email)}')">Documents in: start the diagnostic</button><button class="btn alt" onclick="act('results','${esc(email)}')">Results call done</button><button class="btn alt" onclick="act('handling','${esc(email)}')">I'll take it from here</button></div>
+   <div id="actok"></div></div>` };
+const ACT = { booked: 'discovery-call', noshow: 'no-show', thinking: 'considering', signed: 'client-onboarding', diagnostic: 'diagnostic-90', results: 'after-diagnostic' };
+const HINT = { booked: 'They get a confirmation now and a reminder the day before.', noshow: 'A kind "sorry we missed each other" email now, and one more check-in 4 weekdays later.', thinking: 'A short recap the next weekday and one check-in a week later. You get a reminder if they still haven\'t decided.',
+  signed: 'Welcome email and the list of documents go out now; gentle reminders if they go quiet.', diagnostic: 'Kickoff email now. You get reminders, with drafts, at one month and before the results call.', results: 'Thank-you now, a renewal nudge, then a request for an introduction.' };
+function act(a, email) {
+  if (a === 'handling') { const n = stopContact(email, 'you took it from here'); $('#actok').innerHTML = `<p class="ok">${n ? 'Done. No more automatic emails will go to them.' : 'Nothing was running for them, so nothing changed.'}</p>`; return }
+  const data = {};
+  if (a === 'booked') { const dv = $('#cd').value, tv = $('#ct').value; if (!dv || !tv) { $('#actok').innerHTML = '<p class="ok">Pick the day and the time of the call, then press Call booked.</p>'; return }
+    const at = new Date(dv + 'T' + tv); data.call_iso = at.toISOString();
+    data.call_time = at.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) + ' at ' + at.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit' }); mark('manage') }
+  start(ACT[a], S.contacts[email], data);
+  $('#actok').innerHTML = `<p class="ok">Done. ${HINT[a]} Open the dentist's email to see it.</p>`;
+}
+
+// ----- Maya
+VIEWS.phone = () => { topbar('Call Maya');
+  return `<div class="pad stack"><h1>Talk to Maya</h1><p>Maya is an AI phone assistant. She answers your phone when you are busy, takes the caller's details, and emails you a summary. Call her the way a dentist would. Ask about claims, credentialing or payroll, and ask for a call with Janeth.</p>
+   <a class="btn gold" href="tel:${MAYA_TEL}" onclick="mark('call')">Call ${MAYA_SHOW}</a>
+   <p class="muted">This is a real phone number. Speak Spanish and she hands you to Lucia, who speaks Spanish.</p>
+   <h2 style="margin-top:8px">What Janeth gets after a call</h2><p>After every call, Janeth gets a short summary by email. Here is an example:</p>
+   <button class="btn alt" onclick="mayaSample()">Show an example summary</button></div>` };
+function mayaSample() {
+  start('phone-lead', { email: 'ana@riveradental.example', name: 'Dr. Ana Rivera', phone: '(908) 555-0142' },
+    { practice: 'Rivera Family Dental', role: 'Owner', main_problem: 'credentialing for two new hygienists', wants_call: true, best_time: 'Thursday afternoon',
+      summary: 'Owner of a two-chair practice. Two new hygienists are not credentialed yet and claims are being denied. Would like a call Thursday afternoon.' });
+  go('jmsg', 0);
+}
+
+// ----- the plan
+VIEWS.plan = () => { topbar('How dentists find you');
+  return `<div class="plan">
+   <section><h1>How dentists will find you</h1><p class="muted">Four ways in. All of them end the same way: a dentist takes your free quiz, and you get their name.</p></section>
+   <section><h2>Who we look for</h2><ul>
+    <li>Owners of independent dental offices in New Jersey (one to three locations, not big chains).</li>
+    <li>We start close to home: Union and Essex counties.</li>
+    <li>Offices that show signs of back-office trouble: hiring for billing or the front desk, reviews that complain about billing or nobody answering the phone, no online booking.</li></ul></section>
+   <section><div class="step"><i>1</i><div><h3>Your reels (free)</h3><p>Short videos about real back-office problems: denied claims, payroll, staffing. Each one ends with "comment CHECK". Anyone who comments gets your quiz in their messages automatically. You saw this in the Instagram app.</p></div></div></section>
+   <section><div class="step"><i>2</i><div><h3>Small Instagram and Facebook ads</h3><p>The same videos, shown as ads to:</p><ul><li>The practice owners on our list (we upload the list; Instagram finds the ones it can).</li><li>People who already watched your reels.</li><li>Within about 25 miles of Union.</li></ul><p style="margin-top:6px">We start small and only keep spending on what brings in quiz takers. You decide the budget.</p></div></div></section>
+   <section><div class="step"><i>3</i><div><h3>A short personal email</h3><p>Sent in your name to owners on our list, from a separate address so your main email stays safe. About 20 a day, each one mentioning something real we noticed about that office. One follow-up, then we stop. Example:</p>
+    <div class="sample">To: Dr. [last name], [practice]
+Subject: Quick question about [practice]
+
+Hi Dr. [last name],
+
+I noticed you're hiring for a billing coordinator. When that seat is empty, claims usually start piling up past 30 days.
+
+I put together a free 2-minute Practice Health Check for owners in New Jersey. It scores eight back-office areas and tells you where I'd start: [link]
+
+Janeth Osinowo, RDH
+Smile Management and Consulting Solutions</div></div></div></section>
+   <section><div class="step"><i>4</i><div><h3>Maya answers your phone</h3><p>Anyone who calls gets a friendly, quick answer, and you get a summary by email.</p></div></div></section>
+   <section><h2>What every dentist sees</h2><p>Reel or ad or email, then your website, then the quiz, then their score by email from you, then a free call. Try it yourself with the other apps on this phone.</p>
+    <button class="btn" onclick="go('home')">Back to the phone</button></section>
+  </div>` };
+
+render();
+</script>
+</body>
+</html>
