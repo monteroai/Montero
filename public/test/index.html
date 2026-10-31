@@ -352,7 +352,7 @@ const STORIES = {
     { go: () => go('ig', 'dm'), say: 'You get a message from her right away. Tap Take the Health Check.', wait: 'dm' },
   ],
   rest: [
-    { say: 'Her website opens right at the free quiz. Tap one answer per question (it moves on by itself), then type any name and email.', wait: 'quiz' },
+    { say: 'Her website opens. Scroll down to look around, then tap Take the Health Check. Tap one answer per question (it moves on by itself), then type any name and email.', wait: 'quiz' },
     { go: () => go('lock', 'A minute later'), say: 'You put your phone down. A minute later, this shows up on your lock screen. Tap it.', wait: 'dread' },
     { say: 'Your report, from Janeth, built from your own answers. Scroll down to read it, then tap Next.', next: true },
     { fx: () => skipAhead(), go: () => go('lock', 'Two weekdays later'), say: "Two weekdays later. You haven't replied, so one short note follows. Tap it.", wait: 'dread' },
@@ -405,7 +405,7 @@ function feed() {
   const r = REELS[0];
   return `<div class="post"><div class="post-h"><div class="avatar">SM</div><div><b>smilemanagementconsulting</b><br><small>Sponsored</small></div></div>
    <video src="reels/${r.id}.mp4" poster="reels/${r.id}.jpg" muted playsinline loop autoplay></video>
-   <div class="cta" onclick="mark('ad');go('web','check')"><span>Take the free Health Check</span><span>&rsaquo;</span></div>
+   <div class="cta" onclick="mark('ad');go('web')"><span>Take the free Health Check</span><span>&rsaquo;</span></div>
    <div class="cap"><b>smilemanagementconsulting</b> Denied claims, late payroll, credentialing that never ends. Take the free 1-minute Practice Health Check and see where your practice is leaking.</div></div>
    <div class="pad"><p class="hint">This is what the paid ad looks like in a dentist's feed. Tapping the dark bar opens Janeth's website at the quiz.</p></div>`;
 }
@@ -441,7 +441,7 @@ function postComment(i) {
   if (new RegExp('\\b' + KEYWORD + '\\b', 'i').test(t)) {
     S.comments[i].push({ her: true, t: 'Sent! Check your messages.' });
     if (!S.dmKeyword) { S.dmKeyword = true;
-      S.dms.push({ them: true, auto: true, t: 'Hi! Here is the free Practice Health Check. 8 quick taps, about a minute, and your score goes straight to your email.', btn: ['Take the Health Check', 'web#check'] });
+      S.dms.push({ them: true, auto: true, t: 'Hi! Here is the free Practice Health Check. 8 quick taps, about a minute, and your score goes straight to your email.', btn: ['Take the Health Check', 'web'] });
       S.dmQR = ['Book a free call', 'Talk to Janeth'];
       S.unread.ig++; }
     mark('reel'); setTimeout(() => notify('ig', 'smilemanagementconsulting', 'Sent you a message'), 600);
