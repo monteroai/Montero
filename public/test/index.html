@@ -64,6 +64,14 @@ p{margin:0}
 #story .row .ib{font-size:14px;color:var(--muted)}
 #phone:has(#reel) #story{top:calc(8px + env(safe-area-inset-top,0px));bottom:auto;opacity:.97}
 #screen.story{padding-bottom:190px}
+#screen.story:has(.browser){padding-bottom:0;overflow:hidden}
+#screen.story .browser{height:calc(100% - var(--cap,170px))}
+.sim-hl{outline:4px solid var(--gold)!important;outline-offset:3px;border-radius:12px;animation:simhl 1.1s ease-in-out infinite}
+@keyframes simhl{50%{outline-color:rgba(176,141,74,.2)}}
+#screen.focus .btn.alt:not(.sim-hl),#screen.focus .card:not(:has(.sim-hl)){opacity:.35}
+.done-list{margin:0;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.done-list li{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;font-size:16.5px}
+.done-list i{font-style:normal;width:26px;height:26px;border-radius:50%;background:var(--gold);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}
 #screen.story:has(.lock){padding-bottom:0}#screen.story .lock{padding-bottom:200px}
 
 /* lock screen */
@@ -262,7 +270,8 @@ function stopContact(email, why) { let n = 0; S.enr.forEach((e) => { if (e.email
 // ---------- people the dentist-side forms create
 function dentist() { return Object.values(S.contacts).find((c) => c.me) }
 window.addEventListener('message', (ev) => {
-  const m = ev.data; if (!m || m.type !== 'smc-lead' || !PACK.flows[m.flow]) return;
+  const m = ev.data; if (m && m.type === 'smc-step') { if (m.step === m.n) mark('qdone'); return }
+  if (!m || m.type !== 'smc-lead' || !PACK.flows[m.flow]) return;
   const c = Object.assign({ me: true }, m.contact); c.email = String(c.email || '').trim().toLowerCase();
   start(m.flow, c, m.data); mark(m.flow === 'health-check' ? 'quiz' : 'form');
 });
@@ -344,39 +353,82 @@ VIEWS.lock = (label) => {
 const meEmail = () => (dentist() || {}).email;
 const STORIES = {
   ad: [
-    { go: () => go('ig', 'feed'), say: "You're a dentist, scrolling Instagram after a long day. Janeth's ad shows up in your feed. Tap the dark bar under the video.", wait: 'ad' },
+    { go: () => go('ig', 'feed'), say: "You're a dentist, scrolling Instagram. Janeth's ad shows up. Tap the bar that says Take the free Health Check.", hl: ['main', '.cta'], wait: 'ad' },
   ],
   reel: [
-    { go: () => go('ig', 'profile'), say: "You come across Janeth's profile. Tap one of her videos.", wait: 'reel0' },
-    { say: 'Her video asks you to comment CHECK. Tap Comment, type CHECK, then tap Post.', wait: 'reel' },
-    { go: () => go('ig', 'dm'), say: 'You get a message from her right away. Tap Take the Health Check.', wait: 'dm' },
+    { go: () => go('ig', 'profile'), say: "You're a dentist and you find Janeth on Instagram. Tap one of her videos.", hl: ['main', '.grid button'], wait: 'reel0' },
+    { say: 'Tap Comment.', hl: ['main', '#reel .side button:nth-child(2)'], wait: 'csheet' },
+    { say: 'Type the word CHECK in the box, then tap Post.', hl: ['main', '#cin'], wait: 'reel' },
+    { go: () => go('ig', 'dm'), say: 'Janeth sent you a message right away. Tap Take the Health Check.', hl: ['main', '.thread .mbtn'], wait: 'dm' },
   ],
   rest: [
-    { say: 'Her website opens. Scroll down to look around, then tap Take the Health Check. Tap one answer per question (it moves on by itself), then type any name and email.', wait: 'quiz' },
-    { go: () => go('lock', 'A minute later'), say: 'You put your phone down. A minute later, this shows up on your lock screen. Tap it.', wait: 'dread' },
-    { say: 'Your report, from Janeth, built from your own answers. Scroll down to read it, then tap Next.', next: true },
-    { fx: () => skipAhead(), go: () => go('lock', 'Two weekdays later'), say: "Two weekdays later. You haven't replied, so one short note follows. Tap it.", wait: 'dread' },
-    { say: "That is the last automatic email from the quiz. If you had replied, they would have stopped right away. Next: Janeth's side.", next: true },
-    { go: () => go('jmail'), say: 'Meanwhile, on Janeth\'s phone: she got an alert the moment you finished the quiz. Open it, scroll down, and tap the Manage button.', wait: 'manage0' },
-    { say: 'Janeth called you and you picked a time. She taps Call booked.', wait: 'booked' },
-    { go: () => go('lock', 'Right away'), say: "Back on the dentist's phone: the confirmation arrives right away. Tap it.", wait: 'dread' },
-    { say: 'It comes with the time of the call, and a reminder goes out the day before. Tap Next.', next: true },
-    { go: () => go('manage', meEmail()), say: 'After the call, Janeth taps how it went. Tap Client signed.', wait: 'signed' },
-    { go: () => go('lock', 'Right away'), say: 'The new client gets a welcome and the short list of what to send. Tap it.', wait: 'dread' },
-    { say: "That's the whole journey: ad, quiz, report, follow-up, call, new client. Tap Finish to look around on your own.", next: true, last: true },
+    { say: "Her website opens. Tap Take the Health Check.", hl: ['site', 'a.btn-line[href="#check"]'], wait: 'hc', clickWait: true },
+    { say: 'Answer the 8 questions. Tap the answer that fits. It moves to the next question by itself.', hl: ['site', '#quizcard'], wait: 'qdone' },
+    { say: 'Type any name, office name and email. Pretend, nothing is sent.', hl: ['site', '#f-name'], wait: 'filled', fill: true },
+    { say: 'Tap See my results.', hl: ['site', '#qnext'], wait: 'quiz' },
+    { say: 'Your score shows up on her website right away. Tap Next.', hl: ['site', '#result'], scrollTo: ['site', '#result'], next: true },
+    { go: () => go('lock', 'A minute later'), say: 'A minute later, this pops up on your phone. Tap it.', hl: ['main', '.lnote'], wait: 'dread' },
+    { say: 'This is your report from Janeth, made from your answers. Scroll down to read it. Then tap Next.', next: true },
+    { fx: () => skipAhead(), go: () => go('lock', 'Two days later'), say: "Two days later. You haven't answered, so one short email follows. Tap it.", hl: ['main', '.lnote'], wait: 'dread' },
+    { say: "That's the only reminder. If the dentist answers, the emails stop. Tap Next to switch to your side.", next: true },
+    { go: () => go('jmail'), say: 'Now you are Janeth. This email reached you the moment the dentist finished the quiz. Tap it.', hl: ['main', '.mrow'], wait: 'jread' },
+    { say: 'It shows who they are and their score. Tap the dark Manage button.', hl: ['mail', 'a[href^="sim:manage"]'], wait: 'manage0' },
+    { say: 'You called the dentist and picked a time. Tap Call booked.', hl: ['main', '.card .btn'], focus: true, wait: 'booked' },
+    { go: () => go('lock', 'Right away'), say: "Back to the dentist's phone. The confirmation arrives right away. Tap it.", hl: ['main', '.lnote'], wait: 'dread' },
+    { say: 'It has the day and time of the call. A reminder goes out the day before. Tap Next.', next: true },
+    { go: () => go('manage', meEmail()), say: 'You had the call and they said yes. Tap Client signed.', hl: ['btn', 'Client signed'], focus: true, wait: 'signed' },
+    { go: () => go('lock', 'Right away'), say: 'The new client gets a welcome email. Tap it.', hl: ['main', '.lnote'], wait: 'dread' },
+    { say: 'It tells them what happens next and what to send you. Tap Finish.', next: true, last: true },
   ],
 };
-let ST = null;
-function story(kind) { ST = { steps: STORIES[kind].concat(STORIES.rest), i: 0 }; stepIn() }
-function stepIn() {
-  const st = ST.steps[ST.i]; if (st.fx) st.fx(); if (st.go) st.go();
-  let b = $('#story'); if (!b) { b = document.createElement('div'); b.id = 'story'; $('#phone').appendChild(b) }
-  b.innerHTML = `<span class="sn">Step ${ST.i + 1} of ${ST.steps.length}</span><p>${esc(st.say)}</p><div class="row"><button class="ib" onclick="endStory()">Exit</button>${st.go ? '<button class="ib" onclick="ST.steps[ST.i].go()">Show me again</button>' : ''}${st.next ? `<button class="btn sm" onclick="${st.last ? 'endStory()' : 'storyNext()'}">${st.last ? 'Finish' : 'Next'}</button>` : ''}</div>`;
-  $('#screen').classList.add('story');
+let ST = null, HL = null;
+function story(kind) { ST = { kind, steps: STORIES[kind].concat(STORIES.rest), i: 0 }; stepIn() }
+function docOf(where) { const f = where === 'site' ? $('#site') : where === 'mail' ? $('iframe.mail') : null; if (!where || where === 'main' || where === 'btn') return document;
+  try { return f && f.contentDocument && f.contentDocument.readyState !== 'loading' ? f.contentDocument : null } catch (e) { return null } }
+function find(spec) { const d = docOf(spec[0]); if (!d) return null;
+  if (spec[0] === 'btn') return [...d.querySelectorAll('#screen button')].find((b) => b.textContent.trim() === spec[1]) || null;
+  return d.querySelector(spec[1]) }
+function unglow() { if (HL) { try { HL.classList.remove('sim-hl') } catch (e) {} HL = null } $('#screen').classList.remove('focus') }
+function glow(st, tries) {
+  const spec = st.hl; if (!spec || !ST || ST.steps[ST.i] !== st) return;
+  const el = find(spec);
+  if (!el) { if ((tries || 0) < 40) setTimeout(() => glow(st, (tries || 0) + 1), 150); return }
+  const d = el.ownerDocument;
+  if (d !== document && !d.getElementById('simhl')) d.head.insertAdjacentHTML('beforeend', '<style id="simhl">.sim-hl{outline:4px solid #b08d4a!important;outline-offset:4px;border-radius:12px;animation:simhl 1.1s ease-in-out infinite}@keyframes simhl{50%{outline-color:rgba(176,141,74,.2)}}</style>');
+  unglow(); HL = el; el.classList.add('sim-hl'); if (st.focus) $('#screen').classList.add('focus');
+  const sc = $('#screen'), cap = ($('#story') || {}).offsetHeight || 170;
+  if (spec[0] === 'site') { const t = st.scrollTo ? find(st.scrollTo) : el; t.scrollIntoView({ block: st.scrollTo ? 'start' : 'center' }); if (st.scrollTo) d.defaultView.scrollBy(0, -90) }
+  else if (spec[0] === 'mail') { const fr = $('iframe.mail').getBoundingClientRect(), r = el.getBoundingClientRect(), sr = sc.getBoundingClientRect();
+    sc.scrollTop += fr.top + r.top - sr.top - (sc.clientHeight - cap) / 2 }
+  else { const r = el.getBoundingClientRect(), sr = sc.getBoundingClientRect();
+    if (r.bottom > sr.bottom - cap - 10 || r.top < sr.top) sc.scrollTop += r.top - sr.top - (sc.clientHeight - cap - r.height) / 2 }
+  if (st.clickWait) el.addEventListener('click', () => storyEvent(st.wait), { once: true });
+  if (st.fill) { const chk = () => { const v = (id) => (d.getElementById(id) || {}).value || '';
+      if (v('f-name').trim() && v('f-practice').trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('f-email').trim())) { d.removeEventListener('change', chk, true); storyEvent(st.wait) } };
+    d.addEventListener('change', chk, true) }
 }
-function storyNext() { if (!ST) return; ST.i++; if (ST.i >= ST.steps.length) return endStory(); setTimeout(stepIn, 350) }
+function stepIn() {
+  const st = ST.steps[ST.i]; unglow();
+  if (st.fx) st.fx(); if (st.go) st.go();
+  let b = $('#story'); if (!b) { b = document.createElement('div'); b.id = 'story'; $('#phone').appendChild(b) }
+  b.innerHTML = `<span class="sn">Step ${ST.i + 1} of ${ST.steps.length}</span><p>${esc(st.say)}</p><div class="row"><button class="ib" onclick="endStory(true)">Stop</button>${st.hl ? '<button class="ib" onclick="lost()">I can\'t find it</button>' : ''}${st.next ? `<button class="btn sm" onclick="${st.last ? 'endStory()' : 'storyNext()'}">${st.last ? 'Finish' : 'Next'}</button>` : ''}</div>`;
+  $('#screen').classList.add('story'); $('#phone').style.setProperty('--cap', (b.offsetHeight + 16) + 'px');
+  setTimeout(() => glow(st, 0), 250);
+}
+function lost() { const st = ST.steps[ST.i]; if (st.go && !st.fx) st.go(); setTimeout(() => glow(st, 0), 250) }
+function storyNext() { if (!ST) return; unglow(); ST.i++; if (ST.i >= ST.steps.length) return endStory(); setTimeout(stepIn, 350) }
 function storyEvent(k) { if (ST && ST.steps[ST.i].wait === k) storyNext() }
-function endStory() { ST = null; const b = $('#story'); if (b) b.remove(); $('#screen').classList.remove('story'); go('home') }
+function endStory(stopped) { const kind = ST && ST.kind; ST = null; unglow(); const b = $('#story'); if (b) b.remove(); $('#screen').classList.remove('story');
+  S.unread = { ig: 0, dmail: 0, jmail: 0 }; S.dmail.forEach((m) => m.read = true); S.jmail.forEach((m) => m.read = true);
+  if (stopped) return go('home'); go('done', kind) }
+VIEWS.done = (kind) => { $('#top').hidden = true;
+  return `<div class="home"><h1>That's the whole journey</h1>
+   <ol class="done-list"><li><i>1</i><span>A dentist sees your ad${kind === 'reel' ? ' or comments on your video' : ''}.</span></li><li><i>2</i><span>They take your free quiz on your website.</span></li>
+   <li><i>3</i><span>They get their report from you right away, and one reminder two days later.</span></li><li><i>4</i><span>You get an email about them. You call them and tap Call booked.</span></li>
+   <li><i>5</i><span>After the call you tap Client signed, and they get your welcome email.</span></li></ol>
+   <p>You never write these emails. You talk to dentists and tap one button.</p>
+   <div class="start"><button class="btn" onclick="story('${kind === 'reel' ? 'ad' : 'reel'}')">${kind === 'reel' ? 'Watch the ad version' : 'Watch the other way in (a comment on your video)'}</button>
+   <button class="btn alt" onclick="go('phone')">Call Maya, your phone assistant</button><button class="btn alt" onclick="go('home')">Back to the start</button></div></div>` };
 VIEWS.home = () => {
   $('#top').hidden = true;
   const badge = { ig: S.unread.ig, dmail: S.unread.dmail, jmail: S.unread.jmail };
@@ -386,7 +438,6 @@ VIEWS.home = () => {
    <button class="btn alt" onclick="story('reel')">Another way in: a dentist comments on your reel</button></div>
    <p class="or">Or look around on your own</p>
    <div class="apps">${APPS.map((a) => `<button class="app" onclick="go('${a.id}')"><span class="ico" style="background:${a.bg}">${a.icon}</span>${a.label}${badge[a.id] ? `<span class="badge">${badge[a.id]}</span>` : ''}</button>`).join('')}</div>
-   <p class="who">Instagram, the website and "Email" with a blue label are the dentist's phone. The gold label is your phone.</p>
   </div>` };
 
 // ----- Instagram
@@ -423,6 +474,7 @@ function reel(i) {
 function closeReel() { const b = $('#reel'); if (b) { b.querySelector('video').pause(); b.remove() } }
 function like(i, el) { S.liked[i] = !S.liked[i]; el.innerHTML = (S.liked[i] ? I.heartOn : I.heart) + '<span>Like</span>' }
 function comments(i) {
+  mark('csheet');
   const old = $('#sheet'); if (old) old.remove();
   const list = S.comments[i] = S.comments[i] || [];
   const sh = document.createElement('div'); sh.className = 'sheet'; sh.id = 'sheet';
@@ -487,8 +539,8 @@ VIEWS.dmail = () => { topbar('Email'); return inbox('d') };
 VIEWS.jmail = () => { topbar('Email'); return inbox('j') };
 function msgView(box, i) {
   const list = box === 'j' ? S.jmail : S.dmail; const m = list[i]; if (!m) return '';
-  m.read = true; if (box === 'd') mark('dread');
-  const reply = box === 'd' ? `<div class="ff"><button class="btn sm" onclick="reply(${i})">Reply as the dentist</button><p class="muted" style="font-size:13.5px">Try it: the automatic emails stop, and Janeth gets your reply.</p></div>` : '';
+  m.read = true; mark(box === 'd' ? 'dread' : 'jread');
+  const reply = box === 'd' && !ST ? `<div class="ff"><button class="btn sm" onclick="reply(${i})">Reply as the dentist</button><p class="muted" style="font-size:13.5px">Try it: the automatic emails stop, and Janeth gets your reply.</p></div>` : '';
   return `<div class="mhead"><b>${esc(m.subject)}</b><span>${box === 'j' ? 'To: Janeth' : 'From: Janeth Osinowo'} · ${esc(m.when)}</span></div><iframe class="mail" data-box="${box}" data-i="${i}" sandbox="allow-same-origin allow-popups" title="Email"></iframe>${reply}`;
 }
 VIEWS.dmsg = (i) => { topbar('Email', "go('dmail')"); return msgView('d', i) };
