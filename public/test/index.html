@@ -62,7 +62,7 @@ p{margin:0}
 #story p{font-size:16px;line-height:1.4}
 #story .row{display:flex;gap:8px;justify-content:flex-end;align-items:center}
 #story .row .ib{font-size:14px;color:var(--muted)}
-#phone:has(#reel) #story{top:calc(8px + env(safe-area-inset-top,0px));bottom:auto;opacity:.97}
+#phone:has(#reel) #story{top:calc(8px + env(safe-area-inset-top,0px));bottom:auto}
 #screen.story{padding-bottom:190px}
 #screen.story:has(.browser){padding-bottom:0;overflow:hidden}
 #screen.story .browser{height:calc(100% - var(--cap,170px))}
@@ -119,7 +119,11 @@ p{margin:0}
 
 /* reel viewer */
 .reel{position:absolute;inset:0;background:#000;z-index:10;display:flex;flex-direction:column}
-.reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ph{background:repeating-linear-gradient(135deg,#1b2a4a 0 14px,#203257 14px 28px);color:#f3ede2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;font-family:var(--display)}
+.ph b{font-size:22px}.ph small{font:600 14px/1.3 var(--body);opacity:.8;max-width:24ch}
+.post .ph{width:100%;aspect-ratio:1/1;max-width:100%}
+.reel .ph{position:absolute;inset:0}
+.grid .ph{position:absolute;inset:0}.grid .ph b{font-size:15px}
 .reel .rtop{position:relative;z-index:2;display:flex;justify-content:space-between;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 12px;color:#fff;font-weight:700}
 .reel .rtop button{all:unset;cursor:pointer;color:#fff;font-weight:700;padding:4px 8px;background:rgba(0,0,0,.35);border-radius:8px}
 .reel .side{position:absolute;right:10px;bottom:120px;z-index:2;display:flex;flex-direction:column;gap:18px;align-items:center;color:#fff;font-size:12px;font-weight:700}
@@ -200,10 +204,8 @@ const CLIENT = { name: 'Smile Management and Consulting Solutions', facts: { own
   checklist_url: 'checklist.pdf', address: '(your mailing address goes here)' }, test_mode: false };
 const MAYA_TEL = '+19082791144', MAYA_SHOW = '(908) 279-1144';
 const PACK = SMC.dentalConsulting;
-const REELS = [
-  { id: 'desk_claims_v5', title: 'Another claim denied', cap: 'Denied for a missing narrative. Again. Every denied claim is money you already earned.' },
-  { id: 'smc_not_for_this_v3', title: 'Not for this', cap: "You didn't open a practice to run payroll at midnight." },
-  { id: 'smc_call_in_v2', title: '7:42 AM', cap: '18 minutes until the first patient, and the day is already full.' },
+const REELS = [   // placeholders: the real reels go in later
+  { title: 'Your reel 1' }, { title: 'Your reel 2' }, { title: 'Your reel 3' },
 ];
 const KEYWORD = 'CHECK';
 
@@ -356,7 +358,7 @@ const STORIES = {
     { go: () => go('ig', 'feed'), say: "You're a dentist, scrolling Instagram. Janeth's ad shows up. Tap the bar that says Take the free Health Check.", hl: ['main', '.cta'], wait: 'ad' },
   ],
   reel: [
-    { go: () => go('ig', 'profile'), say: "You're a dentist and you find Janeth on Instagram. Tap one of her videos.", hl: ['main', '.grid button'], wait: 'reel0' },
+    { go: () => go('ig', 'profile'), say: "You're a dentist and you find Janeth on Instagram. Tap one of her reels.", hl: ['main', '.grid button'], wait: 'reel0' },
     { say: 'Tap Comment.', hl: ['main', '#reel .side button:nth-child(2)'], wait: 'csheet' },
     { say: 'Type the word CHECK in the box, then tap Post.', hl: ['main', '#cin'], wait: 'reel' },
     { go: () => go('ig', 'dm'), say: 'Janeth sent you a message right away. Tap Take the Health Check.', hl: ['main', '.thread .mbtn'], wait: 'dm' },
@@ -450,12 +452,11 @@ VIEWS.ig = (tab) => {
   return tabs + `<div class="ig-head"><div class="avatar">SM</div><div><h3>Smile Management &amp; Consulting</h3></div></div>
    <div class="bio"><span>Dental practice back office: claims, credentialing, payroll, HR.</span><span>Run by Janeth Osinowo, RDH. New Jersey.</span><span>Free 1-minute Practice Health Check below.</span><a onclick="go('web')">smilemanagementconsultingsnj.com</a></div>
    <div class="ig-btns"><button class="f" onclick="toast('Following.')">Follow</button><button onclick="go('ig','dm')">Message</button></div>
-   <div class="grid">${REELS.map((r, i) => `<button style="background-image:url('reels/${r.id}.jpg')" onclick="reel(${i})" aria-label="Play reel ${esc(r.title)}"><span>&#9654; ${esc(r.title)}</span></button>`).join('')}</div>`;
+   <div class="grid">${REELS.map((r, i) => `<button onclick="reel(${i})" aria-label="Open ${esc(r.title)}"><span class="ph"><b>${esc(r.title)}</b></span></button>`).join('')}</div>`;
 };
 function feed() {
-  const r = REELS[0];
-  return `<div class="post"><div class="post-h"><div class="avatar">SM</div><div><b>smilemanagementconsulting</b><br><small>Sponsored</small></div></div>
-   <video src="reels/${r.id}.mp4" poster="reels/${r.id}.jpg" muted playsinline loop autoplay></video>
+    return `<div class="post"><div class="post-h"><div class="avatar">SM</div><div><b>smilemanagementconsulting</b><br><small>Sponsored</small></div></div>
+   <div class="ph"><b>Your reel</b><small>Your video plays here as the ad</small></div>
    <div class="cta" onclick="mark('ad');go('web')"><span>Take the free Health Check</span><span>&rsaquo;</span></div>
    <div class="cap"><b>smilemanagementconsulting</b> Denied claims, late payroll, credentialing that never ends. Take the free 1-minute Practice Health Check and see where your practice is leaking.</div></div>
    <div class="pad"><p class="hint">This is what the paid ad looks like in a dentist's feed. Tapping the dark bar opens Janeth's website at the quiz.</p></div>`;
@@ -463,15 +464,13 @@ function feed() {
 function reel(i) {
   const r = REELS[i]; mark('reel0');
   const box = document.createElement('div'); box.className = 'reel'; box.id = 'reel';
-  box.innerHTML = `<video src="reels/${r.id}.mp4" poster="reels/${r.id}.jpg" playsinline loop autoplay muted></video>
+  box.innerHTML = `<div class="ph"><b>${esc(r.title)}</b><small>Your video plays here</small></div>
    <div class="rtop"><button onclick="closeReel()">&larr; Back</button><span>Reels</span><span style="width:60px"></span></div>
-   <div class="sound" id="snd">Tap for sound</div>
    <div class="side"><button onclick="like(${i},this)">${S.liked[i] ? I.heartOn : I.heart}<span>Like</span></button><button onclick="comments(${i})">${I.comment}<span>Comment</span></button><button onclick="toast('Shared.')">${I.send}<span>Share</span></button></div>
-   <div class="rcap"><b>smilemanagementconsulting</b>${esc(r.cap)} Comment ${KEYWORD} and I'll send you the free Practice Health Check.</div>`;
+   <div class="rcap"><b>smilemanagementconsulting</b>Comment ${KEYWORD} and I'll send you the free Practice Health Check.</div>`;
   $('#phone').appendChild(box);
-  const v = box.querySelector('video'); $('#snd').onclick = () => { v.muted = false; v.play(); $('#snd').remove() };
 }
-function closeReel() { const b = $('#reel'); if (b) { b.querySelector('video').pause(); b.remove() } }
+function closeReel() { const b = $('#reel'); if (b) b.remove() }
 function like(i, el) { S.liked[i] = !S.liked[i]; el.innerHTML = (S.liked[i] ? I.heartOn : I.heart) + '<span>Like</span>' }
 function comments(i) {
   mark('csheet');
