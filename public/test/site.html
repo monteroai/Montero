@@ -313,6 +313,14 @@ footer{background:#0a1224;color:rgba(244,238,225,.55);font-size:13px;padding:36p
 .reveal{opacity:0;transform:translateY(22px)}
 .static .reveal,.noanim .reveal{opacity:1;transform:none}
 :focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+/* phones: display-size optical cut + tight tracking crams words together at small sizes */
+@media (max-width:640px){
+  h1,h2.t,.cap h2,.band,.qstep legend,.ledger h3,.step h3{font-variation-settings:normal;font-optical-sizing:auto;letter-spacing:0;word-spacing:.06em}
+  h1,h2.t,.cap h2{font-weight:400}
+  .lbl{display:none}
+  h1{line-height:1.06;font-size:clamp(34px,9.6vw,96px)}
+  h2.t,.cap h2{line-height:1.12}
+}
 </style>
 
 <header class="bar" id="bar">
