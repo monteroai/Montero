@@ -53,6 +53,11 @@ p{margin:0}
 .badge{position:absolute;top:-4px;right:calc(50% - 38px);background:var(--red);color:#fff;font:700 12px/1 var(--body);min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 5px}
 .who{font-size:13px;color:var(--muted);text-align:center}
 .start{display:flex;flex-direction:column;gap:10px}
+.tests{display:flex;flex-direction:column;gap:12px}
+.test{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.test .tn{font:700 12px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+.test p{color:var(--muted);font-size:15.5px}
+.test .btn{margin-top:4px}
 .start .btn small{display:block;font:600 14px/1.3 var(--body);opacity:.8;margin-top:3px}
 .or{font:700 12px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center}
 
@@ -438,9 +443,15 @@ VIEWS.home = () => {
   $('#top').hidden = true;
   const badge = { ig: S.unread.ig, dmail: S.unread.dmail, jmail: S.unread.jmail };
   return `<div class="home">
-   <div><h1>Your test drive</h1><p class="muted" style="margin-top:6px">See exactly what a dentist sees, from the first ad to becoming your client. Nothing is sent to anyone.</p></div>
-   <div class="start"><button class="btn" onclick="story('ad')">Start: I'm a dentist who sees your ad<small>About 3 minutes, one step at a time</small></button>
-   <button class="btn alt" onclick="story('reel')">Another way in: a dentist comments on your reel</button></div>
+   <div><h1>Test page</h1><p class="muted" style="margin-top:6px">Try each part yourself, as a dentist would. Pick a test.</p></div>
+   <div class="tests">
+    <div class="test"><span class="tn">Test 1</span><h2>A phone call</h2><p>Call Maya, your AI phone assistant, and talk like a dentist. After you hang up, a summary of the call is emailed (to Montero while we test).</p>
+     <a class="btn gold" href="tel:${MAYA_TEL}" onclick="mark('call')">Call ${MAYA_SHOW}</a></div>
+    <div class="test"><span class="tn">Test 2</span><h2>The emails</h2><p>See your ad, take the quiz on your website, and get every email a dentist gets. About 3 minutes. Nothing is sent.</p>
+     <button class="btn" onclick="story('ad')">Start the email test</button></div>
+    <div class="test"><span class="tn">Test 3</span><h2>An Instagram message</h2><p>Comment CHECK on your reel and get the automatic message with the quiz.</p>
+     <button class="btn" onclick="story('reel')">Start the message test</button></div>
+   </div>
    <p class="or">Or look around on your own</p>
    <div class="apps">${APPS.map((a) => `<button class="app" onclick="go('${a.id}')"><span class="ico" style="background:${a.bg}">${a.icon}</span>${a.label}${badge[a.id] ? `<span class="badge">${badge[a.id]}</span>` : ''}</button>`).join('')}</div>
   </div>` };
