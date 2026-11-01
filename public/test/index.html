@@ -326,6 +326,8 @@ function topbar(title, backTo) {
 }
 function render() {
   const r = VIEWS[app.name] || VIEWS.home; $('#screen').innerHTML = r(app.arg) || ''; afterRender();
+  // a redraw mid-tour (e.g. tapping another DM button) wipes the gold outline: put it back
+  if (ST && HL && !HL.isConnected) { const st = ST.steps[ST.i]; HL = null; setTimeout(() => glow(st, 0), 60) }
 }
 function afterRender() {
   document.querySelectorAll('iframe.mail[data-i]').forEach((f) => {
@@ -495,7 +497,7 @@ function comments(i) {
    <div class="list" id="clist">
     <div class="cm"><span class="av her">SM</span><div><b>smilemanagementconsulting</b> Comment <b>${KEYWORD}</b> and I'll send you the free Practice Health Check in your messages.<small class="pin">Pinned</small></div></div>
     ${list.map((c) => `<div class="cm"><span class="av ${c.her ? 'her' : ''}">${c.her ? 'SM' : 'You'}</span><div><b>${c.her ? 'smilemanagementconsulting' : 'you'}</b> ${esc(c.t)}${c.her ? '<small>Automatic reply</small>' : ''}</div></div>`).join('')}
-    ${list.length ? '' : `<p class="hint">Try it: type ${KEYWORD} below and press Post.</p>`}
+    ${!list.length ? `<p class="hint">Try it: type ${KEYWORD} below and press Post.</p>` : list.some((c) => c.her) ? '' : `<p class="hint">No message yet? Only comments with the word ${KEYWORD} get the automatic message. Try ${KEYWORD}.</p>`}
    </div>
    <form class="compose" onsubmit="event.preventDefault();postComment(${i})"><input id="cin" autocomplete="off" placeholder="Add a comment..." aria-label="Comment"><button type="submit">Post</button></form>`;
   $('#reel').appendChild(sh);
