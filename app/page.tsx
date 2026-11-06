@@ -1,25 +1,11 @@
-import { Nav } from '@/components/Nav'
-import { MainHero } from '@/components/MainHero'
-import { TickerStrip } from '@/components/TickerStrip'
-import { Services } from '@/components/Services'
-import { CaseStudies } from '@/components/CaseStudies'
-import { WhyMontero } from '@/components/WhyMontero'
-import { MainContact } from '@/components/MainContact'
-import { CircuitBackground } from '@/components/CircuitBackground'
+import type { Metadata } from 'next'
+import { HomePage } from '@/components/home/HomePage'
 
-export default function HomePage() {
-  return (
-    <>
-      <CircuitBackground />
-      <Nav variant="main" />
-      <main>
-        <MainHero />
-        <TickerStrip />
-        <Services />
-        <CaseStudies />
-        <WhyMontero />
-        <MainContact />
-      </main>
-    </>
-  )
+export const metadata: Metadata = {
+  title: 'MONTERO · Video ads for businesses with nothing to film',
+  description: 'Short animated reels built from what you already have, plus the landing pages and automations they point to. First reel free.',
+}
+
+export default function Page() {
+  return <HomePage />
 }
