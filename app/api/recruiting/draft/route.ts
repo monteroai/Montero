@@ -15,6 +15,7 @@ Rules:
 - Only use roles, cities, pay and names the visitor actually gave. Never invent openings or pay. If pay is missing use "Apply today"; if type is missing use "Open now".
 - Keep everything from the current reel that the visitor did not ask to change. When they give their own roles for the first time, replace the starter roles completely.
 - lon/lat: your best coordinates for that city. US cities only.
+- One card per distinct role and city, even when they need several people ("2 CNC machinists" is one card).
 - Short role titles (max 30 characters). Pay like "$24/hr", "$65K/yr", "$1,800/wk".
 - A color they name becomes a hex brand color dark enough for white text on top.
 - If they paste a link to their site or job board, put the domain in site and say in the reply that you can't open links from here, so ask them to paste a few roles.
