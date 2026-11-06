@@ -8,7 +8,7 @@ import us from 'us-atlas/states-10m.json';
 // (the HD render), minus camera motion blur (too heavy live) and with a PREVIEW tag. Keep the two in step.
 // Fonts + SFX: public/jobmap/
 export const MAP = {
-  agency: 'Northgate Staffing', site: 'northgatestaffing.com', brand: '#1E4BFF', states: ['New Jersey', 'New York'],
+  agency: 'Your Agency', site: 'youragency.com', brand: '#1E4BFF', states: ['New Jersey', 'New York'],
   jobs: [
     { role: 'Forklift Operator', city: 'Newark', st: 'NJ', lon: -74.172, lat: 40.735, pay: '$24/hr', type: 'Full-time' },
     { role: 'Warehouse Lead', city: 'Albany', st: 'NY', lon: -73.756, lat: 42.652, pay: '$26/hr', type: '1st shift' },

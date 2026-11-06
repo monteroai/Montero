@@ -9,13 +9,13 @@ import { AbsoluteFill, Audio, Sequence, useCurrentFrame, Easing } from 'remotion
 // chime + FINAL CALL on one row -> FILLED on another -> whole board flips into the call to action.
 // Swap BOARD per agency per week. SFX: scripts/departures_sfx.py -> public/departures/
 export const BOARD = {
-  agency: 'Northgate Staffing',
+  agency: 'Your Agency',
   jobs: [
     ['FORKLIFT OPERATOR', 'NEWARK NJ', '$24/HR'], ['WAREHOUSE LEAD', 'EDISON NJ', '$26/HR'], ['CNC MACHINIST', 'PATERSON NJ', '$31/HR'],
     ['CDL-A DRIVER', 'ELIZABETH NJ', '$29/HR'], ['MEDICAL BILLER', 'REMOTE', '$23/HR'], ['HR ASSISTANT', 'CLIFTON NJ', '$22/HR'],
   ],
   finalCall: 1, filled: 5, filledIn: '4 days',
-  message: ['', 'APPLY BEFORE', 'IT DEPARTS', '', 'NORTHGATE', 'LINK IN BIO'],
+  message: ['', 'APPLY BEFORE', 'IT DEPARTS', '', 'YOUR AGENCY', 'LINK IN BIO'],
 };
 export const DEPARTURES_FPS = 60;
 export const DEPARTURES_FRAMES = Math.round(14.5 * DEPARTURES_FPS);
@@ -27,6 +27,8 @@ const ease = Easing.bezier(0.5, 0, 0.15, 1);
 const expo = Easing.bezier(0.16, 1, 0.3, 1);
 const UI = 'DpUI, Arial, sans-serif';
 const YEL = '#FFD23F';
+// agency brand color, lifted toward white so dark brands still read on the black board
+const tint = (h, k) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(h.slice(i, i + 2), 16) * (1 - k) + 255 * k).toString(16).padStart(2, '0')).join('');
 
 let fontsAdded = false;
 const useFonts = () => {
@@ -103,9 +105,9 @@ const Tile = ({ x, y, st, color }) => {
   </div>;
 };
 
-const Caption = ({ t, at, out, children }) => { if (t < at || t > out + 0.2) return null; const p = expo(seg(t, at, at + 0.3)), o = seg(t, out, out + 0.2);
+const Caption = ({ t, at, out, children, accent }) => { if (t < at || t > out + 0.2) return null; const p = expo(seg(t, at, at + 0.3)), o = seg(t, out, out + 0.2);
   return <div style={{ position: 'absolute', left: 0, right: 0, top: 210, textAlign: 'center', zIndex: 20, opacity: 1 - o }}>
-    <span style={{ display: 'inline-block', font: `900 58px ${UI}`, letterSpacing: '-.02em', color: '#111', background: YEL, padding: '18px 34px', borderRadius: 10, boxShadow: '0 14px 40px rgba(0,0,0,.55)',
+    <span style={{ display: 'inline-block', font: `900 58px ${UI}`, letterSpacing: '-.02em', color: accent ? '#fff' : '#111', background: accent || YEL, padding: '18px 34px', borderRadius: 10, boxShadow: '0 14px 40px rgba(0,0,0,.55)',
       transform: `translateY(${(1 - p) * -40}px) scale(${lerp(1.18, 1, p) - 0.08 * o})` }}>{children}</span></div>; };
 
 const Scene = ({ b }) => {
@@ -131,7 +133,7 @@ const Scene = ({ b }) => {
       {/* housing */}
       <div style={{ position: 'absolute', left: 0, top: 0, width: BW, height: BH, borderRadius: 18, background: 'linear-gradient(#17191c, #0e0f11)', border: '3px solid #2b2f35',
         boxShadow: '0 50px 120px rgba(0,0,0,.7), inset 0 2px 0 rgba(255,255,255,.06)' }} />
-      <div style={{ position: 'absolute', left: X0, top: 34, font: `900 58px/1 ${UI}`, color: YEL, letterSpacing: '.04em' }}>DEPARTURES</div>
+      <div style={{ position: 'absolute', left: X0, top: 34, font: `900 58px/1 ${UI}`, color: b.accent ? tint(b.accent, 0.45) : YEL, letterSpacing: '.04em' }}>DEPARTURES</div>
       <div style={{ position: 'absolute', left: X0 + 410, top: 52, font: `600 24px/1 ${UI}`, color: '#8b95a1', letterSpacing: '.18em', whiteSpace: 'nowrap' }}>JOBS LEAVING THIS WEEK</div>
       <div style={{ position: 'absolute', right: BW - LAMPX - 40, top: 30, font: `800 58px/1 ${UI}`, color: '#F4F1E8', fontVariantNumeric: 'tabular-nums' }}>08:4{Math.min(9, 7 + Math.floor(t / 6))}</div>
       {COLS.map(([l, c0]) => <div key={l} style={{ position: 'absolute', left: tileX(c0), top: 124, font: `800 22px/1 ${UI}`, color: '#6f7a86', letterSpacing: '.2em' }}>{l}</div>)}
@@ -143,13 +145,13 @@ const Scene = ({ b }) => {
     </div>
     {/* lens: vignette + faint top light */}
     <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 75% 55% at 50% 48%, rgba(0,0,0,0) 55%, rgba(0,0,0,.65) 100%)' }} />
-    <Caption t={t} at={0.3} out={1.85}>{b.jobs.length} jobs leaving this week.</Caption>
-    <Caption t={t} at={7.3} out={8.45}>Final call.</Caption>
-    {b.filledIn && <Caption t={t} at={8.95} out={9.7}>This one filled in {b.filledIn}.</Caption>}
+    <Caption accent={b.accent} t={t} at={0.3} out={1.85}>{b.jobs.length} jobs leaving this week.</Caption>
+    <Caption accent={b.accent} t={t} at={7.3} out={8.45}>Final call.</Caption>
+    {b.filledIn && <Caption accent={b.accent} t={t} at={8.95} out={9.7}>This one filled in {b.filledIn}.</Caption>}
     {t >= 11.0 && <>
       <div style={{ position: 'absolute', left: 0, right: 0, top: 200, textAlign: 'center', opacity: endIn, transform: `translateY(${(1 - endIn) * -50}px)` }}>
         <div style={{ font: `900 86px/1 ${UI}`, color: '#fff', letterSpacing: '-.035em' }}>Don't miss</div>
-        <div style={{ font: `900 86px/1.05 ${UI}`, color: YEL, letterSpacing: '-.035em' }}>your flight.</div></div>
+        <div style={{ font: `900 86px/1.05 ${UI}`, color: b.accent ? tint(b.accent, 0.45) : YEL, letterSpacing: '-.035em' }}>your flight.</div></div>
       <div style={{ position: 'absolute', left: 0, right: 0, top: 1440, textAlign: 'center', display: 'grid', gap: 16, opacity: expo(seg(t, 11.5, 12.0)), transform: `translateY(${(1 - expo(seg(t, 11.5, 12.0))) * 40}px)` }}>
         <div style={{ font: `800 50px/1 ${UI}`, color: '#fff' }}>{b.agency}</div>
         <div style={{ font: `600 32px/1 ${UI}`, color: '#9aa4af' }}>{b.jobs.length} roles open · apply at the link in bio</div></div>

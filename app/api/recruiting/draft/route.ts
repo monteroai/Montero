@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { createHmac } from 'crypto'
 import { NextResponse } from 'next/server'
 import { clean, FORMATS, MAX_JOBS, ST, STARTER, type Reel } from '@/lib/recruiting/reel'
 import { pinIn } from '@/lib/recruiting/geo'
@@ -41,12 +42,24 @@ const TOOL: Anthropic.Tool = {
   },
 }
 
-// Best-effort limit per warm instance; real abuse protection would sit at the edge.
+// Limits, kept out of a normal visitor's way: 20 edits a day per browser (signed cookie), 60 once they've given an
+// email, plus a per-IP cap per warm instance against cookie-clearing scripts. Each edit costs well under a cent;
+// the hard ceiling is the spend limit on ANTHROPIC_BUILDER_KEY (falls back to ANTHROPIC_API_KEY).
+const FREE_PER_DAY = 20, EMAIL_PER_DAY = 60
+const SECRET = process.env.BUILDER_COOKIE_SECRET || process.env.ANTHROPIC_BUILDER_KEY || process.env.ANTHROPIC_API_KEY || 'montero'
+const sign = (v: string) => createHmac('sha256', SECRET).update(v).digest('base64url').slice(0, 16)
+function usage(req: Request) {
+  const day = new Date().toISOString().slice(0, 10)
+  const raw = req.headers.get('cookie')?.match(/(?:^|; )mb_n=([^;]+)/)?.[1] || ''
+  const [d, n, sig] = decodeURIComponent(raw).split('.')
+  return d === day && sig === sign(`${d}.${n}`) ? { day, n: Number(n) || 0 } : { day, n: 0 }
+}
+const cookieFor = (day: string, n: number) => `mb_n=${encodeURIComponent(`${day}.${n}.${sign(`${day}.${n}`)}`)}; Path=/api/recruiting; Max-Age=172800; HttpOnly; Secure; SameSite=Lax`
 const hits = new Map<string, number[]>()
 function limited(ip: string) {
   const now = Date.now(), list = (hits.get(ip) || []).filter((t) => now - t < 3600_000)
   list.push(now); hits.set(ip, list)
-  return list.length > 40
+  return list.length > 120
 }
 
 const NAMES = Object.fromEntries(Object.entries(ST).map(([k, v]) => [v.toLowerCase(), k]))
@@ -72,9 +85,11 @@ function parseLines(text: string, cur: Reel): Reel | null {
 
 export async function POST(req: Request) {
   const ip = req.headers.get('x-nf-client-connection-ip') || req.headers.get('x-forwarded-for')?.split(',')[0] || 'local'
-  if (limited(ip)) return NextResponse.json({ error: 'That’s a lot of drafts for one hour. Send us your email below and we’ll finish it for you.' }, { status: 429 })
-
   const b = await req.json().catch(() => ({}))
+  const use = usage(req), cap = /^\S+@\S+\.\S+$/.test(String(b.email || '')) ? EMAIL_PER_DAY : FREE_PER_DAY
+  if (limited(ip) || use.n >= cap) return NextResponse.json({ limit: true, reply: cap === FREE_PER_DAY
+    ? `That’s ${FREE_PER_DAY} edits today, the free limit. Add your email and you can keep going, or we’ll finish it for you.`
+    : 'That’s a lot of edits for one day. Send it over as it is and we’ll take it from here.' })
   const cur = clean(b.reel) || STARTER
   const msgs = (Array.isArray(b.messages) ? b.messages : []).slice(-10)
     .map((m: any) => ({ role: m?.role === 'assistant' ? 'assistant' as const : 'user' as const, content: String(m?.text || '').slice(0, 1200) }))
@@ -86,7 +101,7 @@ export async function POST(req: Request) {
 
   let out: { reply: string; reel: Reel; idea?: boolean } | null = null
   try {
-    const r = await new Anthropic().messages.create({
+    const r = await new Anthropic({ apiKey: process.env.ANTHROPIC_BUILDER_KEY || process.env.ANTHROPIC_API_KEY }).messages.create({
       model: 'claude-haiku-5-5', max_tokens: 1200, system: SYSTEM, tools: [TOOL], tool_choice: { type: 'tool', name: 'update_reel' }, messages: msgs,
     })
     const use = r.content.find((c) => c.type === 'tool_use') as Anthropic.ToolUseBlock | undefined
@@ -106,5 +121,7 @@ export async function POST(req: Request) {
       ? { reply: 'Here it is. Add your agency name and colors whenever you like.', reel }
       : { reply: 'Give me one role per line, like: Forklift Operator, Newark NJ, $24/hr', reel: cur }
   }
-  return NextResponse.json(out)
+  const res = NextResponse.json({ ...out, left: cap - use.n - 1 })
+  res.headers.append('Set-Cookie', cookieFor(use.day, use.n + 1))
+  return res
 }

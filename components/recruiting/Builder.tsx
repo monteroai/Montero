@@ -15,7 +15,7 @@ import b from './builder.module.css'
 // the spec as a lead; pitching their own idea opens the idea form (2 free reels).
 type Msg = { role: 'user' | 'assistant'; text: string }
 const HELLO = 'Tell me your agency’s name and a few roles you’re hiring for, with the city and pay. Your reel builds as we go.'
-const IDEAS = ['We’re Apex Staffing. Hiring CNC Machinists in Dayton OH at $28/hr and Forklift Operators in Columbus OH at $21/hr', 'Make it dark green', 'Add a Medical Assistant in Tampa FL, $19/hr, full-time']
+const IDEAS = ['We’re Your Agency. Hiring CNC Machinists in Dayton OH at $28/hr and Forklift Operators in Columbus OH at $21/hr', 'Make it dark green', 'Add a Medical Assistant in Tampa FL, $19/hr, full-time']
 
 const COMP = {
   jobmap: { component: JobMap, fps: JOBMAP_FPS, frames: (r: Reel) => Math.round(jobMapSeconds(r.jobs.length) * JOBMAP_FPS), bg: '#EEF1F6' },
@@ -73,7 +73,7 @@ export default function Builder() {
     if (!text || busy) return
     const next = [...msgs, { role: 'user' as const, text }]
     setMsgs(next); setInput(''); setBusy(true)
-    const r = await fetch('/api/recruiting/draft', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: next, reel: full }) }).catch(() => null)
+    const r = await fetch('/api/recruiting/draft', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: next, reel: full, email }) }).catch(() => null)
     const j = r ? await r.json().catch(() => ({})) : {}
     setBusy(false)
     if (j.reel) {
@@ -84,6 +84,7 @@ export default function Builder() {
     }
     setMsgs([...next, { role: 'assistant', text: j.reply || j.error || 'That didn’t go through. Try once more, or email ai@montero.cool.' }])
     if (j.idea) setTimeout(() => openIdea(text), 900)
+    if (j.limit && step === 'build') setStep('email')
   }
 
   async function order(e: React.FormEvent) {

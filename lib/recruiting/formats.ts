@@ -15,7 +15,7 @@ export function propsFor(format: Format, r: Reel, pick = 0) {
     const n = Math.min(r.jobs.length, 6)
     const name = board(r.agency, 17)
     return {
-      agency: r.agency, preview: true,
+      agency: r.agency, preview: true, accent: r.brand,
       jobs: r.jobs.slice(0, 6).map((j) => [board(j.role, 17), board(`${j.city} ${j.st}`, 12), boardPay(/^\$/.test(j.pay) ? j.pay : '')]),
       finalCall: n > 1 ? 1 : 0, filled: n - 1, filledIn: '',
       message: ['', 'APPLY BEFORE', 'IT DEPARTS', '', name, r.site ? board(r.site, 17) : 'LINK IN BIO'],
