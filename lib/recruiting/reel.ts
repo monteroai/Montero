@@ -1,6 +1,8 @@
 // Shared shape of a Job Map reel: what the builder edits, the API returns, share links carry and the HD render takes.
 export type Job = { role: string; city: string; st: string; lon: number; lat: number; pay: string; type: string }
-export type Reel = { agency: string; site: string; brand: string; jobs: Job[] }
+export const FORMATS = ['jobmap', 'departures', 'jobdrop'] as const
+export type Format = (typeof FORMATS)[number]
+export type Reel = { agency: string; site: string; brand: string; jobs: Job[]; format?: Format }
 
 export const MAX_JOBS = 6
 
@@ -37,17 +39,18 @@ export function clean(x: any): Reel | null {
   })).filter((j: Job) => j.role && j.city && ST[j.st] && isFinite(j.lon) && isFinite(j.lat))
   if (!jobs.length) return null
   const brand = /^#[0-9a-f]{6}$/i.test(String(x.brand)) ? String(x.brand) : STARTER.brand
-  return { agency: str(x.agency, 40) || STARTER.agency, site: str(x.site, 40).replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, ''), brand, jobs }
+  const format = FORMATS.includes(x.format) ? (x.format as Format) : 'jobmap'
+  return { agency: str(x.agency, 40) || STARTER.agency, site: str(x.site, 40).replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, ''), brand, jobs, format }
 }
 
 // Share links: /recruiting?r=<base64url JSON>. Short keys keep the URL under ~600 chars for six jobs.
 export function encodeReel(r: Reel) {
-  const j = JSON.stringify({ a: r.agency, s: r.site, b: r.brand, j: r.jobs.map((x) => [x.role, x.city, x.st, +x.lon.toFixed(3), +x.lat.toFixed(3), x.pay, x.type]) })
+  const j = JSON.stringify({ a: r.agency, s: r.site, b: r.brand, f: r.format, j: r.jobs.map((x) => [x.role, x.city, x.st, +x.lon.toFixed(3), +x.lat.toFixed(3), x.pay, x.type]) })
   return btoa(unescape(encodeURIComponent(j))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
 export function decodeReel(s: string): Reel | null {
   try {
     const o = JSON.parse(decodeURIComponent(escape(atob(s.replace(/-/g, '+').replace(/_/g, '/')))))
-    return clean({ agency: o.a, site: o.s, brand: o.b, jobs: (o.j || []).map((x: any[]) => ({ role: x[0], city: x[1], st: x[2], lon: x[3], lat: x[4], pay: x[5], type: x[6] })) })
+    return clean({ agency: o.a, site: o.s, brand: o.b, format: o.f, jobs: (o.j || []).map((x: any[]) => ({ role: x[0], city: x[1], st: x[2], lon: x[3], lat: x[4], pay: x[5], type: x[6] })) })
   } catch { return null }
 }

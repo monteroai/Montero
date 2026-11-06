@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextResponse } from 'next/server'
-import { clean, MAX_JOBS, ST, STARTER, type Reel } from '@/lib/recruiting/reel'
+import { clean, FORMATS, MAX_JOBS, ST, STARTER, type Reel } from '@/lib/recruiting/reel'
 import { pinIn } from '@/lib/recruiting/geo'
 
 // The /recruiting reel builder. Takes the chat so far plus the reel on screen, returns a one-line reply and the
@@ -20,6 +20,8 @@ Rules:
 - A color they name becomes a hex brand color dark enough for white text on top.
 - If they paste a link to their site or job board, put the domain in site and say in the reply that you can't open links from here, so ask them to paste a few roles.
 - Reply plainly, like a helpful person, in at most two short sentences (under 30 words): what changed, then one next tweak to try (their colors, website, a missing pay, another role). Don't list the roles back; they can see them. No emojis, no exclamation marks, no sales talk.
+- Three formats: jobmap (all roles pinned on a US map), departures (an airport split-flap board of hot jobs), jobdrop (one role, fast and punchy). Set format only when they ask for a different look; otherwise leave it out.
+- Set idea to true when the visitor pitches their own concept or a kind of video these formats don't cover (a story, characters, a testimonial style, a campaign, a series, a different industry angle). Then reply warmly in one sentence that it's a good idea worth building properly, and that a short form is opening so the team can make it with them. Leave the reel as it is.
 - If the message has nothing to do with hiring reels, or asks for anything offensive, leave the reel as it is and steer back in one sentence.
 Always answer by calling update_reel.`
 
@@ -31,6 +33,7 @@ const TOOL: Anthropic.Tool = {
     properties: {
       reply: { type: 'string' },
       agency: { type: 'string' }, site: { type: 'string' }, brand: { type: 'string', description: '#RRGGBB' },
+      format: { type: 'string', enum: [...FORMATS] }, idea: { type: 'boolean' },
       jobs: { type: 'array', maxItems: MAX_JOBS, items: { type: 'object', required: ['role', 'city', 'st', 'lon', 'lat', 'pay', 'type'], properties: {
         role: { type: 'string' }, city: { type: 'string' }, st: { type: 'string' }, lon: { type: 'number' }, lat: { type: 'number' }, pay: { type: 'string' }, type: { type: 'string' } } } },
     },
@@ -81,7 +84,7 @@ export async function POST(req: Request) {
   // The model sees the reel on screen as context on the last turn.
   msgs[msgs.length - 1].content = `Current reel: ${JSON.stringify(cur)}\nStarter roles still showing: ${JSON.stringify(cur.jobs) === JSON.stringify(STARTER.jobs)}\n\nVisitor: ${msgs[msgs.length - 1].content}`
 
-  let out: { reply: string; reel: Reel } | null = null
+  let out: { reply: string; reel: Reel; idea?: boolean } | null = null
   try {
     const r = await new Anthropic().messages.create({
       model: 'claude-haiku-5-5', max_tokens: 1200, system: SYSTEM, tools: [TOOL], tool_choice: { type: 'tool', name: 'update_reel' }, messages: msgs,
@@ -91,7 +94,8 @@ export async function POST(req: Request) {
     const reel = clean(x)
     if (reel) {
       reel.jobs = reel.jobs.map((j) => { const [lon, lat] = pinIn(ST[j.st], j.lon, j.lat); return { ...j, lon, lat } })
-      out = { reply: String(x.reply || 'Updated.').slice(0, 400), reel }
+      reel.format = FORMATS.includes(x.format) ? x.format : cur.format
+      out = { reply: String(x.reply || 'Updated.').slice(0, 400), reel, idea: x.idea === true }
     }
   } catch (e) {
     console.error('recruiting draft', e)
