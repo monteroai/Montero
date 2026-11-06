@@ -4,8 +4,8 @@
   --gold: #d6ae62; --gold-hi: #e8c47e; --gold-soft: rgba(214, 174, 98, 0.14); --rim: rgba(255, 255, 255, 0.09); --rim2: rgba(255, 255, 255, 0.16);
   --glass: rgba(255, 255, 255, 0.045); --glass2: rgba(255, 255, 255, 0.07);
   --voice: "Segoe UI", -apple-system, system-ui, sans-serif;
-  min-height: 100vh; color: var(--ink); overflow-x: clip; position: relative;
-  background:
+  min-height: 100vh; color: var(--ink); overflow-x: clip; position: relative; background: #09090b; isolation: isolate; }
+.page::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; background:
     radial-gradient(900px 600px at 82% 6%, rgba(214, 174, 98, 0.13), transparent 70%),
     radial-gradient(800px 700px at 8% 52%, rgba(120, 140, 190, 0.07), transparent 70%),
     radial-gradient(900px 600px at 70% 96%, rgba(214, 174, 98, 0.08), transparent 70%),
@@ -15,8 +15,8 @@
 .page h3 { font-size: 20px; font-weight: 650; letter-spacing: -0.015em; }
 
 /* glass recipe, shared */
-.bar, .order, .card, .steps li, .price, .startCard, .faq details, .phone {
-  backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%); }
+/* blur only where something moves behind it: the sticky header and the slip over the reel */
+.bar, .order { backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); }
 
 /* the voice: thin, spaced, uppercase. Labels only. */
 .label { font-family: var(--voice); font-weight: 300; font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useCleanAnchors } from '@/components/site/useCleanAnchors'
 import s from './recruiting.module.css'
 
 // /recruiting: the one link every staffing-agency email points to. Samples are fictional (labelled on page).
@@ -77,6 +78,7 @@ function StartForm() {
 }
 
 export function RecruitingPage() {
+  useCleanAnchors()
   return (
     <div className={s.page}>
       <header className={s.bar}>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useCleanAnchors } from '@/components/site/useCleanAnchors'
 import s from './home.module.css'
 
 // montero.cool front page (2026-11 refresh): black + gold, dark glass. Leads with animated video ads (the core product),
@@ -33,6 +34,7 @@ function Reel({ name, eager }: { name: string; eager?: boolean }) {
 const Arrow = () => <svg width="16" height="16" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 10h10m-4-4 4 4-4 4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
 
 export function HomePage() {
+  useCleanAnchors()
   return (
     <div className={s.page}>
       <header className={s.bar}>
@@ -57,8 +59,8 @@ export function HomePage() {
         </div>
         <div className={s.fan} aria-hidden="true">
           <div className={s.fanGlow} />
-          <div className={`${s.phone} ${s.left}`}><Reel name="departures" /></div>
-          <div className={`${s.phone} ${s.right}`}><Reel name="jobdrop" /></div>
+          <div className={`${s.phone} ${s.left}`}><img className={s.video} src="/recruiting/departures.jpg" alt="" /></div>
+          <div className={`${s.phone} ${s.right}`}><img className={s.video} src="/recruiting/jobdrop.jpg" alt="" /></div>
           <div className={`${s.phone} ${s.mid}`}><Reel name="jobmap" eager /></div>
         </div>
       </section>

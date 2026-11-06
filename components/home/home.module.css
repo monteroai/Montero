@@ -3,8 +3,8 @@
 .page { --w: 1160px; --ink: #f4f1ea; --muted: rgba(244, 241, 234, 0.62); --dim: rgba(244, 241, 234, 0.38);
   --gold: #d6ae62; --gold-hi: #e8c47e; --rim: rgba(255, 255, 255, 0.09); --rim2: rgba(255, 255, 255, 0.16); --glass: rgba(255, 255, 255, 0.045);
   --voice: "Segoe UI", -apple-system, system-ui, sans-serif;
-  min-height: 100vh; color: var(--ink); overflow-x: clip;
-  background:
+  min-height: 100vh; color: var(--ink); overflow-x: clip; background: #09090b; isolation: isolate; }
+.page::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; background:
     radial-gradient(1000px 700px at 78% 4%, rgba(214, 174, 98, 0.14), transparent 70%),
     radial-gradient(900px 700px at 6% 46%, rgba(120, 140, 190, 0.07), transparent 70%),
     radial-gradient(1000px 700px at 60% 98%, rgba(214, 174, 98, 0.09), transparent 70%),
@@ -15,7 +15,7 @@
 .label { font-family: var(--voice); font-weight: 300; font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); }
 .lead { font-size: 18px; line-height: 1.6; color: var(--muted); max-width: 56ch; }
 
-.bar, .svc, .steps li, .cta, .feature, .phone { backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%); }
+.bar { backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); }
 
 /* header */
 .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: rgba(10, 10, 12, 0.6); border-bottom: 1px solid var(--rim); }
