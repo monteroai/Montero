@@ -88,29 +88,31 @@ export function RecruitingPage() {
 
       <section className={s.hero}>
         <div className={s.heroText}>
-          <p className={s.pill}>For staffing and recruiting agencies</p>
+          <p className={s.label}>For staffing and recruiting agencies</p>
           <h1>Every opening gets its own <em>video ad.</em></h1>
           <p className={s.lead}>You sell people, not a product, so there’s nothing to film. Send us your job orders and we send back short animated reels, sized for Instagram, TikTok, LinkedIn and your job posts.</p>
           <div className={s.ctas}><a href="#start" className={s.btn}>Get a free sample reel</a><a href="#formats" className={s.ghost}>See the formats</a></div>
-          <ul className={s.facts}>
-            <li><b>48 hours</b><span>from roles to reels</span></li>
-            <li><b>Free</b><span>first reel</span></li>
-            <li><b>Zero</b><span>filming or editing</span></li>
-          </ul>
+          <p className={s.sub}>First reel free · Back in 48 hours · Nothing to film</p>
         </div>
         <div className={s.stage}>
           <div className={s.glow} aria-hidden="true" />
           <div className={s.phone}><Reel name="jobmap" label="Job Map sample reel" eager /></div>
+          <div className={s.order} aria-hidden="true">
+            <p className={s.label}>Job order in</p>
+            <p className={s.orderRole}>Forklift Operator</p>
+            <p className={s.orderMeta}>Newark, NJ · $24/hr · Full-time</p>
+            <p className={s.orderOut}><span className={s.dot} />Reel out in 48 hrs</p>
+          </div>
         </div>
       </section>
 
       <section id="formats" className={s.section}>
-        <div className={s.head}><p className={s.eyebrow}>Formats</p><h2>Three formats, all from your job details.</h2></div>
+        <div className={s.head}><p className={s.label}>Formats</p><h2>Three formats, all from your job details.</h2></div>
         <div className={s.grid}>
           {FORMATS.map((f) => (
             <article key={f.key} className={s.card}>
               <div className={s.cardVid}><Reel name={f.key} label={`${f.name} sample reel`} /></div>
-              <div className={s.cardBody}><p className={s.eyebrow}>{f.tag}</p><h3>{f.name}</h3><p>{f.what}</p></div>
+              <div className={s.cardBody}><p className={s.label}>{f.tag}</p><h3>{f.name}</h3><p>{f.what}</p></div>
             </article>
           ))}
         </div>
@@ -118,27 +120,27 @@ export function RecruitingPage() {
       </section>
 
       <section className={s.section}>
-        <div className={s.head}><p className={s.eyebrow}>How it works</p><h2>No call, no software, no shoot.</h2></div>
+        <div className={s.head}><p className={s.label}>How it works</p><h2>No call, no software, no shoot.</h2></div>
         <ol className={s.steps}>
           {STEPS.map(([t, d], i) => <li key={t}><span className={s.num}>{i + 1}</span><h3>{t}</h3><p>{d}</p></li>)}
         </ol>
       </section>
 
       <section id="pricing" className={s.section}>
-        <div className={s.head}><p className={s.eyebrow}>Pricing</p><h2>Start free. Pay when you want more.</h2></div>
+        <div className={s.head}><p className={s.label}>Pricing</p><h2>Start free. Pay when you want more.</h2></div>
         <div className={s.prices}>
           <div className={s.price}>
-            <p className={s.eyebrow}>First reel</p><p className={s.amt}>$0</p>
+            <p className={s.label}>First reel</p><p className={s.amt}>$0</p>
             <ul><li><Check />Any format</li><li><Check />Built from your real openings</li><li><Check />No card needed</li></ul>
             <a href="#start" className={s.ghost}>Get your free reel</a>
           </div>
           <div className={s.price}>
-            <p className={s.eyebrow}>Single reel</p><p className={s.amt}>${PRICE.single}</p>
+            <p className={s.label}>Single reel</p><p className={s.amt}>${PRICE.single}</p>
             <ul><li><Check />One reel, any format</li><li><Check />Back in 48 hours</li><li><Check />Yours to keep</li></ul>
             <a href="#start" className={s.ghost}>Order one</a>
           </div>
           <div className={`${s.price} ${s.best}`}>
-            <p className={s.eyebrow}>Weekly</p><p className={s.amt}>${PRICE.weekly}<span>/month</span></p>
+            <p className={s.label}>Weekly</p><p className={s.amt}>${PRICE.weekly}<span>/month</span></p>
             <ul><li><Check />Up to {PRICE.weeklyReels} reels a month</li><li><Check />A roundup of your openings every week</li><li><Check />Cancel anytime</li></ul>
             <a href={STRIPE || '#start'} className={s.btn}>{STRIPE ? 'Subscribe' : 'Start with a free reel'}</a>
           </div>
@@ -148,7 +150,7 @@ export function RecruitingPage() {
       <section id="start" className={s.section}>
         <div className={s.startCard}>
           <div className={s.startCopy}>
-            <p className={s.eyebrow}>Free sample</p>
+            <p className={s.label}>Free sample</p>
             <h2>Get your first reel free.</h2>
             <p className={s.lead}>Tell us a few roles you’re hiring for. We build the reel and send it to your inbox.</p>
             <ul className={s.ticks}><li><Check />Your agency name and colors</li><li><Check />Your real openings and pay</li><li><Check />In your inbox within 48 hours</li></ul>
@@ -158,7 +160,7 @@ export function RecruitingPage() {
       </section>
 
       <section className={s.section}>
-        <div className={s.head}><p className={s.eyebrow}>Questions</p><h2>Before you ask.</h2></div>
+        <div className={s.head}><p className={s.label}>Questions</p><h2>Before you ask.</h2></div>
         <div className={s.faq}>{FAQ.map(([q, a]) => <details key={q}><summary>{q}</summary><p>{a}</p></details>)}</div>
       </section>
 
