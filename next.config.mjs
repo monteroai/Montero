@@ -4,5 +4,9 @@ const nextConfig = {
   async rewrites() {
     return [{ source: '/test', destination: '/test/index.html' }]
   },
+  // /recruitment and /recruiting are the same page
+  async redirects() {
+    return [{ source: '/recruitment', destination: '/recruiting', permanent: false }]
+  },
 }
 export default nextConfig
