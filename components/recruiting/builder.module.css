@@ -1,0 +1,49 @@
+/* reel builder: chat on the left, the live reel in a phone on the right. Uses the .page tokens from recruiting.module.css. */
+.wrap { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 40px; align-items: start; }
+.chat { display: grid; grid-template-rows: minmax(0, 1fr) auto auto; gap: 14px; height: 640px; padding: 18px; border-radius: 22px;
+  background: rgba(0, 0, 0, 0.28); border: 1px solid var(--rim); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05); }
+.thread { overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 6px 4px; overscroll-behavior: contain; }
+.bot, .me { max-width: 86%; padding: 13px 16px; border-radius: 18px; font-size: 15px; line-height: 1.5; }
+.bot { align-self: flex-start; background: var(--glass2); border: 1px solid var(--rim); border-bottom-left-radius: 6px; color: var(--ink); }
+.me { align-self: flex-end; background: linear-gradient(180deg, rgba(232, 196, 126, 0.95), rgba(214, 174, 98, 0.95)); color: #171104; font-weight: 550; border-bottom-right-radius: 6px; }
+.typing { display: flex; gap: 5px; padding: 16px 18px; }
+.typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: blink 1.2s infinite; }
+.typing i:nth-child(2) { animation-delay: 0.15s; }
+.typing i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes blink { 0%, 80%, 100% { opacity: 0.25; } 40% { opacity: 1; } }
+
+.ideas { display: flex; flex-wrap: wrap; gap: 8px; }
+.ideas button { font: inherit; font-size: 13px; line-height: 1.35; text-align: left; color: var(--muted); background: var(--glass); border: 1px solid var(--rim);
+  border-radius: 12px; padding: 9px 12px; cursor: pointer; transition: border-color 0.2s, color 0.2s; }
+.ideas button:hover { border-color: rgba(214, 174, 98, 0.45); color: var(--ink); }
+.ideas button:first-child { flex-basis: 100%; }
+
+.compose { display: flex; gap: 10px; align-items: flex-end; }
+.compose textarea { flex: 1; font: inherit; font-size: 16px; line-height: 1.45; color: var(--ink); background: rgba(0, 0, 0, 0.35); border: 1px solid var(--rim2);
+  border-radius: 14px; padding: 13px 15px; resize: none; transition: border-color 0.2s, box-shadow 0.2s; }
+.compose textarea::placeholder { color: var(--dim); }
+.compose textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }
+.compose button { padding: 0; width: 52px; height: 52px; flex: none; }
+
+.side { display: grid; gap: 16px; justify-items: center; }
+.side > div:first-child { position: relative; width: min(300px, 76vw); }
+.sound { position: absolute; right: 22px; top: 22px; font: inherit; font-size: 12px; font-weight: 600; color: #fff; background: rgba(12, 26, 58, 0.55);
+  border: 0; border-radius: 999px; padding: 7px 12px; cursor: pointer; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.acts { display: grid; gap: 10px; width: min(300px, 76vw); justify-items: center; }
+.link { font: inherit; font-size: 14px; color: var(--gold-hi); background: none; border: 0; cursor: pointer; padding: 6px; }
+.link:hover { text-decoration: underline; }
+.email { width: 100%; font: inherit; font-size: 16px; color: var(--ink); background: rgba(0, 0, 0, 0.35); border: 1px solid var(--rim2); border-radius: 12px; padding: 14px 15px; }
+.email:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }
+.small { font-size: 12.5px; color: var(--dim); text-align: center; line-height: 1.45; max-width: 300px; overflow-wrap: anywhere; }
+.sent { width: min(300px, 76vw); font-size: 14.5px; line-height: 1.5; color: var(--muted); text-align: center; }
+.sent b { color: var(--ink); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ideas button:focus-visible, .link:focus-visible, .sound:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+@media (max-width: 960px) {
+  .wrap { grid-template-columns: 1fr; gap: 28px; }
+  .side { order: -1; }
+  .chat { height: 520px; }
+}
+@media (max-width: 640px) { .chat { height: 460px; padding: 12px; } .side > div:first-child, .acts, .sent { width: min(250px, 70vw); } }
+@media (prefers-reduced-motion: reduce) { .typing i { animation: none; opacity: 0.6; } }

@@ -3,7 +3,7 @@ import { RecruitingPage } from '@/components/recruiting/RecruitingPage'
 
 export const metadata: Metadata = {
   title: 'Video ads for staffing agencies · MONTERO',
-  description: 'Send us your job orders. Get short animated reels back in 48 hours, ready for Instagram, TikTok, LinkedIn and your job posts. No filming.',
+  description: 'Type your open roles and watch your hiring reel build in seconds. Animated video ads for Instagram, TikTok, LinkedIn and your job posts. No filming.',
 }
 
 export default function Page() {
