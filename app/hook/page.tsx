@@ -3,7 +3,7 @@ import { HookPage } from '@/components/hook/HookPage'
 
 export const metadata: Metadata = {
   title: 'The viral hook reel, built for your business · MONTERO',
-  description: 'The ant reel that got a car detailer 370,000 likes, rebuilt for your business in 3D with your line and your brand. $447, delivered in 24 hours, no filming needed.',
+  description: 'The ant reel that got a car detailer 370,000 likes, rebuilt for your business in 3D with your line and your brand. $235, delivered in 24 hours, no filming needed.',
   robots: { index: false },
 }
 

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useCleanAnchors } from '@/components/site/useCleanAnchors'
 import s from './hook.module.css'
 
-export const STRIPE = 'https://buy.stripe.com/14A8wRdwn0Yl9X4aLhfbq02'
+export const STRIPE = 'https://buy.stripe.com/bJefZjakbdL75GO7z5fbq03'
 const ORIGINAL = 'https://www.instagram.com/reel/DfdbBaxC4gz/'
 const COPY = 'https://www.instagram.com/reel/DfhieBZuLML/'
 const THIRD = 'https://www.instagram.com/reel/DffaQnRPtd2/'
@@ -117,7 +117,7 @@ function Roi() {
   const [inq, setInq] = useState(2)      // inquiries per 10,000 views
   const [close, setClose] = useState(30) // % of inquiries that book
   const [job, setJob] = useState(800)    // average job value
-  const leads = (views / 10000) * inq, jobs = leads * (close / 100), rev = jobs * job, x = rev / 447
+  const leads = (views / 10000) * inq, jobs = leads * (close / 100), rev = jobs * job, x = rev / 235
   const f = (n: number) => n.toLocaleString('en-US', { maximumFractionDigits: 0 })
   const Row = ({ id, label, val, set, min, max, step, show }: { id: string; label: string; val: number; set: (n: number) => void; min: number; max: number; step: number; show: string }) => (
     <div className={s.roiRow}><label htmlFor={id}>{label}</label><output htmlFor={id}>{show}</output>
@@ -134,7 +134,7 @@ function Roi() {
       <div className={s.roiOut}>
         <p className={s.label}>What one reel could bring in</p>
         <p className={s.roiBig}>${f(rev)}</p>
-        <p className={s.muted}>{f(leads)} inquiries, about {jobs < 10 ? jobs.toFixed(1) : f(jobs)} booked jobs. That’s {x < 10 ? x.toFixed(1) : f(x)}x the $447 cost.</p>
+        <p className={s.muted}>{f(leads)} inquiries, about {jobs < 10 ? jobs.toFixed(1) : f(jobs)} booked jobs. That’s {x < 10 ? x.toFixed(1) : f(x)}x the $235 cost.</p>
         <p className={s.note}>These are your numbers, not a promise. Move the sliders to match your shop.</p>
       </div>
     </div>
@@ -158,7 +158,7 @@ export function HookPage() {
           <p className={s.label}>For businesses that sell the dream</p>
           <h1>One ant reel. <em>370,000 likes.</em> Yours next.</h1>
           <p className={s.lead}>The funniest ad format on Instagram right now, built for your business. A 3D ant, your punchline, your work. Ready to post.</p>
-          <div className={s.ctas}><a href={STRIPE} className={s.btn}>Get my reel · $447</a><a href="#proof" className={s.ghost}>Watch the original</a></div>
+          <div className={s.ctas}><a href={STRIPE} className={s.btn}>Get my reel · $235</a><a href="#proof" className={s.ghost}>Watch the original</a></div>
           <p className={s.sub}>Delivered in 24 hours · 2 free rounds of changes · No filming needed</p>
         </div>
         <div className={s.stage}>
@@ -243,7 +243,7 @@ export function HookPage() {
           <div className={s.priceTop}>
             <div>
               <p className={s.label}>One reel, made for you</p>
-              <p className={s.price}>$447</p>
+              <p className={s.price}>$235</p>
               <p className={s.muted}>Paid once. No subscription.</p>
             </div>
             <a href={STRIPE} className={s.btn}>Get my reel</a>
@@ -271,7 +271,8 @@ export function HookPage() {
           <details><summary>Do I need to film anything?</summary><p>No. The whole reel is 3D: the ant, the car and your branded ending. If you’d like your own clips in it too, add a link in the brief and we’ll cut them in.</p></details>
           <details><summary>Will it go viral?</summary><p>No one can promise that. What we can promise is the opening that’s working right now, built properly for your business, and two free rounds of changes until it’s right.</p></details>
           <details><summary>What do you need from me after I pay?</summary><p>Checkout takes you straight to a short form: your business name, your Instagram handle, the thing your customers dream about, and what you do for them. It takes about two minutes, and your reel arrives within 24 hours.</p></details>
-          <details><summary>What if I change my mind?</summary><p>Your reel goes into production as soon as you send your brief, so payments are non-refundable once production starts. If something isn’t right, you get two free rounds of changes.</p></details>
+          <details><summary>What if I change my mind?</summary><p>Changed your mind before you send your brief? Email ai@montero.cool and we refund you in full. Once you send the brief your reel goes into production, so payments are non-refundable from then on. If something isn’t right, you get two free rounds of changes.</p></details>
+          <details><summary>How do I reach you?</summary><p>Email ai@montero.cool. A real person answers, usually within a few hours on business days. Payments run through Stripe, so your card details never touch our site.</p></details>
           <details><summary>Can I use it as an ad?</summary><p>Yes. You own the video, so you can post it, boost it or run it as a paid ad.</p></details>
         </div>
       </section>
@@ -279,7 +280,7 @@ export function HookPage() {
       <footer className={s.foot}>
         <div className={s.footIn}>
           <span className={s.brand}>MONTERO</span>
-          <span className={s.muted}>Questions? Email ai@montero.cool</span>
+          <span className={s.muted}>Questions? Email ai@montero.cool. A real person replies, usually within a few hours.</span>
         </div>
         <p className={s.disc}>The Instagram reels shown above belong to their creators and are shown as examples of the format. Montero is not affiliated with them.</p>
       </footer>
