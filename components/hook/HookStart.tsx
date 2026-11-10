@@ -9,10 +9,14 @@ export function HookStart() {
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setErr(''); setState('sending')
-    const data = Object.fromEntries(new FormData(e.currentTarget).entries())
-    const r = await fetch('/api/hook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).catch(() => null)
-    const j = r ? await r.json().catch(() => ({})) : {}
-    if (!r || !r.ok) { setErr(j.error || 'That didn’t go through. Email ai@montero.cool and we’ll take it from there.'); setState('idle'); return }
+    const data = Object.fromEntries(new FormData(e.currentTarget).entries()) as Record<string, string>
+    if (!/^\S+@\S+\.\S+$/.test(data.email || '')) { setErr('Add your email so we can send you the first cut.'); setState('idle'); return }
+    // Two routes, either one counts: Netlify Forms (stored in the Netlify dashboard + email notification) and the API route.
+    const net = fetch('/__forms.html', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ 'form-name': 'hook-brief', ...data }).toString() }).then((r) => r.ok).catch(() => false)
+    const api = fetch('/api/hook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then((r) => r.ok).catch(() => false)
+    const [a, b] = await Promise.all([net, api])
+    if (!a && !b) { setErr('That didn’t go through. Email your brief to ai@montero.cool and we’ll take it from there.'); setState('idle'); return }
     setState('done')
   }
   return (
