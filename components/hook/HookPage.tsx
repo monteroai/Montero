@@ -18,8 +18,21 @@ const PRESETS = [
 
 /* The 3D render in the phone: ant bite (0-6.2s), then a cut to the car, which stands in for the client's own clips. */
 const CUT = 6.2
+function useVisiblePlay() {
+  const ref = useRef<HTMLVideoElement>(null)
+  useEffect(() => {
+    const v = ref.current
+    if (!v) return
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) v.play().catch(() => {}); else v.pause() }, { threshold: 0.25 })
+    io.observe(v)
+    return () => io.disconnect()
+  }, [])
+  return ref
+}
+
 function Phone3D({ dream, service }: { dream: string; service: string }) {
   const [t, setT] = useState(0)
+  const vref = useVisiblePlay()
   const cap = t < 2.9 ? <>When an ant bites you, it grabs your skin with its pinchers</>
     : t < CUT ? <>But it’s not the pinchers that hurt you</>
     : t < 8.3 ? <>What actually hurts is not owning <b>{dream}</b></>
@@ -27,7 +40,7 @@ function Phone3D({ dream, service }: { dream: string; service: string }) {
   const beat = t < 2.9 ? 0 : t < CUT ? 1 : t < 8.3 ? 2 : 3
   return (
     <div className={s.screen}>
-      <video className={s.vid} src="/hook/ant.mp4" poster="/hook/ant.jpg" autoPlay muted loop playsInline preload="auto"
+      <video ref={vref} className={s.vid} src="/hook/ant.mp4" poster="/hook/ant.jpg" muted loop playsInline preload="auto"
         onTimeUpdate={(e) => setT(e.currentTarget.currentTime)} aria-label="3D low-poly ant pulling up skin, then a cut to a car, rendered by Montero" />
       <p key={beat} className={`${s.cap} ${s.capIn}`}>{cap}</p>
       {t >= CUT ? <span className={`${s.badge} ${s.badgeAd}`}>This part is your ad</span> : <span className={s.badge}>Rendered in 3D by Montero</span>}
@@ -72,6 +85,36 @@ function Retention() {
   )
 }
 
+/* ROI calculator: the visitor's own numbers. No claims about other businesses' sales. */
+function Roi() {
+  const [views, setViews] = useState(50000)
+  const [inq, setInq] = useState(2)      // inquiries per 10,000 views
+  const [close, setClose] = useState(30) // % of inquiries that book
+  const [job, setJob] = useState(800)    // average job value
+  const leads = (views / 10000) * inq, jobs = leads * (close / 100), rev = jobs * job, x = rev / 447
+  const f = (n: number) => n.toLocaleString('en-US', { maximumFractionDigits: 0 })
+  const Row = ({ id, label, val, set, min, max, step, show }: { id: string; label: string; val: number; set: (n: number) => void; min: number; max: number; step: number; show: string }) => (
+    <div className={s.roiRow}><label htmlFor={id}>{label}</label><output htmlFor={id}>{show}</output>
+      <input id={id} type="range" min={min} max={max} step={step} value={val} onChange={(e) => set(+e.target.value)} /></div>
+  )
+  return (
+    <div className={s.roi}>
+      <div className={s.roiIn}>
+        <Row id="roi-v" label="Views on your reel" val={views} set={setViews} min={5000} max={500000} step={5000} show={f(views)} />
+        <Row id="roi-i" label="People who reach out, per 10,000 views" val={inq} set={setInq} min={0.5} max={10} step={0.5} show={String(inq)} />
+        <Row id="roi-c" label="Of those, how many book" val={close} set={setClose} min={5} max={80} step={5} show={close + '%'} />
+        <Row id="roi-j" label="Your average job" val={job} set={setJob} min={100} max={5000} step={50} show={'$' + f(job)} />
+      </div>
+      <div className={s.roiOut}>
+        <p className={s.label}>What one reel could bring in</p>
+        <p className={s.roiBig}>${f(rev)}</p>
+        <p className={s.muted}>{f(leads)} inquiries, about {jobs < 10 ? jobs.toFixed(1) : f(jobs)} booked jobs. That’s {x < 10 ? x.toFixed(1) : f(x)}x the $447 cost.</p>
+        <p className={s.note}>These are your numbers, not a promise. Move the sliders to match your shop.</p>
+      </div>
+    </div>
+  )
+}
+
 export function HookPage() {
   useCleanAnchors()
   const [dream, setDream] = useState(PRESETS[0].dream)
@@ -88,10 +131,10 @@ export function HookPage() {
       <section className={s.hero}>
         <div className={s.heroText}>
           <p className={s.label}>For businesses that sell the dream</p>
-          <h1>A 37-second ant reel got a car detailer <em>370,000 likes.</em> We’ll make yours.</h1>
-          <p className={s.lead}>An ant bites someone’s skin. “It’s not the pinchers that hurt you. What actually hurts is not owning a Porsche 911.” Then the punchline turns into an ad. We build the whole thing for your business, 3D animation included. You just post it.</p>
+          <h1>One ant reel. <em>370,000 likes.</em> Yours next.</h1>
+          <p className={s.lead}>The funniest ad format on Instagram right now, built for your business. A 3D ant, your punchline, your work. Ready to post.</p>
           <div className={s.ctas}><a href={STRIPE} className={s.btn}>Get my reel · $447</a><a href="#proof" className={s.ghost}>Watch the original</a></div>
-          <p className={s.sub}>First cut in 3 business days · One free redo · Nothing to film</p>
+          <p className={s.sub}>First cut in 3 business days · One free redo · No footage? We’ve got you</p>
         </div>
         <div className={s.stage}>
           <div className={s.glow} aria-hidden="true" />
@@ -102,24 +145,24 @@ export function HookPage() {
 
       <section id="proof" className={s.section}>
         <p className={s.label}>The proof</p>
-        <h2>One ant. Three accounts. Same joke.</h2>
+        <h2>One bug. Three accounts. Same joke.</h2>
         <p className={s.lead}>A detailing shop posted it with no budget and no actors. A car creator made his own version, and a car app copied it with a spider. That’s over half a million likes from one joke. People share it because it lands before they realize it’s an ad.</p>
         <div className={s.proof}>
           <figure className={s.proofCard}>
-            <div className={s.stats}><span><b>370K+</b> likes</span><span><b>2,000+</b> comments</span></div>
+            <div className={s.stats}><span><b>370K+</b> likes</span><span><b>2,100+</b> comments</span></div>
             <p className={s.who}>Car detailer · the original</p>
             <iframe className={s.embed} src="https://www.instagram.com/reel/DfdbBaxC4gz/embed/" title="Original ant reel on Instagram" loading="lazy" allowFullScreen />
             <a className={s.lnk} href={ORIGINAL} target="_blank" rel="noopener noreferrer">Open on Instagram</a>
           </figure>
           <figure className={s.proofCard}>
-            <div className={s.stats}><span><b>155K+</b> likes</span><span><b>1,100+</b> comments</span></div>
+            <div className={s.stats}><span><b>165K+</b> likes</span><span><b>1,200+</b> comments</span></div>
             <p className={s.who}>Car creator · his version</p>
             <iframe className={s.embed} src="https://www.instagram.com/reel/DffaQnRPtd2/embed/" title="Car creator version of the reel on Instagram" loading="lazy" allowFullScreen />
             <a className={s.lnk} href={THIRD} target="_blank" rel="noopener noreferrer">Open on Instagram</a>
           </figure>
           <figure className={s.proofCard}>
-            <div className={s.stats}><span><b>9,400+</b> likes</span><span>same script, a spider</span></div>
-            <p className={s.who}>Car app · the copy</p>
+            <div className={s.stats}><span><b>15K+</b> likes</span><span><b>90+</b> comments</span></div>
+            <p className={s.who}>Car app · the spider version</p>
             <iframe className={s.embed} src="https://www.instagram.com/reel/DfhieBZuLML/embed/" title="Spider version of the reel on Instagram" loading="lazy" allowFullScreen />
             <a className={s.lnk} href={COPY} target="_blank" rel="noopener noreferrer">Open on Instagram</a>
           </figure>
@@ -129,6 +172,8 @@ export function HookPage() {
       <section id="how" className={s.section}>
         <p className={s.label}>How we remake it</p>
         <h2>Here’s what we’d make for you.</h2>
+        <div className={s.howGrid}>
+        <div className={s.phone}><Phone3D dream={dream} service={service} /></div>
         <div className={s.steps}>
           <article className={s.step}>
             <p className={s.when}>0–3s</p>
@@ -146,11 +191,12 @@ export function HookPage() {
             <p>“But if you do, we can…” and then what you do, over your own clips. By the time they realize it’s an ad, they’ve watched it.</p>
           </article>
         </div>
+        </div>
 
         <div className={s.builder}>
           <div>
             <h3>Try your line</h3>
-            <p className={s.muted}>Pick your business or type your own. The captions on the phone above change to match.</p>
+            <p className={s.muted}>Pick your business or type your own. The captions on the phone change to match.</p>
             <div className={s.chips}>
               {PRESETS.map((p) => (
                 <button key={p.k} type="button" className={`${s.chip} ${dream === p.dream ? s.chipOn : ''}`} onClick={() => { setDream(p.dream); setService(p.service) }}>{p.k}</button>
@@ -171,10 +217,17 @@ export function HookPage() {
           <div>
             <p className={s.label}>Why it works</p>
             <h2>Most reels lose their viewers in the first three seconds.</h2>
-            <p className={s.lead}>Instagram decides who else sees your reel by how many people keep watching. A normal opening, like a logo, a slow pan or someone saying hi, gives people a reason to scroll. A bug lunging at the lens doesn’t. Once they’re curious about the joke, they stay for your offer.</p>
+            <p className={s.lead}>Instagram decides who else sees your reel by how many people keep watching. A normal opening, like a logo, a slow pan or someone saying hi, gives people a reason to scroll. A giant ant grabbing someone’s skin doesn’t. Once they’re curious about the joke, they stay for your offer.</p>
           </div>
           <Retention />
         </div>
+      </section>
+
+      <section id="roi" className={s.section}>
+        <p className={s.label}>The math</p>
+        <h2>What’s one reel worth to your shop?</h2>
+        <p className={s.lead}>The original passed 370,000 likes, and likes are only a slice of the people who watched. Plug in your own numbers.</p>
+        <Roi />
       </section>
 
       <section id="price" className={s.section}>
@@ -207,7 +260,7 @@ export function HookPage() {
       <section className={s.section}>
         <p className={s.label}>Questions</p>
         <div className={s.faq}>
-          <details><summary>Do I need to film anything?</summary><p>No. If you have clips of your work, send them. If you don’t, we’ll use stock footage that fits your business.</p></details>
+          <details><summary>Do I need to film anything?</summary><p>No. If you have clips of your work, send them, even phone videos. If you don’t have any yet, we use licensed stock footage that fits your business, or you can send clips later and we start once they arrive.</p></details>
           <details><summary>Will it go viral?</summary><p>No one can promise that. What we can promise is the opening that’s working right now, built properly for your business, and one free redo if the first cut isn’t right.</p></details>
           <details><summary>What do you need from me after I pay?</summary><p>Checkout takes you straight to a short form: your business name, your Instagram handle, the thing your customers dream about, and a link to your clips. It takes about two minutes. Your first cut arrives within 3 business days.</p></details>
           <details><summary>Can I use it as an ad?</summary><p>Yes. You own the video, so you can post it, boost it or run it as a paid ad.</p></details>

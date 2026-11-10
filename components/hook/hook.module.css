@@ -165,3 +165,18 @@
 .lnk:hover { color: var(--gold-hi); }
 @media (max-width: 860px) { .proof { grid-template-columns: 1fr; } }
 .badgeAd { background: var(--gold); color: #171104; border-color: var(--gold); font-weight: 600; }
+.howGrid { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 32px; align-items: center; margin-top: 36px; }
+.howGrid .steps { grid-template-columns: 1fr; margin-top: 0; }
+.howGrid .phone { width: min(300px, 74vw); justify-self: center; }
+@media (max-width: 860px) { .howGrid { grid-template-columns: 1fr; } }
+.roi { margin-top: 28px; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: 16px; }
+.roiIn, .roiOut { background: var(--glass); border: 1px solid var(--rim); border-radius: 20px; padding: 24px; }
+.roiIn { display: grid; gap: 18px; }
+.roiRow { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center; }
+.roiRow label { color: var(--muted); font-size: 14px; }
+.roiRow output { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); }
+.roiRow input { grid-column: 1 / -1; width: 100%; accent-color: var(--gold); }
+.roiOut { display: grid; align-content: center; gap: 8px; border-color: rgba(214, 174, 98, 0.45); }
+.roiBig { font-size: clamp(44px, 6vw, 64px); font-weight: 750; letter-spacing: -0.04em; color: var(--gold-hi); font-variant-numeric: tabular-nums; line-height: 1; }
+.roiOut .note { text-align: left; }
+@media (max-width: 860px) { .roi { grid-template-columns: 1fr; } }
