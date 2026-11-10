@@ -134,7 +134,7 @@ export function HookPage() {
           <h1>One ant reel. <em>370,000 likes.</em> Yours next.</h1>
           <p className={s.lead}>The funniest ad format on Instagram right now, built for your business. A 3D ant, your punchline, your work. Ready to post.</p>
           <div className={s.ctas}><a href={STRIPE} className={s.btn}>Get my reel · $447</a><a href="#proof" className={s.ghost}>Watch the original</a></div>
-          <p className={s.sub}>First cut in 3 business days · One free redo · No footage? We’ve got you</p>
+          <p className={s.sub}>Delivered in 24 hours · One free redo · No filming needed</p>
         </div>
         <div className={s.stage}>
           <div className={s.glow} aria-hidden="true" />
@@ -188,7 +188,7 @@ export function HookPage() {
           <article className={s.step}>
             <p className={s.when}>8–15s</p>
             <h3>Your offer</h3>
-            <p>“But if you do, we can…” and then what you do, over your own clips. By the time they realize it’s an ad, they’ve watched it.</p>
+            <p>“But if you do, we can…” over a 3D car built in the same style, then your name, handle and number on the last frame. By the time they realize it’s an ad, they’ve watched it.</p>
           </article>
         </div>
         </div>
@@ -242,16 +242,16 @@ export function HookPage() {
           </div>
           <ul className={s.incl}>
             <li>A 3D hook scene made from scratch for your reel, the ant or your own idea</li>
-            <li>Your line written with you, with captions burned in</li>
-            <li>Edited with your clips, or with stock footage if you don’t have any</li>
+            <li>Your line, voiced and captioned, with your name, handle and number at the end</li>
+            <li>No filming: the whole reel is 3D. Want your own clips in it? Add them and we cut them in.</li>
             <li>Vertical 9:16 file ready for Reels, TikTok and Shorts</li>
-            <li>First cut in 3 business days. Don’t love it? We redo it once, free.</li>
+            <li>Delivered within 24 hours. Don’t love it? We redo it once, free.</li>
             <li>You own the finished video</li>
           </ul>
           <ol className={s.flow}>
             <li><b>Pay</b><span>Secure checkout through Stripe.</span></li>
-            <li><b>Two-minute brief</b><span>Right after checkout: your line, your handle and a link to your clips.</span></li>
-            <li><b>First cut in 3 business days</b><span>Counted from when we have your brief. We email it to you.</span></li>
+            <li><b>Two-minute brief</b><span>Right after checkout: your business name, your line and your handle.</span></li>
+            <li><b>Your reel within 24 hours</b><span>We email it to you, ready to post.</span></li>
             <li><b>Post it</b><span>Or ask for your one free redo first.</span></li>
           </ol>
         </div>
@@ -260,9 +260,9 @@ export function HookPage() {
       <section className={s.section}>
         <p className={s.label}>Questions</p>
         <div className={s.faq}>
-          <details><summary>Do I need to film anything?</summary><p>No. If you have clips of your work, send them, even phone videos. If you don’t have any yet, we use licensed stock footage that fits your business, or you can send clips later and we start once they arrive.</p></details>
+          <details><summary>Do I need to film anything?</summary><p>No. The whole reel is 3D: the ant, the car and your branded ending. If you’d like your own clips in it too, add a link in the brief and we’ll cut them in.</p></details>
           <details><summary>Will it go viral?</summary><p>No one can promise that. What we can promise is the opening that’s working right now, built properly for your business, and one free redo if the first cut isn’t right.</p></details>
-          <details><summary>What do you need from me after I pay?</summary><p>Checkout takes you straight to a short form: your business name, your Instagram handle, the thing your customers dream about, and a link to your clips. It takes about two minutes. Your first cut arrives within 3 business days.</p></details>
+          <details><summary>What do you need from me after I pay?</summary><p>Checkout takes you straight to a short form: your business name, your Instagram handle, the thing your customers dream about, and what you do for them. It takes about two minutes, and your reel arrives within 24 hours.</p></details>
           <details><summary>Can I use it as an ad?</summary><p>Yes. You own the video, so you can post it, boost it or run it as a paid ad.</p></details>
         </div>
       </section>

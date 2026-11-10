@@ -6,7 +6,7 @@ export async function POST(req: Request) {
   const b = await req.json().catch(() => ({}))
   const f = (k: string, n = 300) => String(b[k] || '').trim().slice(0, n)
   const brief = { business: f('business', 120), name: f('name', 120), email: f('email', 160), instagram: f('instagram', 80), dream: f('dream', 120),
-    service: f('service', 160), clips: f('clips', 500), notes: f('notes', 2000) }
+    service: f('service', 160), phone: f('phone', 120), clips: f('clips', 500), notes: f('notes', 2000) }
   if (!/^\S+@\S+\.\S+$/.test(brief.email)) return NextResponse.json({ error: 'Add your email so we can send you the first cut.' }, { status: 400 })
   if (!brief.business || !brief.dream) return NextResponse.json({ error: 'Add your business name and what your customers dream of owning.' }, { status: 400 })
 
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     'HOOK REEL BRIEF (montero.cool/hook/start)', '',
     `Business: ${brief.business}`, `Name: ${brief.name}`, `Email: ${brief.email}`, `Instagram: ${brief.instagram}`, '',
     `Line: "What actually hurts is not owning ${brief.dream}... but if you do, we can ${brief.service || 'help'}."`, '',
-    `Clips: ${brief.clips || '(none yet, ask for them)'}`, '', 'Notes:', brief.notes || '-',
+    `Phone/site on end card: ${brief.phone || '-'}`, `Clips: ${brief.clips || '(none: full 3D version)'}`, '', 'Notes:', brief.notes || '-',
   ].join('\n')
   const [mail, hook] = await Promise.all([
     sendEmail({ to: process.env.FREE_REEL_NOTIFY_EMAIL || 'ai@montero.cool', subject: `HOOK REEL brief: ${brief.business}`, text, replyTo: brief.email }),
