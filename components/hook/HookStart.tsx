@@ -71,6 +71,17 @@ export function HookStart() {
               </label>
               <label htmlFor="b-clips">Photos or videos you want in it (optional: Google Drive, Dropbox or WeTransfer link)</label>
               <input id="b-clips" name="clips" placeholder="Leave blank for the full 3D version" maxLength={500} />
+              <details className={s.guide}>
+                <summary>Filming your own clips? A 1-minute guide</summary>
+                <ul>
+                  <li><b>Vertical, back camera, clean lens.</b> 4K at 60 fps if your phone has it.</li>
+                  <li><b>Good light:</b> open shade or the hour before sunset. Avoid harsh noon sun and dim garages.</li>
+                  <li><b>3 to 6 clips, 3 to 8 seconds each:</b> a slow walk-around at car height, a close glide along the paint and reflections, a wheel and caliper close-up, a before and after of the same panel, the interior.</li>
+                  <li><b>Move slowly and steadily.</b> Hold still for 2 seconds at the start and end. Don’t zoom.</li>
+                  <li><b>Send the original files</b> through Google Drive, Dropbox or WeTransfer, not screenshots or Instagram downloads.</li>
+                  <li>We steady, color-correct and upscale every clip, so phone footage is fine.</li>
+                </ul>
+              </details>
               {!change && <>
                 <label htmlFor="b-notes">Anything else? An offer to mention, a different bug, colors</label><textarea id="b-notes" name="notes" rows={3} maxLength={2000} />
               </>}

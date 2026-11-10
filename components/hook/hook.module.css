@@ -196,3 +196,7 @@
 .check { display: flex; gap: 10px; align-items: flex-start; color: var(--ink) !important; cursor: pointer; }
 .check input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--gold); flex: none; }
 .form input[type="file"] { padding: 10px; font-size: 14px; }
+.guide { border: 1px solid var(--rim); border-radius: 12px; background: rgba(0, 0, 0, 0.25); padding: 12px 14px; margin-top: 4px; }
+.guide summary { cursor: pointer; color: var(--gold-hi); font-size: 14px; font-weight: 600; }
+.guide ul { margin: 10px 0 2px; padding-left: 18px; display: grid; gap: 6px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.guide b { color: var(--ink); }
