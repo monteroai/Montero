@@ -9,8 +9,9 @@ export function HookStart() {
   const [state, setState] = useState<'idle' | 'sending' | 'done'>('idle')
   const [err, setErr] = useState('')
   const [change, setChange] = useState(false)
+  const [approve, setApprove] = useState(false)
   const [noLogo, setNoLogo] = useState(false)
-  useEffect(() => { setChange(new URLSearchParams(window.location.search).has('change')) }, [])
+  useEffect(() => { const q = new URLSearchParams(window.location.search); setChange(q.has('change')); setApprove(q.has('approve')) }, [])
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -20,7 +21,7 @@ export function HookStart() {
     if (!/^\S+@\S+\.\S+$/.test(email)) { setErr('Add your email so we can send you your reel.'); setState('idle'); return }
     const logo = fd.get('logo')
     if (logo instanceof File && logo.size > 7.5 * 1024 * 1024) { setErr('That logo file is over 7.5 MB. Try a smaller PNG or JPG.'); setState('idle'); return }
-    fd.set('form-name', 'hook-brief'); fd.set('kind', change ? 'change request' : 'new reel brief')
+    fd.set('form-name', 'hook-brief'); fd.set('kind', approve ? 'APPROVED: send final file' : change ? 'change request' : 'new reel brief')
     // Netlify Forms keeps the brief and the uploaded logo (Netlify dashboard + email notice). The API route is a text-only backup.
     const net = fetch('/__forms.html', { method: 'POST', body: fd }).then((r) => r.ok).catch(() => false)
     const text: Record<string, string> = {}
@@ -35,19 +36,34 @@ export function HookStart() {
     <div className={s.page}>
       <header className={s.bar}><div className={s.barIn}><a href="/" className={s.brand} aria-label="Montero home">MONTERO</a></div></header>
       <section className={s.startWrap}>
-        {state === 'done' ? (
+        {approve && state !== 'done' ? (
+          <form className={s.priceCard} onSubmit={submit}>
+            <p className={s.label}>Approve your reel</p>
+            <h1 className={s.startH}>Happy with your preview?</h1>
+            <p className={s.muted}>Approve it and we email you the full-quality file without the watermark, ready to post. Want changes instead? Use the change form and we send a new preview.</p>
+            <div className={s.form}>
+              <label htmlFor="a-business">Business name</label><input id="a-business" name="business" required maxLength={120} />
+              <label htmlFor="a-email">Email we sent the preview to</label><input id="a-email" name="email" type="email" required maxLength={160} />
+              <label className={s.check} htmlFor="a-ok"><input id="a-ok" name="approved" type="checkbox" value="yes" required />
+                <span>I approve my reel. I understand the money-back guarantee ends once I approve.</span></label>
+            </div>
+            {err && <p className={s.err} role="alert">{err}</p>}
+            <button className={`${s.btn} ${s.btnBlock}`} disabled={state === 'sending'}>{state === 'sending' ? 'Sending…' : 'Approve and send my file'}</button>
+            <p className={s.muted}><a href="/hook/start?change=1" style={{ color: 'var(--gold-hi)' }}>I want changes instead</a></p>
+          </form>
+        ) : state === 'done' ? (
           <div className={s.priceCard}>
             <p className={s.label}>Got it</p>
-            <h1 className={s.startH}>{change ? 'Your changes are in.' : 'Your brief is in.'}</h1>
-            <p className={s.lead}>{change ? 'We’ll send the updated reel to the same email, usually within 24 hours.'
-              : 'Your reel arrives within 24 hours, ready to post. Once you’ve seen it, you get 2 free rounds of changes, like a new logo, your own clips or different words.'}</p>
+            <h1 className={s.startH}>{approve ? 'Approved. Your file is on its way.' : change ? 'Your changes are in.' : 'Your brief is in.'}</h1>
+            <p className={s.lead}>{approve ? 'We’ll email the full-quality reel to you shortly, ready to post.' : change ? 'We’ll send an updated preview to the same email, usually within 24 hours.'
+              : 'Your preview arrives within 24 hours. Approve it and you get the full-quality file, or ask for changes. 2 rounds are free, and if you still don’t love it, you get your money back.'}</p>
           </div>
         ) : (
           <form className={s.priceCard} onSubmit={submit} encType="multipart/form-data">
             <p className={s.label}>{change ? 'Free changes' : 'Step 2 of 4 · Your brief'}</p>
             <h1 className={s.startH}>{change ? 'What should we change?' : 'Thanks for your order. Tell us about your reel.'}</h1>
             <p className={s.muted}>{change ? 'Tell us what to change and add any files. Your updated reel comes back to the same email.'
-              : 'About two minutes. No filming needed. Your reel arrives within 24 hours, and 2 rounds of changes after that are free.'}</p>
+              : 'About two minutes. No filming needed. Your preview arrives within 24 hours. Love it or your money back.'}</p>
             <div className={s.form}>
               <label htmlFor="b-business">Business name</label><input id="b-business" name="business" required maxLength={120} />
               <label htmlFor="b-email">Email for your reel</label><input id="b-email" name="email" type="email" required maxLength={160} />
