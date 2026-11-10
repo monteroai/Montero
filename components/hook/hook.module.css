@@ -180,3 +180,14 @@
 .roiBig { font-size: clamp(44px, 6vw, 64px); font-weight: 750; letter-spacing: -0.04em; color: var(--gold-hi); font-variant-numeric: tabular-nums; line-height: 1; }
 .roiOut .note { text-align: left; }
 @media (max-width: 860px) { .roi { grid-template-columns: 1fr; } }
+
+/* before/after compare slider on the hero phone */
+.cmpLine { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #fff; box-shadow: 0 0 12px rgba(0, 0, 0, 0.6); pointer-events: none; z-index: 2; }
+.cmpLine i { position: absolute; top: 50%; left: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; background: rgba(10, 10, 12, 0.7); border: 2px solid #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5); }
+.cmpLine i::before { content: '‹ ›'; position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: 15px; font-style: normal; letter-spacing: 2px; }
+.cmpLab { position: absolute; bottom: 12px; z-index: 2; font-family: var(--voice); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #fff;
+  background: rgba(0, 0, 0, 0.55); padding: 5px 8px; border-radius: 6px; pointer-events: none; }
+.cmpL { left: 12px; } .cmpR { right: 12px; color: var(--gold-hi); }
+.cmpRange { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; z-index: 3; touch-action: pan-y; }
+.cmpRange:focus-visible + * { outline: none; }

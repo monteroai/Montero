@@ -30,9 +30,16 @@ function useVisiblePlay() {
   return ref
 }
 
-function Phone3D({ dream, service }: { dream: string; service: string }) {
+function Phone3D({ dream, service, compare = false }: { dream: string; service: string; compare?: boolean }) {
   const [t, setT] = useState(0)
+  const [pos, setPos] = useState(50)
   const vref = useVisiblePlay()
+  const aref = useRef<HTMLVideoElement>(null)
+  const sync = (v: HTMLVideoElement) => {
+    setT(v.currentTime)
+    const a = aref.current
+    if (a && a.duration && Math.abs(a.currentTime - v.currentTime) > 0.12) a.currentTime = Math.min(v.currentTime, a.duration - 0.05)
+  }
   const cap = t < 2.9 ? <>When an ant bites you, it grabs your skin with its pinchers</>
     : t < CUT ? <>But it’s not the pinchers that hurt you</>
     : t < 8.3 ? <>What actually hurts is not owning <b>{dream}</b></>
@@ -40,10 +47,21 @@ function Phone3D({ dream, service }: { dream: string; service: string }) {
   const beat = t < 2.9 ? 0 : t < CUT ? 1 : t < 8.3 ? 2 : 3
   return (
     <div className={s.screen}>
-      <video ref={vref} className={s.vid} src="/hook/ant.mp4" poster="/hook/ant.jpg" muted loop playsInline preload="auto"
-        onTimeUpdate={(e) => setT(e.currentTarget.currentTime)} aria-label="3D low-poly ant pulling up skin, then a cut to a car, rendered by Montero" />
+      <video ref={vref} className={s.vid} src={compare ? '/hook/ant.mp4' : '/hook/ant_ai.mp4'} poster={compare ? '/hook/ant.jpg' : '/hook/ant_ai.jpg'} muted loop playsInline preload="auto"
+        onTimeUpdate={(e) => sync(e.currentTarget)}
+        onPlay={() => aref.current?.play().catch(() => {})} onPause={() => aref.current?.pause()}
+        aria-label={compare ? '3D grid render of the ant and the car, made by Montero' : 'Finished ant reel: an ant pulls up skin, then a cut to a Porsche 911'} />
+      {compare && <>
+        <video ref={aref} className={s.vid} src="/hook/ant_ai.mp4" poster="/hook/ant_ai.jpg" muted playsInline preload="auto"
+          style={{ clipPath: `inset(0 0 0 ${pos}%)` }} aria-hidden="true" />
+        <span className={s.cmpLine} style={{ left: `${pos}%` }} aria-hidden="true"><i /></span>
+        <span className={`${s.cmpLab} ${s.cmpL}`}>3D render</span>
+        <span className={`${s.cmpLab} ${s.cmpR}`}>Finished</span>
+        <input id="hk-compare" className={s.cmpRange} type="range" min={0} max={100} value={pos} onChange={(e) => setPos(+e.target.value)}
+          aria-label="Drag to compare the 3D render with the finished reel" />
+      </>}
       <p key={beat} className={`${s.cap} ${s.capIn}`}>{cap}</p>
-      {t >= CUT ? <span className={`${s.badge} ${s.badgeAd}`}>This part is your ad</span> : <span className={s.badge}>Rendered in 3D by Montero</span>}
+      {t >= CUT ? <span className={`${s.badge} ${s.badgeAd}`}>This part is your ad</span> : <span className={s.badge}>{compare ? 'Drag to compare' : 'Made in 3D by Montero'}</span>}
     </div>
   )
 }
@@ -138,8 +156,8 @@ export function HookPage() {
         </div>
         <div className={s.stage}>
           <div className={s.glow} aria-hidden="true" />
-          <div className={s.phone}><Phone3D dream={dream} service={service} /></div>
-          <p className={s.stageNote}>We built this ant from scratch to show you we can. Yours is styled to match your brand.</p>
+          <div className={s.phone}><Phone3D dream={dream} service={service} compare /></div>
+          <p className={s.stageNote}>Drag across the video: our 3D render on the left, the finished reel on the right.</p>
         </div>
       </section>
 
