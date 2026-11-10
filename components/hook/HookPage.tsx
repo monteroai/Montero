@@ -263,6 +263,7 @@ export function HookPage() {
           <details><summary>Do I need to film anything?</summary><p>No. The whole reel is 3D: the ant, the car and your branded ending. If you’d like your own clips in it too, add a link in the brief and we’ll cut them in.</p></details>
           <details><summary>Will it go viral?</summary><p>No one can promise that. What we can promise is the opening that’s working right now, built properly for your business, and one free redo if the first cut isn’t right.</p></details>
           <details><summary>What do you need from me after I pay?</summary><p>Checkout takes you straight to a short form: your business name, your Instagram handle, the thing your customers dream about, and what you do for them. It takes about two minutes, and your reel arrives within 24 hours.</p></details>
+          <details><summary>What if I change my mind?</summary><p>Your reel goes into production as soon as you send your brief, so payments are non-refundable once production starts. If something isn’t right, you get one free redo.</p></details>
           <details><summary>Can I use it as an ad?</summary><p>Yes. You own the video, so you can post it, boost it or run it as a paid ad.</p></details>
         </div>
       </section>
