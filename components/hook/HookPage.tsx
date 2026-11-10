@@ -8,13 +8,6 @@ export const STRIPE = 'https://buy.stripe.com/14A8wRdwn0Yl9X4aLhfbq02'
 const ORIGINAL = 'https://www.instagram.com/reel/DfdbBaxC4gz/'
 const COPY = 'https://www.instagram.com/reel/DfhieBZuLML/'
 const THIRD = 'https://www.instagram.com/reel/DffaQnRPtd2/'
-const PRESETS = [
-  { k: 'Detailing', dream: 'a Porsche 911', service: 'keep it looking perfect' },
-  { k: 'Pools', dream: 'a pool', service: 'keep it perfect all summer' },
-  { k: 'Watches', dream: 'a Rolex', service: 'keep it running perfectly' },
-  { k: 'Motorcycles', dream: 'a Ducati', service: 'keep you riding' },
-  { k: 'Boats', dream: 'a 40-foot boat', service: 'keep it ready every weekend' },
-]
 
 /* The 3D render in the phone: ant bite (0-6.2s), then a cut to the car, which stands in for the client's own clips. */
 const CUT = 6.2
@@ -150,8 +143,7 @@ function Roi() {
 
 export function HookPage() {
   useCleanAnchors()
-  const [dream, setDream] = useState(PRESETS[0].dream)
-  const [service, setService] = useState(PRESETS[0].service)
+  const dream = 'a Porsche 911', service = 'keep it looking perfect'
   return (
     <div className={s.page}>
       <header className={s.bar}>
@@ -216,7 +208,7 @@ export function HookPage() {
           <article className={s.step}>
             <p className={s.when}>3–8s</p>
             <h3>The punchline</h3>
-            <p>“What actually hurts is not owning…” and then the thing your customers wish they had. A Porsche, a pool, a Rolex.</p>
+            <p>“What actually hurts is not owning…” and then the car your customers wish they had. A Porsche, a BMW, a Hellcat.</p>
           </article>
           <article className={s.step}>
             <p className={s.when}>8–15s</p>
@@ -226,23 +218,6 @@ export function HookPage() {
         </div>
         </div>
 
-        <div className={s.builder}>
-          <div>
-            <h3>Try your line</h3>
-            <p className={s.muted}>Pick your business or type your own. The captions on the phone change to match.</p>
-            <div className={s.chips}>
-              {PRESETS.map((p) => (
-                <button key={p.k} type="button" className={`${s.chip} ${dream === p.dream ? s.chipOn : ''}`} onClick={() => { setDream(p.dream); setService(p.service) }}>{p.k}</button>
-              ))}
-            </div>
-          </div>
-          <div className={s.fields}>
-            <label htmlFor="hk-dream">What actually hurts is not owning…</label>
-            <input id="hk-dream" value={dream} maxLength={40} onChange={(e) => setDream(e.target.value)} />
-            <label htmlFor="hk-svc">But if you do, we can…</label>
-            <input id="hk-svc" value={service} maxLength={50} onChange={(e) => setService(e.target.value)} />
-          </div>
-        </div>
       </section>
 
       <section id="why" className={s.section}>
