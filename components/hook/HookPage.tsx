@@ -35,11 +35,26 @@ function Phone3D({ dream, service, compare = false }: { dream: string; service: 
   const [pos, setPos] = useState(50)
   const vref = useVisiblePlay()
   const aref = useRef<HTMLVideoElement>(null)
-  const sync = (v: HTMLVideoElement) => {
-    setT(v.currentTime)
-    const a = aref.current
-    if (a && a.duration && Math.abs(a.currentTime - v.currentTime) > 0.12) a.currentTime = Math.min(v.currentTime, a.duration - 0.05)
-  }
+  // Keep the finished video locked to the render without constant seeking (seeks cause the stutter):
+  // nudge its playback speed for small drift, hard-seek only on big drift (loop restart, tab wake).
+  useEffect(() => {
+    if (!compare) return
+    let raf = 0
+    const tick = () => {
+      const v = vref.current, a = aref.current
+      if (v && a && !v.paused && a.readyState >= 2) {
+        const d = v.currentTime - a.currentTime
+        if (Math.abs(d) > 0.5) { a.currentTime = v.currentTime; a.playbackRate = 1 }
+        else a.playbackRate = Math.abs(d) > 0.04 ? 1 + Math.max(-0.15, Math.min(0.15, d * 1.5)) : 1
+        if (a.paused) a.play().catch(() => {})
+      }
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [compare, vref])
+  const sync = (v: HTMLVideoElement) => setT(v.currentTime)
+  const fadeL = Math.max(0, Math.min(1, (pos - 10) / 22)), fadeR = Math.max(0, Math.min(1, (90 - pos) / 22))
   const cap = t < 2.9 ? <>When an ant bites you, it grabs your skin with its pinchers</>
     : t < CUT ? <>But it’s not the pinchers that hurt you</>
     : t < 8.3 ? <>What actually hurts is not owning <b>{dream}</b></>
@@ -52,11 +67,11 @@ function Phone3D({ dream, service, compare = false }: { dream: string; service: 
         onPlay={() => aref.current?.play().catch(() => {})} onPause={() => aref.current?.pause()}
         aria-label={compare ? '3D grid render of the ant and the car, made by Montero' : 'Finished ant reel: an ant pulls up skin, then a cut to a Porsche 911'} />
       {compare && <>
-        <video ref={aref} className={s.vid} src="/hook/ant_ai.mp4" poster="/hook/ant_ai.jpg" muted playsInline preload="auto"
+        <video ref={aref} className={s.vid} src="/hook/ant_ai.mp4" poster="/hook/ant_ai.jpg" muted loop playsInline preload="auto"
           style={{ clipPath: `inset(0 0 0 ${pos}%)` }} aria-hidden="true" />
         <span className={s.cmpLine} style={{ left: `${pos}%` }} aria-hidden="true"><i /></span>
-        <span className={`${s.cmpLab} ${s.cmpL}`}>3D render</span>
-        <span className={`${s.cmpLab} ${s.cmpR}`}>Finished</span>
+        <span className={`${s.cmpLab} ${s.cmpL}`} style={{ opacity: fadeL, transform: `scale(${0.7 + 0.3 * fadeL})` }}>3D render</span>
+        <span className={`${s.cmpLab} ${s.cmpR}`} style={{ opacity: fadeR, transform: `scale(${0.7 + 0.3 * fadeR})` }}>Finished</span>
         <input id="hk-compare" className={s.cmpRange} type="range" min={0} max={100} value={pos} onChange={(e) => setPos(+e.target.value)}
           aria-label="Drag to compare the 3D render with the finished reel" />
       </>}
