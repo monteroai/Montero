@@ -193,3 +193,6 @@
 .cmpRange:focus-visible + * { outline: none; }
 .cmpLab { transition: opacity 0.15s linear, transform 0.15s linear; }
 .cmpL { transform-origin: left bottom; } .cmpR { transform-origin: right bottom; }
+.check { display: flex; gap: 10px; align-items: flex-start; color: var(--ink) !important; cursor: pointer; }
+.check input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--gold); flex: none; }
+.form input[type="file"] { padding: 10px; font-size: 14px; }

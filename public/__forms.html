@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html><body>
-<!-- Static copy of the /hook/start brief form so Netlify Forms detects it at deploy. Not linked anywhere. -->
-<form name="hook-brief" data-netlify="true" netlify-honeypot="bot-field" hidden>
+<!-- Static copy of the /hook/start form so Netlify Forms detects it at deploy (incl. the logo upload). Not linked anywhere. -->
+<form name="hook-brief" data-netlify="true" netlify-honeypot="bot-field" enctype="multipart/form-data" hidden>
   <input type="hidden" name="form-name" value="hook-brief" />
-  <input name="bot-field" />
+  <input name="bot-field" /><input name="kind" />
   <input name="business" /><input name="name" /><input name="email" type="email" /><input name="instagram" />
-  <input name="dream" /><input name="service" /><input name="phone" /><input name="clips" /><textarea name="notes"></textarea>
+  <input name="dream" /><input name="service" /><input name="website" /><input name="phone" />
+  <input name="logo" type="file" /><input name="nologo" type="checkbox" value="yes" />
+  <input name="clips" /><textarea name="notes"></textarea><textarea name="changes"></textarea>
 </form>
 </body></html>

@@ -167,7 +167,7 @@ export function HookPage() {
           <h1>One ant reel. <em>370,000 likes.</em> Yours next.</h1>
           <p className={s.lead}>The funniest ad format on Instagram right now, built for your business. A 3D ant, your punchline, your work. Ready to post.</p>
           <div className={s.ctas}><a href={STRIPE} className={s.btn}>Get my reel · $447</a><a href="#proof" className={s.ghost}>Watch the original</a></div>
-          <p className={s.sub}>Delivered in 24 hours · One free redo · No filming needed</p>
+          <p className={s.sub}>Delivered in 24 hours · 2 free rounds of changes · No filming needed</p>
         </div>
         <div className={s.stage}>
           <div className={s.glow} aria-hidden="true" />
@@ -275,17 +275,17 @@ export function HookPage() {
           </div>
           <ul className={s.incl}>
             <li>A 3D hook scene made from scratch for your reel, the ant or your own idea</li>
-            <li>Your line, voiced and captioned, with your name, handle and number at the end</li>
+            <li>Your line, voiced and captioned, ending on your logo, handle and number. No logo? We make you one.</li>
             <li>No filming: the whole reel is 3D. Want your own clips in it? Add them and we cut them in.</li>
             <li>Vertical 9:16 file ready for Reels, TikTok and Shorts</li>
-            <li>Delivered within 24 hours. Don’t love it? We redo it once, free.</li>
+            <li>Delivered within 24 hours, ready to post. After that, 2 rounds of changes are free: your logo, your clips, new words.</li>
             <li>You own the finished video</li>
           </ul>
           <ol className={s.flow}>
             <li><b>Pay</b><span>Secure checkout through Stripe.</span></li>
-            <li><b>Two-minute brief</b><span>Right after checkout: your business name, your line and your handle.</span></li>
+            <li><b>Two-minute brief</b><span>Right after checkout: your line, your website and your logo.</span></li>
             <li><b>Your reel within 24 hours</b><span>We email it to you, ready to post.</span></li>
-            <li><b>Post it</b><span>Or ask for your one free redo first.</span></li>
+            <li><b>Post it</b><span>Or send changes first. Two rounds are free.</span></li>
           </ol>
         </div>
       </section>
@@ -294,9 +294,9 @@ export function HookPage() {
         <p className={s.label}>Questions</p>
         <div className={s.faq}>
           <details><summary>Do I need to film anything?</summary><p>No. The whole reel is 3D: the ant, the car and your branded ending. If you’d like your own clips in it too, add a link in the brief and we’ll cut them in.</p></details>
-          <details><summary>Will it go viral?</summary><p>No one can promise that. What we can promise is the opening that’s working right now, built properly for your business, and one free redo if the first cut isn’t right.</p></details>
+          <details><summary>Will it go viral?</summary><p>No one can promise that. What we can promise is the opening that’s working right now, built properly for your business, and two free rounds of changes until it’s right.</p></details>
           <details><summary>What do you need from me after I pay?</summary><p>Checkout takes you straight to a short form: your business name, your Instagram handle, the thing your customers dream about, and what you do for them. It takes about two minutes, and your reel arrives within 24 hours.</p></details>
-          <details><summary>What if I change my mind?</summary><p>Your reel goes into production as soon as you send your brief, so payments are non-refundable once production starts. If something isn’t right, you get one free redo.</p></details>
+          <details><summary>What if I change my mind?</summary><p>Your reel goes into production as soon as you send your brief, so payments are non-refundable once production starts. If something isn’t right, you get two free rounds of changes.</p></details>
           <details><summary>Can I use it as an ad?</summary><p>Yes. You own the video, so you can post it, boost it or run it as a paid ad.</p></details>
         </div>
       </section>
