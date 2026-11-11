@@ -5,7 +5,8 @@ import s from './hook.module.css'
 
 /* /hook/start          = the brief right after checkout (reel delivered within 24 hours)
    /hook/start?change=1 = free changes after they've seen their reel (new logo, clips, words) */
-export function HookStart() {
+export function HookStart({ food = false }: { food?: boolean }) {
+  const base = food ? '/drone/start' : '/hook/start'
   const [state, setState] = useState<'idle' | 'sending' | 'done'>('idle')
   const [err, setErr] = useState('')
   const [change, setChange] = useState(false)
@@ -21,7 +22,7 @@ export function HookStart() {
     if (!/^\S+@\S+\.\S+$/.test(email)) { setErr('Add your email so we can send you your reel.'); setState('idle'); return }
     const logo = fd.get('logo')
     if (logo instanceof File && logo.size > 7.5 * 1024 * 1024) { setErr('That logo file is over 7.5 MB. Try a smaller PNG or JPG.'); setState('idle'); return }
-    fd.set('form-name', 'hook-brief'); fd.set('kind', approve ? 'APPROVED: send final file' : change ? 'change request' : 'new reel brief')
+    fd.set('form-name', 'hook-brief'); fd.set('kind', (food ? 'RESTAURANT ' : '') + (approve ? 'APPROVED: send final file' : change ? 'change request' : 'new reel brief'))
     // Netlify Forms keeps the brief and the uploaded logo (Netlify dashboard + email notice). The API route is a text-only backup.
     const net = fetch('/__forms.html', { method: 'POST', body: fd }).then((r) => r.ok).catch(() => false)
     const text: Record<string, string> = {}
@@ -49,7 +50,7 @@ export function HookStart() {
             </div>
             {err && <p className={s.err} role="alert">{err}</p>}
             <button className={`${s.btn} ${s.btnBlock}`} disabled={state === 'sending'}>{state === 'sending' ? 'Sending…' : 'Approve and send my file'}</button>
-            <p className={s.muted}><a href="/hook/start?change=1" style={{ color: 'var(--gold-hi)' }}>I want changes instead</a></p>
+            <p className={s.muted}><a href={`${base}?change=1`} style={{ color: 'var(--gold-hi)' }}>I want changes instead</a></p>
           </form>
         ) : state === 'done' ? (
           <div className={s.priceCard}>
@@ -63,15 +64,20 @@ export function HookStart() {
             <p className={s.label}>{change ? 'Free changes' : 'Step 2 of 4 · Your brief'}</p>
             <h1 className={s.startH}>{change ? 'What should we change?' : 'Thanks for your order. Tell us about your reel.'}</h1>
             <p className={s.muted}>{change ? 'Tell us what to change and add any files. Your updated reel comes back to the same email.'
-              : 'About two minutes. No filming needed. Your preview arrives within 24 hours. Love it or your money back.'}</p>
+              : (food ? 'About two minutes. Phone clips of your food help, but they’re optional. ' : 'About two minutes. No filming needed. ') + 'Your preview arrives within 24 hours. Love it or your money back.'}</p>
             <div className={s.form}>
               <label htmlFor="b-business">Business name</label><input id="b-business" name="business" required maxLength={120} />
               <label htmlFor="b-email">Email for your reel</label><input id="b-email" name="email" type="email" required maxLength={160} />
               {!change && <>
                 <label htmlFor="b-name">Your name</label><input id="b-name" name="name" maxLength={120} />
                 <label htmlFor="b-ig">Instagram handle</label><input id="b-ig" name="instagram" placeholder="@yourbusiness" maxLength={80} />
-                <label htmlFor="b-dream">What actually hurts is not owning…</label><input id="b-dream" name="dream" required placeholder="a Porsche 911" maxLength={120} />
-                <label htmlFor="b-svc">But if you do, we can…</label><input id="b-svc" name="service" placeholder="keep it looking perfect" maxLength={160} />
+                {food ? <>
+                  <label htmlFor="b-dream">Your signature item</label><input id="b-dream" name="dream" required placeholder="smash burger with our house sauce" maxLength={120} />
+                  <label htmlFor="b-svc">Your address (shown at the end)</label><input id="b-svc" name="service" placeholder="418 Main St, Springfield" maxLength={160} />
+                </> : <>
+                  <label htmlFor="b-dream">What actually hurts is not owning…</label><input id="b-dream" name="dream" required placeholder="a Porsche 911" maxLength={120} />
+                  <label htmlFor="b-svc">But if you do, we can…</label><input id="b-svc" name="service" placeholder="keep it looking perfect" maxLength={160} />
+                </>}
                 <label htmlFor="b-site">Website</label><input id="b-site" name="website" placeholder="yourbusiness.com" maxLength={200} />
                 <label htmlFor="b-phone">Phone number to show at the end (optional)</label><input id="b-phone" name="phone" placeholder="(203) 555-0147" maxLength={60} />
               </>}
@@ -86,7 +92,7 @@ export function HookStart() {
                 <span>No logo yet? Make me one. We design a clean wordmark for free.</span>
               </label>
               <label htmlFor="b-clips">Photos or videos you want in it (optional: Google Drive, Dropbox or WeTransfer link)</label>
-              <input id="b-clips" name="clips" placeholder="Leave blank for the full 3D version" maxLength={500} />
+              <input id="b-clips" name="clips" placeholder={food ? 'Leave blank and we use the photos on your site' : 'Leave blank for the full 3D version'} maxLength={500} />
               <details className={s.guide}>
                 <summary>Filming your own clips? A 1-minute guide</summary>
                 <ul>
