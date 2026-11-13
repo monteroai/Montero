@@ -1,0 +1,85 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="robots" content="noindex, nofollow"><title>Astonishing Detail Reel</title>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a contact-sheet storyboard — each beat is one line of the reel's text over its frames side by side; then the draft reel and the originals; one next step. */
+:root{
+  --bg:#f1f3f3; --panel:#ffffff; --ink:#132022; --muted:#5a6b6c; --line:#d7dfdf; --teal:#0e868b; --gold:#e3ad00;
+  --display:"Archivo",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1515;--panel:#162020;--ink:#e7efee;--muted:#93a5a4;--line:#273434;--teal:#3fc4c9;--gold:#ffcf3a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1515;--panel:#162020;--ink:#e7efee;--muted:#93a5a4;--line:#273434;--teal:#3fc4c9;--gold:#ffcf3a;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);margin:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+.wrap{max-width:1280px;margin:0 auto;display:grid;gap:30px}
+header{display:flex;flex-wrap:wrap;gap:18px 28px;align-items:center;justify-content:space-between}
+header .t{display:grid;gap:6px}
+.logo{height:40px;width:auto;background:#0f1719;padding:9px 13px;border-radius:6px}
+.eyebrow{font:500 12px var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--teal)}
+h1{font:800 clamp(28px,4.4vw,44px)/1.05 var(--display);margin:0;letter-spacing:-.015em}
+.idea{margin:0;color:var(--muted);max-width:56ch}
+h2{font:800 20px var(--display);margin:0 0 4px}
+.beat{display:grid;gap:10px}
+.beat .line{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.beat .tc{font:500 12px var(--mono);color:var(--teal);font-variant-numeric:tabular-nums;min-width:86px}
+.beat q{font:700 17px/1.3 var(--display);quotes:none}
+.strip{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(140px,210px);gap:8px;overflow-x:auto;padding-bottom:4px;justify-content:start}
+.strip img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:8px;display:block;background:#000}
+.board{display:grid;gap:26px}
+.end{aspect-ratio:2/3;background:#0b2a2c;border-radius:8px;display:grid;place-items:center;padding:16px}
+.end img{width:85%;height:auto}
+.vids{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.vids figure{margin:0;display:grid;gap:6px}
+.vids video{width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:10px;background:#000}
+.vids figcaption{font-size:14px;color:var(--muted)}
+.vids figcaption b{color:var(--ink);font-weight:600}
+.vids a{color:var(--teal)}
+.next{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px 24px;display:flex;flex-wrap:wrap;gap:14px 30px;align-items:center;justify-content:space-between}
+.next p{margin:0;max-width:60ch}
+.next b{font:800 20px var(--display);display:block;margin-bottom:4px}
+.next .cta{font:600 15px var(--body);background:var(--teal);color:#fff;padding:12px 18px;border-radius:8px}
+footer{font-size:13px;color:var(--muted)}
+</style></head><body>
+
+<div class="wrap">
+  <header>
+    <div class="t">
+      <div class="eyebrow">Reel concept for Astonishing Detail</div>
+      <h1>"The Ant"</h1>
+      <p class="idea">A trending car-account format, rebuilt around your shop, your Toronado and your Corvette.</p>
+    </div>
+    <img loading="lazy" class="logo" src="/p/astonishing/logo.png" alt="Astonishing Detail">
+  </header>
+
+  <section class="board" aria-label="Storyboard">
+    <div class="beat"><div class="line"><span class="tc">0:00–0:06</span><q>When an ant bites you, it grabs your skin with its pinchers. But it's not actually the pinchers that hurt you.</q></div>
+      <div class="strip"><img loading="lazy" src="/p/astonishing/a1.jpg" alt="3D ant on skin"><img loading="lazy" src="/p/astonishing/a2.jpg" alt="3D ant close up"></div></div>
+    <div class="beat"><div class="line"><span class="tc">0:06–0:14</span><q>What actually hurts is those damn swirl marks on your baby. And it spreads.</q></div>
+      <div class="strip"><img loading="lazy" src="/p/astonishing/n1.jpg" alt="Swirled-up black sedan in the sun"><img loading="lazy" src="/p/astonishing/r2.jpg" alt="Inspection light revealing swirls"><img loading="lazy" src="/p/astonishing/r7.jpg" alt="Taped 50/50 hood"></div></div>
+    <div class="beat"><div class="line"><span class="tc">0:14–0:17</span><q>Every time the sun hits your paint, it gets worse.</q></div>
+      <div class="strip"><img loading="lazy" src="/p/astonishing/m2.jpg" alt="Man squinting at swirls on his hood in the sun"><img loading="lazy" src="/p/astonishing/r9.jpg" alt="Sun revealing swirls on an SUV hood"></div></div>
+    <div class="beat"><div class="line"><span class="tc">0:17–0:21</span><q>Every time a car rolls out of Astonishing Detail looking this good, yours looks even worse.</q></div>
+      <div class="strip"><img loading="lazy" src="/p/astonishing/r4.jpg" alt="Teal Toronado rolling out of the shop"><img loading="lazy" src="/p/astonishing/m3.jpg" alt="People on the sidewalk turning to watch the Toronado"></div></div>
+    <div class="beat"><div class="line"><span class="tc">0:21–0:26</span><q>And when one pulls up next to you at a red light, it's unbearable.</q></div>
+      <div class="strip"><img loading="lazy" src="/p/astonishing/l1.jpg" alt="Traffic light on red"><img loading="lazy" src="/p/astonishing/n2.jpg" alt="Faded red sedan and glossy Corvette side by side at the red light"><img loading="lazy" src="/p/astonishing/l2.jpg" alt="Man in aviators in the gleaming Corvette"><img loading="lazy" src="/p/astonishing/q3.jpg" alt="Jealous driver staring at the Corvette beside him"><img loading="lazy" src="/p/astonishing/q4.jpg" alt="Swirl marks on the faded sedan's door"></div></div>
+    <div class="beat"><div class="line"><span class="tc">0:26–0:33</span><q>Doctors say there's no cure. The only treatment is paint correction and a ceramic coating.</q></div>
+      <div class="strip"><img loading="lazy" src="/p/astonishing/m4.jpg" alt="Doctor holding up a swirled hood photo like an X-ray"><img loading="lazy" src="/p/astonishing/m5.jpg" alt="Ceramic coating applied to the Toronado"><img loading="lazy" src="/p/astonishing/r5.jpg" alt="Water beading on the Toronado"><div class="end"><img loading="lazy" src="/p/astonishing/logo.png" alt="Astonishing Detail logo"></div></div></div>
+  </section>
+
+  <section>
+    <h2>Rough cut, and the reels it's based on</h2>
+    <div class="vids">
+      <figure><video src="/p/astonishing/preview.mp4" controls playsinline muted loop preload="metadata" poster="/p/astonishing/a1.jpg"></video><figcaption><b>Your rough cut.</b> Quick animation to show the idea. Voiceover to come.</figcaption></figure>
+      <figure><video src="/p/astonishing/orig.mp4" controls playsinline muted loop preload="metadata"></video><figcaption><b>The original.</b> <a href="https://www.instagram.com/reel/DfdbBaxC4gz/">Watch on Instagram</a></figcaption></figure>
+      <figure><video src="/p/astonishing/copy.mp4" controls playsinline muted loop preload="metadata"></video><figcaption><b>Another car account's take.</b> <a href="https://www.instagram.com/reel/DfkE35dg9c8/">Watch on Instagram</a></figcaption></figure>
+    </div>
+  </section>
+
+  <section class="next">
+    <p><b>Like the idea?</b>Reply to our email with a yes. The full, finished reel takes about a day to make and arrives ready to post.</p>
+    <span class="cta">Reply "yes" to get started</span>
+  </section>
+
+  <footer>Prepared by Montero · montero.cool</footer>
+</div>
+</body></html>
