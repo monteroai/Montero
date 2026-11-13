@@ -43,8 +43,14 @@ h2{font:800 21px var(--display);margin:0 0 12px}
 .lnk{font-size:14px;color:var(--teal);justify-self:start}
 @media (max-width:860px){.proof{grid-template-columns:1fr}}
 .next{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px 24px;display:flex;flex-wrap:wrap;gap:14px 30px;align-items:center;justify-content:space-between}
-.next p{margin:0;max-width:60ch}.next b{font:800 20px var(--display);display:block;margin-bottom:4px}
-.cta{font:600 15px var(--body);background:var(--teal);color:#fff;padding:12px 18px;border-radius:8px}
+.next .np{margin:0 0 10px;max-width:58ch}.next b{font:800 22px var(--display);display:block;margin-bottom:6px}
+.trust{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--muted)}
+.trust li::before{content:"✓";margin-right:6px;color:var(--teal);font-weight:700}
+.ctas{display:grid;gap:8px;justify-items:center}
+.q{font-size:13px;color:var(--muted)}
+.cta{font:700 17px var(--body);background:var(--teal);color:#fff;padding:15px 26px;border-radius:10px;text-decoration:none;display:inline-block}
+.cta:hover{filter:brightness(1.08)}
+.cta:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 footer{font-size:13px;color:var(--muted)}
 .lede2{margin:-4px 0 16px;color:var(--muted);max-width:62ch}
 .roi{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:24px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}
@@ -76,5 +82,5 @@ footer{font-size:13px;color:var(--muted)}
 <div class="rr"><label for="rj">Your average job (correction, ceramic, PPF)</label><output id="oj"></output><input id="rj" type="range" min="100" max="5000" step="50" value="900"></div>
 </div><div class="roiOut"><p class="rl">What one reel could bring in</p><p class="big" id="rev"></p><p class="rm" id="det"></p><p class="rn">These are your numbers, not a promise. Move the sliders to match your shop.</p></div></div>
 <script>(function(){const $=i=>document.getElementById(i),f=n=>n.toLocaleString('en-US',{maximumFractionDigits:0});function u(){const v=+$('rv').value,i=+$('ri').value,c=+$('rc').value,j=+$('rj').value,l=v/1e4*i,b=l*c/100,r=b*j,x=r/100;$('ov').textContent=f(v);$('oi').textContent=i;$('oc').textContent=c+'%';$('oj').textContent='$'+f(j);$('rev').textContent='$'+f(r);$('det').textContent=f(l)+' inquiries, about '+(b<10?b.toFixed(1):f(b))+' booked jobs. That’s '+(x<10?x.toFixed(1):f(x))+'x the cost of the reel.'}['rv','ri','rc','rj'].forEach(k=>$(k).addEventListener('input',u));u()})();</script></section>
-<section class="next"><p><b>Like the idea?</b>Reply to our email with a yes. The full, finished reel takes about a day to make and arrives ready to post.</p><span class="cta">Reply "yes" to get started</span></section>
+<section class="next"><div><b>Get your reel</b><p class="np">Your first one is $100, which covers the software it takes to make it. Formats like this usually run 3 to 4 weeks before everyone has seen them.</p><ul class="trust"><li>Delivered in about a day</li><li>Two rounds of changes</li><li>Full refund if you don't love it</li></ul></div><div class="ctas"><a class="cta" href="https://buy.stripe.com/bJe28tdwngXjd9gaLhfbq05?client_reference_id=astonishing-detail" target="_blank" rel="noopener">Get my reel · $100</a><span class="q">Questions? Just reply to our email.</span></div></section>
 <footer>Prepared by Montero · montero.cool</footer></div></body></html>
