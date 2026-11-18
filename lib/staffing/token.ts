@@ -4,7 +4,7 @@ import { createHmac } from 'crypto'
 // the link itself carries the agency's details, and the signature stops anyone from forging one.
 export type Agency = { n: string; e: string; p?: string; b?: string }   // name, email for applicants, phone, job board link
 
-const secret = () => process.env.APPLY_SECRET || process.env.RESEND_API_KEY || 'dev-only-secret'
+const secret = () => process.env.APPLY_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 const b64 = (s: string) => Buffer.from(s, 'utf8').toString('base64url')
 const sig = (body: string) => createHmac('sha256', secret()).update(body).digest('base64url').slice(0, 22)
 
@@ -15,7 +15,7 @@ export function makeToken(a: Agency): string {
 
 export function readToken(token: string): Agency | null {
   const [body, s] = String(token || '').split('.')
-  if (!body || !s || sig(body) !== s) return null
+  if (!secret() || !body || !s || sig(body) !== s) return null
   try {
     const a = JSON.parse(Buffer.from(body, 'base64url').toString('utf8'))
     return a && typeof a.n === 'string' && typeof a.e === 'string' ? a : null

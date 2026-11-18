@@ -19,7 +19,8 @@ export default function Page({ searchParams }: { searchParams: { done?: string; 
           <>
             <h1 style={h1}>A few questions and you are done</h1>
             <p style={{ margin: 0, color: '#5c5448' }}>This takes about a minute. There is nothing to install and no accounts to connect.</p>
-            {searchParams.error ? <p style={{ margin: 0, color: '#b83227' }}>Please add your agency name and a working email.</p> : null}
+            {searchParams.error === '2' ? <p style={{ margin: 0, color: '#b83227' }}>Something went wrong on our side and your details were not saved. Please email ai@montero.cool and we will set you up by hand.</p>
+              : searchParams.error ? <p style={{ margin: 0, color: '#b83227' }}>Please add your agency name and a working email.</p> : null}
             <form method="post" action="/api/start" style={{ display: 'grid', gap: 14 }}>
               <input name="company_site" tabIndex={-1} autoComplete="off" style={{ position: 'absolute', left: -9999 }} aria-hidden="true" />
               <label style={label}>Agency name<input name="agency" required style={box} /></label>
