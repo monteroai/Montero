@@ -102,7 +102,7 @@ export function drawAd(c: C, t: number, p: AdProps, opts: { watermark?: boolean 
     let y = 930
     if (p.rate) {
       fit(c, money(week), W / 2, y, 980, 900, 230, 'center')
-      c.globalAlpha = end * 0.9; y += 80; y += wrap(c, `a week at ${rt}/hr for ${p.hours} hours, before taxes`, W / 2, y, 900, 600, 50, 62)
+      c.globalAlpha = end * 0.9; y += 84; fit(c, `a week at ${rt}/hr for ${p.hours} hours, before taxes`, W / 2, y, 960, 600, 48, 'center'); y += 62
     } else {
       y = 800; y += wrap(c, p.title, W / 2, y + 90, 960, 900, 120, 128) + 60
     }

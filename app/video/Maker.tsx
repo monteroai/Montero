@@ -84,6 +84,20 @@ export default function Maker({ mode, initial, from = 'video page', madeFor }: {
   const name = `${p.agency}-${p.title}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'job-video'
   const caption = `${p.title}${p.rate ? `, $${p.rate} an hour` : ''}${p.where ? `, ${p.where}` : ''}. ${p.shift}. ${p.cta}`
 
+  const claimBlock = (<>
+            {claim === '' && <button type="button" onClick={() => setClaim('ask')} style={btn(blue)}>Get the video file, free</button>}
+            {(claim === 'ask' || claim === 'down') && (
+              <div style={{ display: 'grid', gap: 10, background: '#fff', border: `1px solid ${line}`, borderRadius: 14, padding: 14 }}>
+                <label style={lab}>Where should we send it?<input id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@youragency.com" style={box} /></label>
+                <button type="button" onClick={send} disabled={busy} style={btn(blue)}>{busy ? 'Sending…' : 'Email me the video'}</button>
+                <p style={{ margin: 0, fontSize: 13, color: muted }}>One free video per company. We send one email with your link and nothing else unless you reply.</p>
+                {claim === 'down' && <p style={{ margin: 0, color: red }}>We could not send it just now. Email ai@montero.cool and we will send your video by hand.</p>}
+              </div>
+            )}
+            {claim === 'sent' && <div role="status" style={{ background: '#fff', border: `1px solid ${line}`, borderRadius: 14, padding: 16 }}><b>Check your email.</b> The link to your video is on its way to {email} and should arrive within a minute or two.</div>}
+            {claim === 'used' && <div role="status" style={{ background: '#fff', border: `1px solid ${line}`, borderRadius: 14, padding: 16 }}><b>Your company already had its free video.</b> A new ad every week is $50 a month. <a href="/weekly" style={{ color: blue }}>See how it works</a>, or reply to the email we sent and tell us how the first one did.</div>}
+  </>)
+
   return (
     <main style={{ minHeight: '100vh', background: paper, color: ink, font: '16px/1.5 Arial, Helvetica, sans-serif', padding: '30px 18px 60px' }}>
       <div style={{ maxWidth: 460, margin: '0 auto', display: 'grid', gap: 18 }}>
@@ -115,6 +129,7 @@ export default function Maker({ mode, initial, from = 'video page', madeFor }: {
           </div>
         )}
 
+        {mode === 'made' && <div style={{ display: 'grid', gap: 12 }}>{claimBlock}<p style={{ margin: '6px 0 0', font: '700 15px Arial, Helvetica, sans-serif' }}>Want to change something first?</p></div>}
         {mode !== 'file' && stage === 'edit' && (
           <div ref={editRef} style={{ display: 'grid', gap: 12 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -124,17 +139,7 @@ export default function Maker({ mode, initial, from = 'video page', madeFor }: {
             {FIELDS.map(([k, label, ph]) => <label key={k} style={lab}>{label}<input id={k} value={String(p[k] ?? '')} onChange={(e) => set(k, e.target.value)} placeholder={ph} maxLength={60} style={box} /></label>)}
             <label style={{ ...lab, gridTemplateColumns: 'auto 1fr', alignItems: 'center', gap: 10 }}>Your colour<input id="brand" type="color" value={p.brand} onChange={(e) => set('brand', e.target.value)} style={{ width: 56, height: 36, border: `1px solid ${line}`, borderRadius: 8, background: '#fff', padding: 2 }} /></label>
 
-            {claim === '' && <button type="button" onClick={() => setClaim('ask')} style={btn(blue)}>Get the video file, free</button>}
-            {(claim === 'ask' || claim === 'down') && (
-              <div style={{ display: 'grid', gap: 10, background: '#fff', border: `1px solid ${line}`, borderRadius: 14, padding: 14 }}>
-                <label style={lab}>Where should we send it?<input id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@youragency.com" style={box} /></label>
-                <button type="button" onClick={send} disabled={busy} style={btn(blue)}>{busy ? 'Sending…' : 'Email me the video'}</button>
-                <p style={{ margin: 0, fontSize: 13, color: muted }}>One free video per company. We send one email with your link and nothing else unless you reply.</p>
-                {claim === 'down' && <p style={{ margin: 0, color: red }}>We could not send it just now. Email ai@montero.cool and we will send your video by hand.</p>}
-              </div>
-            )}
-            {claim === 'sent' && <div role="status" style={{ background: '#fff', border: `1px solid ${line}`, borderRadius: 14, padding: 16 }}><b>Check your email.</b> The link to your video is on its way to {email} and should arrive within a minute or two.</div>}
-            {claim === 'used' && <div role="status" style={{ background: '#fff', border: `1px solid ${line}`, borderRadius: 14, padding: 16 }}><b>Your company already had its free video.</b> A new ad every week is $50 a month. <a href="/weekly" style={{ color: blue }}>See how it works</a>, or reply to the email we sent and tell us how the first one did.</div>}
+            {mode !== 'made' && claimBlock}
             {mode === 'made' && <p style={{ margin: 0, color: muted }}>Have another opening? <a href="/video" style={{ color: blue }}>Paste any job posting</a> and it becomes a video the same way.</p>}
             {mode === 'make' && <button type="button" onClick={() => { setStage('paste'); setMsg(''); setClaim('') }} style={{ ...btn('transparent', muted), border: `1px solid ${line}` }}>Start over with another posting</button>}
           </div>
