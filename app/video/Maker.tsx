@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { AD_W, AD_H, AD_SECONDS, SAMPLE, cleanProps, drawAd, type AdProps } from '@/lib/make/ad'
+import { AdSound } from '@/lib/make/sound'
 
 // The job video maker. mode "make": paste a posting, check the details, ask for the file.
 // mode "made": the same page opened with one agency's job already filled in. mode "file": the emailed link, where the file is saved.
@@ -20,6 +21,8 @@ export default function Maker({ mode, initial, from = 'video page', madeFor }: {
   const [file, setFile] = useState<{ url: string; ext: string } | null>(null); const [rec, setRec] = useState(false)
   const canvas = useRef<HTMLCanvasElement>(null), props = useRef(p), t0 = useRef(0), hold = useRef(false), editRef = useRef<HTMLDivElement>(null)
   props.current = p
+  const sound = useRef<AdSound | null>(null); const [snd, setSnd] = useState(false)
+  const toggleSound = () => { if (!sound.current) sound.current = new AdSound(); setSnd(sound.current.toggle()); t0.current = performance.now() }
 
   useEffect(() => {
     let raf = 0, alive = true
@@ -34,6 +37,7 @@ export default function Maker({ mode, initial, from = 'video page', madeFor }: {
         const fixed = (window as unknown as { __t?: number }).__t; if (typeof fixed === 'number') t = fixed
         if (!hold.current && t > AD_SECONDS + 1.5) { t0.current = now; t = 0 }
         drawAd(c, Math.min(t, AD_SECONDS), props.current, { watermark: mode !== 'file' })
+        if (props.current.style === 'type') sound.current?.frame(t)
       }
       raf = requestAnimationFrame(tick)
     }
@@ -115,7 +119,8 @@ export default function Maker({ mode, initial, from = 'video page', madeFor }: {
         {msg && <p role="status" style={{ margin: 0, color: /could not|wrong|not look|would not|cannot|Enter|Paste|lists several|Add your/.test(msg) ? red : muted }}>{msg}</p>}
 
         <div style={{ display: 'grid', gap: 8, justifyItems: 'center' }}>
-          <canvas ref={canvas} width={AD_W} height={AD_H} aria-label={`Video ad for ${p.title}`} style={{ width: '100%', maxWidth: 300, aspectRatio: '9 / 16', borderRadius: 22, background: '#05060f', boxShadow: '0 18px 44px rgba(29,26,22,.28)' }} />
+          <canvas ref={canvas} onClick={p.style === 'type' ? toggleSound : undefined} width={AD_W} height={AD_H} aria-label={`Video ad for ${p.title}`} style={{ width: '100%', maxWidth: 300, aspectRatio: '9 / 16', borderRadius: 22, background: '#05060f', boxShadow: '0 18px 44px rgba(29,26,22,.28)', cursor: p.style === 'type' ? 'pointer' : 'default' }} />
+          {p.style === 'type' && <button type="button" id="sound" onClick={toggleSound} aria-pressed={snd} style={{ font: '700 15px Arial, Helvetica, sans-serif', padding: '10px 18px', borderRadius: 999, border: '2px solid #1d1a16', background: snd ? '#1d1a16' : 'transparent', color: snd ? '#fff' : '#1d1a16', cursor: 'pointer' }}>{snd ? 'Sound is on' : 'Tap for sound'}</button>}
           <p style={{ margin: 0, font: '13px Arial, Helvetica, sans-serif', color: muted }}>{mode === 'file' ? `${p.title} · ${AD_SECONDS} seconds` : stage === 'paste' ? 'An example. Yours will use your posting.' : 'Preview. The file you get has no watermark.'}</p>
         </div>
 
