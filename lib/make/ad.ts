@@ -143,61 +143,108 @@ function rise(c: C, lines: string[], size: number, weight: number, x: number, y:
   lines.forEach((l, i) => { const p = expo(seg(k, i * 0.14, 0.5 + i * 0.14)); c.globalAlpha = base * p; c.fillText(l, x, y + size * 0.82 + i * size * lh + (1 - p) * 70) })
   c.globalAlpha = base; return lines.length * size * lh
 }
-const BEATS = [0, 1.5, 3.7, 5.5, 7.0]
+
+// ---- the kinetic job ad: dark stage, coloured glow, words that fly in with motion blur and turn into things ----
+// Job title (last word boxed), pay that counts up and becomes a weekly pill, a clock for the shift, a pin for the town, a button that gets tapped.
+const KB = [0, 1.9, 4.0, 5.7, 7.0]
+const outQ = (x: number) => 1 - Math.pow(1 - x, 5)
+// Text drawn several times along its path, so fast moves smear like motion blur.
+function smear(c: C, text: string, x: number, y: number, dx: number, dy: number, alpha: number) {
+  const n = Math.abs(dx) + Math.abs(dy) > 6 ? 7 : 1
+  for (let i = n - 1; i >= 0; i--) { c.globalAlpha = alpha * (i === 0 ? 1 : 0.16 * (1 - i / n)); c.fillText(text, x + (dx * i) / n, y + (dy * i) / n) }
+  c.globalAlpha = 1
+}
+// Lays words out in lines, then brings them in one at a time from the right. Returns the block height and the last word's box.
+function words(c: C, text: string, x: number, y: number, w: number, weight: number, max: number, maxLines: number, k: number, color: string, boxLast?: string) {
+  const L = layout(c, text, w, weight, max, maxLines); font(c, weight, L.size); c.textAlign = 'left'
+  const all = L.lines.flatMap((l, li) => { let cx = x; return l.split(' ').map((wd) => { const o = { wd, x: cx, y: y + L.size * 0.82 + li * L.size * 1.03 }; cx += c.measureText(wd + ' ').width; return o }) })
+  const step = Math.min(0.16, 0.7 / all.length)
+  all.forEach((o, i) => {
+    const p = outQ(seg(k, i * step, i * step + 0.34)); if (p <= 0) return
+    const last = i === all.length - 1 && boxLast
+    if (last) { const bw = c.measureText(o.wd).width, g = outQ(seg(k, i * step + 0.2, i * step + 0.5)); c.globalAlpha = 1; c.fillStyle = boxLast as string; rr(c, o.x - 16, o.y - L.size * 0.82, (bw + 32) * g, L.size * 1.04, 14); c.fill() }
+    c.fillStyle = color; smear(c, o.wd, o.x + (1 - p) * 260, o.y, (1 - p) * 190, 0, Math.min(1, p * 1.6))
+  })
+  return L.lines.length * L.size * 1.03
+}
+function stage(c: C, t: number, brand: string) {
+  const W = AD_W, HH = AD_H
+  c.fillStyle = '#06070b'; c.fillRect(0, 0, W, HH)
+  const blob = (x: number, y: number, r: number, a: number) => { const g = c.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, brand); g.addColorStop(1, 'rgba(0,0,0,0)'); c.globalAlpha = a; c.fillStyle = g; c.fillRect(x - r, y - r, r * 2, r * 2) }
+  blob(W * 0.2 + Math.sin(t * 0.5) * 160, HH * 0.24 + Math.cos(t * 0.4) * 120, 900, 0.55)
+  blob(W * 0.86 + Math.cos(t * 0.45) * 140, HH * 0.8 + Math.sin(t * 0.37) * 150, 820, 0.42)
+  c.globalAlpha = 1
+}
 
 function drawType(c: C, t: number, p: AdProps, opts: { watermark?: boolean } = {}) {
-  const W = AD_W, HH = AD_H, X = 76, TW = W - X * 2
-  c.save(); c.textBaseline = 'alphabetic'
-  let b = 0; for (let i = 0; i < BEATS.length; i++) if (t >= BEATS[i]) b = i
-  const bg = [p.brand, PAPER, NIGHT, p.brand, PAPER], fg = ['#fff', NIGHT, '#fff', '#fff', NIGHT]
-  // the colour of the beat before, then the new colour wiping up over it
-  c.fillStyle = bg[Math.max(0, b - 1)]; c.fillRect(0, 0, W, HH)
-  const wipe = b === 0 ? 1 : expo(seg(t, BEATS[b], BEATS[b] + 0.36))
-  c.fillStyle = bg[b]; c.fillRect(0, HH * (1 - wipe), W, HH * wipe)
-  const k = seg(t, BEATS[b] + (b ? 0.14 : 0.05), BEATS[b] + 1.05)   // how far into this beat's entrance we are
-  const ink = fg[b], soft = b === 1 || b === 4 ? 'rgba(11,11,15,.55)' : 'rgba(255,255,255,.72)'
-  const accent = b === 1 || b === 4 ? p.brand : '#fff'
-  const label = (s: string, y: number) => { c.globalAlpha = seg(k, 0, 0.25); c.fillStyle = soft; font(c, 800, 40); c.textAlign = 'left'; c.fillText(s.toUpperCase().split('').join(' '), X, y); c.globalAlpha = 1; c.fillStyle = ink }
-  // agency name, top of every beat
-  c.globalAlpha = seg(t, 0.1, 0.5); c.fillStyle = soft; fit(c, p.agency.toUpperCase(), X, 190, TW, 800, 42); c.globalAlpha = 1
-  c.fillStyle = ink
-  const week = p.rate ? money(p.rate * p.hours) : ''
+  const W = AD_W, HH = AD_H, X = 84, TW = W - X * 2
+  c.save(); c.textBaseline = 'alphabetic'; stage(c, t, p.brand)
+  let b = 0; for (let i = 0; i < KB.length; i++) if (t >= KB[i]) b = i
+  const end = b < 4 ? KB[b + 1] : AD_SECONDS + 1
+  const u = t - KB[b], out = b < 4 ? Math.pow(seg(t, end - 0.2, end), 2) : 0
+  const k = seg(u, 0.04, 1.25)
+  // agency name stays put
+  c.fillStyle = 'rgba(255,255,255,.7)'; c.globalAlpha = seg(t, 0.1, 0.5); font(c, 800, 40); c.textAlign = 'left'; c.fillText(p.agency.toUpperCase().split('').join(' '), X, 196); c.globalAlpha = 1
+  // a slow push-in and a slight tilt, so nothing is ever still; each beat leaves upward with a smear
+  c.save(); c.translate(W / 2, HH / 2); c.rotate(-0.028 + u * 0.004); const z = 1 + u * 0.018; c.scale(z, z); c.translate(-W / 2, -HH / 2 - out * 520)
+  const A = 1 - out
+  const tag = (s: string, y: number) => { c.globalAlpha = A * seg(k, 0, 0.2); c.fillStyle = p.brand; c.shadowColor = p.brand; c.shadowBlur = 30; font(c, 900, 44); c.textAlign = 'left'; c.fillText(s.toUpperCase().split('').join(' '), X, y); c.shadowBlur = 0; c.fillStyle = '#fff'; c.globalAlpha = A }
+  c.globalAlpha = A
   if (b === 0) {
-    // "now hiring" tag, then the job title
-    const tk = pop(seg(k, 0, 0.3)); c.save(); c.translate(X, 660); c.scale(tk, tk); rr(c, 0, -62, 400, 86, 43); c.fillStyle = '#fff'; c.fill(); c.fillStyle = p.brand; font(c, 900, 44); c.textAlign = 'center'; c.fillText('NOW HIRING', 200, -2); c.restore()
-    c.fillStyle = ink; const L = layout(c, p.title, TW, 900, 250, 4); rise(c, L.lines, L.size, 900, X, 770, seg(k, 0.12, 1))
+    const tk = pop(seg(k, 0, 0.26)); c.save(); c.translate(X, 700); c.scale(tk, tk); c.shadowColor = p.brand; c.shadowBlur = 50; rr(c, 0, -64, 410, 90, 45); c.fillStyle = p.brand; c.fill(); c.shadowBlur = 0; c.fillStyle = '#fff'; font(c, 900, 44); c.textAlign = 'center'; c.fillText('NOW HIRING', 205, -3); c.restore()
+    words(c, p.title, X, 800, TW, 900, 230, 4, seg(k, 0.14, 1), '#fff', p.brand)
   } else if (b === 1) {
     if (p.rate) {
-      label('Pays', 640)
-      const n = p.rate * expo(seg(t, BEATS[1] + 0.2, BEATS[1] + 1.0)); const txt = Number.isInteger(p.rate) ? `$${Math.round(n)}` : `$${n.toFixed(2)}`
-      c.fillStyle = accent; c.globalAlpha = seg(k, 0, 0.2); const full = rateText(p.rate); let size = 400; font(c, 900, size); while (c.measureText(full).width > TW && size > 120) { size -= 10; font(c, 900, size) }
-      c.textAlign = 'left'; c.fillText(txt, X - 8, 680 + size * 0.86)
-      c.fillStyle = ink; c.globalAlpha = seg(k, 0.3, 0.55); font(c, 800, 96); c.fillText('an hour', X, 680 + size * 0.86 + 130)
-      const yb = 680 + size * 0.86 + 230, bk = pop(seg(k, 0.5, 0.85)); c.globalAlpha = seg(k, 0.5, 0.7)
-      c.save(); c.translate(X, yb + 70); c.scale(bk, bk); rr(c, 0, -70, TW, 140, 28); c.fillStyle = NIGHT; c.fill(); c.fillStyle = '#fff'; fit(c, `${week} a week`, 44, 22, TW * 0.5, 900, 66)
-      c.fillStyle = 'rgba(255,255,255,.7)'; fit(c, `${p.hours} hours, before taxes`, TW - 44, 18, TW * 0.42, 600, 36, 'right'); c.restore(); c.globalAlpha = 1
-    } else { label('The job', 640); const L = layout(c, p.note, TW, 900, 150, 4); rise(c, L.lines, L.size, 900, X, 700, k) }
+      tag('Pays', 690)
+      const cu = outQ(seg(u, 0.12, 1.0)), n = p.rate * cu; const txt = Number.isInteger(p.rate) ? `$${Math.round(n)}` : `$${n.toFixed(2)}`
+      const full = rateText(p.rate); let size = 420; font(c, 900, size); while (c.measureText(full).width > TW && size > 120) { size -= 10; font(c, 900, size) }
+      const land = pop(seg(u, 0.95, 1.25)); c.save(); c.translate(X, 740 + size * 0.86); c.scale(0.92 + 0.08 * land, 0.92 + 0.08 * land)
+      c.shadowColor = p.brand; c.shadowBlur = 40 + 60 * seg(u, 0.9, 1.1) * (1 - seg(u, 1.1, 1.6)); c.fillStyle = '#fff'; c.textAlign = 'left'; smear(c, txt, -6, 0, 0, (1 - cu) * -150, A * seg(u, 0.05, 0.25)); c.restore(); c.shadowBlur = 0
+      c.globalAlpha = A * seg(u, 0.5, 0.75); c.fillStyle = 'rgba(255,255,255,.8)'; font(c, 800, 92); c.fillText('an hour', X, 740 + size * 0.86 + 128)
+      // the weekly figure draws itself as a pill
+      const yb = 740 + size * 0.86 + 220, d = outQ(seg(u, 1.05, 1.6)); if (d > 0) {
+        c.globalAlpha = A; c.lineWidth = 5; c.strokeStyle = p.brand; c.shadowColor = p.brand; c.shadowBlur = 24; rr(c, X, yb, TW * d, 150, 75); c.stroke(); c.shadowBlur = 0
+        c.globalAlpha = A * seg(u, 1.3, 1.6); c.fillStyle = '#fff'; fit(c, `${money(p.rate * p.hours)} a week`, X + 50, yb + 98, TW * 0.5, 900, 70); c.fillStyle = 'rgba(255,255,255,.65)'; fit(c, `${p.hours} hours, before taxes`, X + TW - 50, yb + 94, TW * 0.4, 600, 36, 'right')
+      }
+    } else { tag('The job', 690); words(c, p.note, X, 740, TW, 900, 150, 4, k, '#fff') }
   } else if (b === 2) {
-    label('The shift', 640); const raw = p.shift.split(' · '); const parts = raw.map((x) => layout(c, x, TW, 900, 190, raw.length > 1 ? 1 : 4)); const L = { size: Math.min(...parts.map((x) => x.size)), lines: parts.flatMap((x) => x.lines) }; const h = rise(c, L.lines, L.size, 900, X, 700, k)
-    c.globalAlpha = seg(k, 0.5, 0.8); c.fillStyle = soft; const N = layout(c, p.note, TW, 700, 64, 3); c.globalAlpha = seg(k, 0.5, 0.8); rise(c, N.lines, N.size, 700, X, 700 + h + 60, 1, 1.2); c.globalAlpha = 1
+    // a clock draws itself; the hands spin and settle on the start time when the posting gives one
+    const cx = X + 130, cy = 760, r = 124, ring = outQ(seg(u, 0, 0.6)); const m = /(\d{1,2}):(\d{2})/.exec(p.shift)
+    c.lineWidth = 12; c.strokeStyle = '#fff'; c.shadowColor = p.brand; c.shadowBlur = 40; c.beginPath(); c.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * ring); c.stroke(); c.shadowBlur = 0
+    const spin = m ? (1 - outQ(seg(u, 0.1, 1.1))) * 9 : u * 1.4; const hh = m ? (((+m[1] % 12) + +m[2] / 60) / 12) * Math.PI * 2 : 0, mm = m ? (+m[2] / 60) * Math.PI * 2 : 0
+    c.lineCap = 'round'; c.strokeStyle = p.brand; c.lineWidth = 12; c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx + Math.sin(hh + spin) * r * 0.5, cy - Math.cos(hh + spin) * r * 0.5); c.stroke()
+    c.strokeStyle = '#fff'; c.lineWidth = 8; c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx + Math.sin(mm + spin * 3) * r * 0.78, cy - Math.cos(mm + spin * 3) * r * 0.78); c.stroke(); c.lineCap = 'butt'
+    c.globalAlpha = A * seg(k, 0.1, 0.3); c.fillStyle = p.brand; font(c, 900, 44); c.textAlign = 'left'; c.fillText('THE SHIFT'.split('').join(' '), cx + r + 44, cy + 16); c.globalAlpha = A
+    const parts = p.shift.split(' · '); const one = parts.length > 1 ? Math.min(...parts.map((x) => layout(c, x, TW, 900, 170, 1).size)) : 170
+    let y = 960; for (const part of parts) y += words(c, part, X, y, TW, 900, one, parts.length > 1 ? 1 : 3, seg(k, 0.15, 1), '#fff') + 6
+    c.globalAlpha = A * seg(u, 0.8, 1.1); c.fillStyle = 'rgba(255,255,255,.7)'; const N = layout(c, p.note, TW, 700, 60, 3); font(c, 700, N.size); N.lines.forEach((l, i) => c.fillText(l, X, y + 70 + i * N.size * 1.2))
   } else if (b === 3) {
-    const has = !!p.where; label(has ? 'Where' : 'With', 640); const L = layout(c, has ? p.where : p.agency, TW, 900, 220, 3); rise(c, L.lines, L.size, 900, X, 700, k)
+    // a pin drops and the ground ripples
+    const has = !!p.where, d = pop(seg(u, 0, 0.42)), px = X + 110, py = 800
+    for (let i = 0; i < 2; i++) { const rp = seg(u, 0.32 + i * 0.25, 1.3 + i * 0.25); if (rp > 0 && rp < 1) { c.globalAlpha = A * (1 - rp) * 0.8; c.strokeStyle = p.brand; c.lineWidth = 6; c.beginPath(); c.ellipse(px, py + 6, 60 + rp * 260, 16 + rp * 70, 0, 0, Math.PI * 2); c.stroke() } }
+    c.globalAlpha = A; c.save(); c.translate(px, py - (1 - d) * 700); c.shadowColor = p.brand; c.shadowBlur = 50; c.fillStyle = p.brand; c.beginPath(); c.moveTo(0, 0); c.bezierCurveTo(-120, -130, -96, -270, 0, -270); c.bezierCurveTo(96, -270, 120, -130, 0, 0); c.fill(); c.shadowBlur = 0; c.fillStyle = '#fff'; c.beginPath(); c.arc(0, -176, 36, 0, Math.PI * 2); c.fill(); c.restore()
+    c.globalAlpha = A * seg(k, 0.15, 0.35); c.fillStyle = p.brand; font(c, 900, 44); c.textAlign = 'left'; c.fillText((has ? 'WHERE' : 'WITH').split('').join(' '), px + 130, py - 150); c.globalAlpha = A
+    words(c, has ? p.where : p.agency, X, 900, TW, 900, 210, 3, seg(k, 0.2, 1), '#fff')
   } else {
-    // the whole job on one card, and how to apply
-    c.fillStyle = ink; const L = layout(c, p.title, TW, 900, 130, 3); const h = rise(c, L.lines, L.size, 900, X, 540, k)
-    let y = 540 + h + 50
-    if (p.rate) { c.fillStyle = p.brand; c.globalAlpha = seg(k, 0.2, 0.45); font(c, 900, 190); c.textAlign = 'left'; const r = rateText(p.rate); c.fillText(r, X - 4, y + 160); const rw = c.measureText(r).width; c.fillStyle = ink; font(c, 800, 64); c.fillText('/hr', X + rw + 14, y + 160); y += 220 }
-    c.globalAlpha = seg(k, 0.3, 0.55); c.fillStyle = ink; fit(c, p.shift, X, y + 60, TW, 700, 56); y += 84
-    if (p.where) { c.fillStyle = soft; fit(c, p.where, X, y + 56, TW, 700, 52); y += 78 }
-    const bk = pop(seg(k, 0.5, 0.9)); c.globalAlpha = seg(k, 0.5, 0.7); font(c, 900, 62); let size = 62; while (c.measureText(p.cta).width > TW - 100 && size > 32) { size -= 2; font(c, 900, size) }
-    c.save(); c.translate(W / 2, y + 150); c.scale(bk, bk); rr(c, -TW / 2, -70, TW, 140, 70); c.fillStyle = p.brand; c.fill(); c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText(p.cta, 0, size * 0.35); c.restore(); c.globalAlpha = 1
+    // the recap, then a button that grows from a dot, types its own label and gets tapped
+    const h = words(c, p.title, X, 520, TW, 900, 124, 3, k, '#fff'); let y = 520 + h + 40
+    if (p.rate) { c.globalAlpha = seg(k, 0.25, 0.5); c.shadowColor = p.brand; c.shadowBlur = 40; c.fillStyle = '#fff'; font(c, 900, 200); c.textAlign = 'left'; const r = rateText(p.rate); c.fillText(r, X - 4, y + 168); c.shadowBlur = 0; const rw = c.measureText(r).width; c.fillStyle = 'rgba(255,255,255,.75)'; font(c, 800, 66); c.fillText('/hr', X + rw + 16, y + 168); y += 232 }
+    c.globalAlpha = seg(k, 0.35, 0.6); c.fillStyle = '#fff'; fit(c, p.shift, X, y + 60, TW, 700, 56); y += 84
+    if (p.where) { c.fillStyle = 'rgba(255,255,255,.65)'; fit(c, p.where, X, y + 56, TW, 700, 52); y += 78 }
+    const by = y + 90, g = outQ(seg(u, 0.55, 1.05)), tap = seg(u, 1.55, 1.75), bw = 150 + (TW - 150) * g
+    font(c, 900, 62); let size = 62; while (c.measureText(p.cta).width > TW - 110 && size > 32) { size -= 2; font(c, 900, size) }
+    c.globalAlpha = seg(u, 0.5, 0.6); const press = 1 - 0.05 * Math.sin(tap * Math.PI)
+    c.save(); c.translate(W / 2, by + 75); c.scale(press, press); c.shadowColor = p.brand; c.shadowBlur = 40 + 70 * Math.sin(tap * Math.PI); rr(c, -bw / 2, -75, bw, 150, 75); c.fillStyle = tap > 0.5 ? '#fff' : p.brand; c.fill(); c.shadowBlur = 0
+    const typed = p.cta.slice(0, Math.round(p.cta.length * seg(u, 0.95, 1.4))); c.fillStyle = tap > 0.5 ? p.brand : '#fff'; c.textAlign = 'center'; c.fillText(typed, 0, size * 0.35)
+    if (typed.length < p.cta.length && typed.length > 0) { const tw2 = c.measureText(typed).width; c.fillRect(tw2 / 2 + 6, -size * 0.45, 5, size * 0.9) }
+    c.restore()
+    const rp = seg(u, 1.6, 2.3); if (rp > 0 && rp < 1) { c.globalAlpha = (1 - rp) * 0.7; c.strokeStyle = '#fff'; c.lineWidth = 6; rr(c, W / 2 - bw / 2 - rp * 50, by - rp * 50, bw + rp * 100, 150 + rp * 100, 75 + rp * 50); c.stroke() }
+    // the pointer slides in and taps
+    const ar = outQ(seg(u, 1.1, 1.55)); if (ar > 0) { const ax = W / 2 + 190 + (1 - ar) * 420, ay = by + 96 + (1 - ar) * 320 - Math.sin(tap * Math.PI) * 10; c.globalAlpha = Math.min(1, ar * 2); c.save(); c.translate(ax, ay); c.scale(1.5, 1.5); c.fillStyle = '#fff'; c.strokeStyle = '#06070b'; c.lineWidth = 5; c.lineJoin = 'round'; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 72); c.lineTo(19, 55); c.lineTo(33, 86); c.lineTo(46, 80); c.lineTo(32, 50); c.lineTo(58, 50); c.closePath(); c.stroke(); c.fill(); c.restore() }
   }
-  // progress: one bar per beat
-  const gw = (TW - 4 * 14) / 5
-  for (let i = 0; i < 5; i++) { const end = i < 4 ? BEATS[i + 1] : AD_SECONDS; c.globalAlpha = 0.25; c.fillStyle = ink; rr(c, X + i * (gw + 14), 1760, gw, 10, 5); c.fill(); c.globalAlpha = 0.9; const f = seg(t, BEATS[i], end); if (f > 0) { rr(c, X + i * (gw + 14), 1760, Math.max(10, gw * f), 10, 5); c.fill() } }
-  c.globalAlpha = 0.5; c.fillStyle = ink; fit(c, 'made with montero.cool', W / 2, HH - 70, 600, 500, 30, 'center')
+  c.restore(); c.globalAlpha = 0.5; c.fillStyle = '#fff'; fit(c, 'made with montero.cool', W / 2, HH - 70, 600, 500, 30, 'center')
   if (opts.watermark) {
-    c.globalAlpha = 0.08; c.translate(W / 2, HH / 2); c.rotate(-0.5)
+    c.globalAlpha = 0.07; c.translate(W / 2, HH / 2); c.rotate(-0.5)
     for (let i = -2; i <= 2; i++) fit(c, 'PREVIEW · montero.cool · PREVIEW · montero.cool', i % 2 ? 260 : 0, i * 470, 3000, 900, 84, 'center')
   }
   c.restore()
