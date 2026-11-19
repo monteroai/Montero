@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 }
 
 // Set STAFFING_PAY_LINK in the site's environment to the Stripe payment link (scripts/staffing_stripe_link.py prints it).
-const PAY = process.env.STAFFING_PAY_LINK || ''
+const PAY = process.env.STAFFING_PAY_LINK || 'https://buy.stripe.com/cNi7sN2RJayV9X44mTfbq06'
 const items = [
   'A new video ad every Monday for the opening you most want filled',
   'We keep trying versions until one clearly pulls, then reuse it',
