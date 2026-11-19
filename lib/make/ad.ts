@@ -1,6 +1,6 @@
 // The "payday alert" job ad, drawn on a canvas so it plays and records in the visitor's own browser (no server render).
 // A phone lock screen on payday: one notification a second gives the pay, the job, the shift and how to apply.
-export type AdProps = { agency: string; title: string; rate: number | null; hours: number; shift: string; where: string; note: string; cta: string; brand: string }
+export type AdProps = { agency: string; title: string; rate: number | null; hours: number; shift: string; where: string; note: string; cta: string; brand: string; style?: 'alert' | 'type' }
 export const AD_W = 1080, AD_H = 1920, AD_SECONDS = 9
 export const SAMPLE: AdProps = { agency: 'Your Agency', title: 'Maintenance Mechanic', rate: 30, hours: 40, shift: 'Mon to Fri · 3:00 to 11:30 PM', where: '2nd shift', note: 'Hiring now. Experience needed.', cta: 'Apply at youragency.com', brand: '#1E3FFF' }
 
@@ -17,7 +17,7 @@ export function cleanProps(p: Partial<AdProps>): AdProps {
   return {
     agency: s(p.agency, 40, SAMPLE.agency), title: s(p.title, 48, 'Now hiring'), rate: rate > 0 && rate < 1000 ? Math.round(rate * 100) / 100 : null,
     hours: hours >= 1 && hours <= 80 ? Math.round(hours) : 40, shift: s(p.shift, 46, 'Full time'), where: s(p.where, 40, ''), note: s(p.note, 60, 'Hiring now.'),
-    cta: s(p.cta, 44, 'Apply today'), brand: /^#[0-9a-fA-F]{6}$/.test(String(p.brand)) ? String(p.brand) : SAMPLE.brand,
+    cta: s(p.cta, 44, 'Apply today'), brand: /^#[0-9a-fA-F]{6}$/.test(String(p.brand)) ? String(p.brand) : SAMPLE.brand, style: p.style === 'type' ? 'type' : 'alert',
   }
 }
 
@@ -40,7 +40,7 @@ function rr(c: C, x: number, y: number, w: number, h: number, r: number) { c.beg
 
 const T = [0.5, 1.9, 3.2, 4.5], END = 6.3, H = [250, 200, 200, 200], GAP = 22, TOP = 700
 
-export function drawAd(c: C, t: number, p: AdProps, opts: { watermark?: boolean } = {}) {
+function drawAlert(c: C, t: number, p: AdProps, opts: { watermark?: boolean } = {}) {
   const W = AD_W, HH = AD_H
   c.save(); c.textBaseline = 'alphabetic'
   // wallpaper
@@ -122,4 +122,87 @@ export function drawAd(c: C, t: number, p: AdProps, opts: { watermark?: boolean 
     for (let i = -2; i <= 2; i++) fit(c, 'PREVIEW · montero.cool · PREVIEW · montero.cool', i % 2 ? 260 : 0, i * 470, 3000, 900, 84, 'center')
   }
   c.restore()
+}
+
+// ---- the "one fact per beat" job ad: big type, a colour wipe between beats. Job, pay, shift, place, apply. ----
+const PAPER = '#f6f3ec', NIGHT = '#0b0b0f'
+// Breaks text into lines at the biggest size (from `max` down) that fits `maxLines` lines of width `w`.
+function layout(c: C, text: string, w: number, weight: number, max: number, maxLines: number) {
+  for (let size = max; size >= 44; size -= 6) {
+    font(c, weight, size)
+    const lines: string[] = []; let line = ''
+    for (const wd of text.split(' ')) { const t = line ? line + ' ' + wd : wd; if (c.measureText(t).width > w && line) { lines.push(line); line = wd } else line = t }
+    if (line) lines.push(line)
+    if (lines.length <= maxLines && lines.every((l) => c.measureText(l).width <= w)) return { size, lines }
+  }
+  font(c, weight, 44); return { size: 44, lines: [text] }
+}
+// Draws laid-out lines from the top `y`, each sliding up a beat after the one before. `k` is 0..1 progress.
+function rise(c: C, lines: string[], size: number, weight: number, x: number, y: number, k: number, lh = 1.04) {
+  font(c, weight, size); c.textAlign = 'left'; const base = c.globalAlpha
+  lines.forEach((l, i) => { const p = expo(seg(k, i * 0.14, 0.5 + i * 0.14)); c.globalAlpha = base * p; c.fillText(l, x, y + size * 0.82 + i * size * lh + (1 - p) * 70) })
+  c.globalAlpha = base; return lines.length * size * lh
+}
+const BEATS = [0, 1.5, 3.7, 5.5, 7.0]
+
+function drawType(c: C, t: number, p: AdProps, opts: { watermark?: boolean } = {}) {
+  const W = AD_W, HH = AD_H, X = 76, TW = W - X * 2
+  c.save(); c.textBaseline = 'alphabetic'
+  let b = 0; for (let i = 0; i < BEATS.length; i++) if (t >= BEATS[i]) b = i
+  const bg = [p.brand, PAPER, NIGHT, p.brand, PAPER], fg = ['#fff', NIGHT, '#fff', '#fff', NIGHT]
+  // the colour of the beat before, then the new colour wiping up over it
+  c.fillStyle = bg[Math.max(0, b - 1)]; c.fillRect(0, 0, W, HH)
+  const wipe = b === 0 ? 1 : expo(seg(t, BEATS[b], BEATS[b] + 0.36))
+  c.fillStyle = bg[b]; c.fillRect(0, HH * (1 - wipe), W, HH * wipe)
+  const k = seg(t, BEATS[b] + (b ? 0.14 : 0.05), BEATS[b] + 1.05)   // how far into this beat's entrance we are
+  const ink = fg[b], soft = b === 1 || b === 4 ? 'rgba(11,11,15,.55)' : 'rgba(255,255,255,.72)'
+  const accent = b === 1 || b === 4 ? p.brand : '#fff'
+  const label = (s: string, y: number) => { c.globalAlpha = seg(k, 0, 0.25); c.fillStyle = soft; font(c, 800, 40); c.textAlign = 'left'; c.fillText(s.toUpperCase().split('').join(' '), X, y); c.globalAlpha = 1; c.fillStyle = ink }
+  // agency name, top of every beat
+  c.globalAlpha = seg(t, 0.1, 0.5); c.fillStyle = soft; fit(c, p.agency.toUpperCase(), X, 190, TW, 800, 42); c.globalAlpha = 1
+  c.fillStyle = ink
+  const week = p.rate ? money(p.rate * p.hours) : ''
+  if (b === 0) {
+    // "now hiring" tag, then the job title
+    const tk = pop(seg(k, 0, 0.3)); c.save(); c.translate(X, 660); c.scale(tk, tk); rr(c, 0, -62, 400, 86, 43); c.fillStyle = '#fff'; c.fill(); c.fillStyle = p.brand; font(c, 900, 44); c.textAlign = 'center'; c.fillText('NOW HIRING', 200, -2); c.restore()
+    c.fillStyle = ink; const L = layout(c, p.title, TW, 900, 250, 4); rise(c, L.lines, L.size, 900, X, 770, seg(k, 0.12, 1))
+  } else if (b === 1) {
+    if (p.rate) {
+      label('Pays', 640)
+      const n = p.rate * expo(seg(t, BEATS[1] + 0.2, BEATS[1] + 1.0)); const txt = Number.isInteger(p.rate) ? `$${Math.round(n)}` : `$${n.toFixed(2)}`
+      c.fillStyle = accent; c.globalAlpha = seg(k, 0, 0.2); const full = rateText(p.rate); let size = 400; font(c, 900, size); while (c.measureText(full).width > TW && size > 120) { size -= 10; font(c, 900, size) }
+      c.textAlign = 'left'; c.fillText(txt, X - 8, 680 + size * 0.86)
+      c.fillStyle = ink; c.globalAlpha = seg(k, 0.3, 0.55); font(c, 800, 96); c.fillText('an hour', X, 680 + size * 0.86 + 130)
+      const yb = 680 + size * 0.86 + 230, bk = pop(seg(k, 0.5, 0.85)); c.globalAlpha = seg(k, 0.5, 0.7)
+      c.save(); c.translate(X, yb + 70); c.scale(bk, bk); rr(c, 0, -70, TW, 140, 28); c.fillStyle = NIGHT; c.fill(); c.fillStyle = '#fff'; fit(c, `${week} a week`, 44, 22, TW * 0.5, 900, 66)
+      c.fillStyle = 'rgba(255,255,255,.7)'; fit(c, `${p.hours} hours, before taxes`, TW - 44, 18, TW * 0.42, 600, 36, 'right'); c.restore(); c.globalAlpha = 1
+    } else { label('The job', 640); const L = layout(c, p.note, TW, 900, 150, 4); rise(c, L.lines, L.size, 900, X, 700, k) }
+  } else if (b === 2) {
+    label('The shift', 640); const parts = p.shift.split(' · ').map((x) => layout(c, x, TW, 900, 190, 2)); const L = { size: Math.min(...parts.map((x) => x.size)), lines: parts.flatMap((x) => x.lines) }; const h = rise(c, L.lines, L.size, 900, X, 700, k)
+    c.globalAlpha = seg(k, 0.5, 0.8); c.fillStyle = soft; const N = layout(c, p.note, TW, 700, 64, 3); c.globalAlpha = seg(k, 0.5, 0.8); rise(c, N.lines, N.size, 700, X, 700 + h + 60, 1, 1.2); c.globalAlpha = 1
+  } else if (b === 3) {
+    const has = !!p.where; label(has ? 'Where' : 'With', 640); const L = layout(c, has ? p.where : p.agency, TW, 900, 220, 3); rise(c, L.lines, L.size, 900, X, 700, k)
+  } else {
+    // the whole job on one card, and how to apply
+    c.fillStyle = ink; const L = layout(c, p.title, TW, 900, 130, 3); const h = rise(c, L.lines, L.size, 900, X, 540, k)
+    let y = 540 + h + 50
+    if (p.rate) { c.fillStyle = p.brand; c.globalAlpha = seg(k, 0.2, 0.45); font(c, 900, 190); c.textAlign = 'left'; const r = rateText(p.rate); c.fillText(r, X - 4, y + 160); const rw = c.measureText(r).width; c.fillStyle = ink; font(c, 800, 64); c.fillText('/hr', X + rw + 14, y + 160); y += 220 }
+    c.globalAlpha = seg(k, 0.3, 0.55); c.fillStyle = ink; fit(c, p.shift, X, y + 60, TW, 700, 56); y += 84
+    if (p.where) { c.fillStyle = soft; fit(c, p.where, X, y + 56, TW, 700, 52); y += 78 }
+    const bk = pop(seg(k, 0.5, 0.9)); c.globalAlpha = seg(k, 0.5, 0.7); font(c, 900, 62); let size = 62; while (c.measureText(p.cta).width > TW - 100 && size > 32) { size -= 2; font(c, 900, size) }
+    c.save(); c.translate(W / 2, y + 150); c.scale(bk, bk); rr(c, -TW / 2, -70, TW, 140, 70); c.fillStyle = p.brand; c.fill(); c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText(p.cta, 0, size * 0.35); c.restore(); c.globalAlpha = 1
+  }
+  // progress: one bar per beat
+  const gw = (TW - 4 * 14) / 5
+  for (let i = 0; i < 5; i++) { const end = i < 4 ? BEATS[i + 1] : AD_SECONDS; c.globalAlpha = 0.25; c.fillStyle = ink; rr(c, X + i * (gw + 14), 1760, gw, 10, 5); c.fill(); c.globalAlpha = 0.9; const f = seg(t, BEATS[i], end); if (f > 0) { rr(c, X + i * (gw + 14), 1760, Math.max(10, gw * f), 10, 5); c.fill() } }
+  c.globalAlpha = 0.5; c.fillStyle = ink; fit(c, 'made with montero.cool', W / 2, HH - 70, 600, 500, 30, 'center')
+  if (opts.watermark) {
+    c.globalAlpha = 0.08; c.translate(W / 2, HH / 2); c.rotate(-0.5)
+    for (let i = -2; i <= 2; i++) fit(c, 'PREVIEW · montero.cool · PREVIEW · montero.cool', i % 2 ? 260 : 0, i * 470, 3000, 900, 84, 'center')
+  }
+  c.restore()
+}
+
+export function drawAd(c: C, t: number, p: AdProps, opts: { watermark?: boolean } = {}) {
+  if (p.style === 'type') drawType(c, t, p, opts); else drawAlert(c, t, p, opts)
 }
