@@ -178,7 +178,7 @@ function drawType(c: C, t: number, p: AdProps, opts: { watermark?: boolean } = {
       c.fillStyle = 'rgba(255,255,255,.7)'; fit(c, `${p.hours} hours, before taxes`, TW - 44, 18, TW * 0.42, 600, 36, 'right'); c.restore(); c.globalAlpha = 1
     } else { label('The job', 640); const L = layout(c, p.note, TW, 900, 150, 4); rise(c, L.lines, L.size, 900, X, 700, k) }
   } else if (b === 2) {
-    label('The shift', 640); const parts = p.shift.split(' · ').map((x) => layout(c, x, TW, 900, 190, 2)); const L = { size: Math.min(...parts.map((x) => x.size)), lines: parts.flatMap((x) => x.lines) }; const h = rise(c, L.lines, L.size, 900, X, 700, k)
+    label('The shift', 640); const raw = p.shift.split(' · '); const parts = raw.map((x) => layout(c, x, TW, 900, 190, raw.length > 1 ? 1 : 4)); const L = { size: Math.min(...parts.map((x) => x.size)), lines: parts.flatMap((x) => x.lines) }; const h = rise(c, L.lines, L.size, 900, X, 700, k)
     c.globalAlpha = seg(k, 0.5, 0.8); c.fillStyle = soft; const N = layout(c, p.note, TW, 700, 64, 3); c.globalAlpha = seg(k, 0.5, 0.8); rise(c, N.lines, N.size, 700, X, 700 + h + 60, 1, 1.2); c.globalAlpha = 1
   } else if (b === 3) {
     const has = !!p.where; label(has ? 'Where' : 'With', 640); const L = layout(c, has ? p.where : p.agency, TW, 900, 220, 3); rise(c, L.lines, L.size, 900, X, 700, k)
