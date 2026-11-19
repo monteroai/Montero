@@ -146,7 +146,7 @@ function rise(c: C, lines: string[], size: number, weight: number, x: number, y:
 
 // ---- the kinetic job ad: dark stage, coloured glow, words that fly in with motion blur and turn into things ----
 // Job title (last word boxed), pay that counts up and becomes a weekly pill, a clock for the shift, a pin for the town, a button that gets tapped.
-const KB = [0, 1.9, 4.0, 5.7, 7.0]
+const KB = [0, 1.6, 3.6, 5.2, 6.5]
 const outQ = (x: number) => 1 - Math.pow(1 - x, 5)
 // Text drawn several times along its path, so fast moves smear like motion blur.
 function smear(c: C, text: string, x: number, y: number, dx: number, dy: number, alpha: number) {
@@ -183,6 +183,12 @@ function drawType(c: C, t: number, p: AdProps, opts: { watermark?: boolean } = {
   const end = b < 4 ? KB[b + 1] : AD_SECONDS + 1
   const u = t - KB[b], out = b < 4 ? Math.pow(seg(t, end - 0.2, end), 2) : 0
   const k = seg(u, 0.04, 1.25)
+  // giant outlined words drift across the lower half: the frame is full and never still
+  const ghost = [p.title, p.rate ? `${rateText(p.rate)} an hour` : p.title, p.shift.split(' · ')[0], p.where || p.agency, 'Apply today'][b].toUpperCase() + '  ·  '
+  c.save(); c.globalAlpha = 0.16 * seg(u, 0, 0.3) * (1 - out); c.strokeStyle = '#fff'; c.lineWidth = 3; font(c, 900, 300); c.textAlign = 'left'
+  const gw = Math.max(400, c.measureText(ghost).width)
+  for (let row = 0; row < 2; row++) { const off = ((t * (row ? -150 : 190)) % gw + gw) % gw; for (let x = -off; x < W; x += gw) c.strokeText(ghost, x, 1330 + row * 290) }
+  c.restore()
   // agency name stays put
   c.fillStyle = 'rgba(255,255,255,.7)'; c.globalAlpha = seg(t, 0.1, 0.5); font(c, 800, 40); c.textAlign = 'left'; c.fillText(p.agency.toUpperCase().split('').join(' '), X, 196); c.globalAlpha = 1
   // a slow push-in and a slight tilt, so nothing is ever still; each beat leaves upward with a smear
@@ -192,7 +198,10 @@ function drawType(c: C, t: number, p: AdProps, opts: { watermark?: boolean } = {
   c.globalAlpha = A
   if (b === 0) {
     const tk = pop(seg(k, 0, 0.26)); c.save(); c.translate(X, 700); c.scale(tk, tk); c.shadowColor = p.brand; c.shadowBlur = 50; rr(c, 0, -64, 410, 90, 45); c.fillStyle = p.brand; c.fill(); c.shadowBlur = 0; c.fillStyle = '#fff'; font(c, 900, 44); c.textAlign = 'center'; c.fillText('NOW HIRING', 205, -3); c.restore()
-    words(c, p.title, X, 800, TW, 900, 230, 4, seg(k, 0.14, 1), '#fff', p.brand)
+    const th = words(c, p.title, X, 800, TW, 900, 230, 4, seg(k, 0.14, 1), '#fff', p.brand)
+    const chips = [p.rate ? `${rateText(p.rate)}/hr` : '', p.where].filter(Boolean); let cx = X; font(c, 800, 50)
+    chips.forEach((s2, i) => { const g = outQ(seg(u, 0.75 + i * 0.14, 1.15 + i * 0.14)); if (g <= 0) return; const w2 = c.measureText(s2).width + 64; c.globalAlpha = A * g; c.strokeStyle = 'rgba(255,255,255,.8)'; c.lineWidth = 4; rr(c, cx + (1 - g) * 120, 800 + th + 44, w2, 92, 46); c.stroke(); c.fillStyle = '#fff'; c.textAlign = 'left'; c.fillText(s2, cx + 32 + (1 - g) * 120, 800 + th + 44 + 63); cx += w2 + 22 })
+    c.globalAlpha = A
   } else if (b === 1) {
     if (p.rate) {
       tag('Pays', 690)
@@ -200,6 +209,7 @@ function drawType(c: C, t: number, p: AdProps, opts: { watermark?: boolean } = {
       const full = rateText(p.rate); let size = 420; font(c, 900, size); while (c.measureText(full).width > TW && size > 120) { size -= 10; font(c, 900, size) }
       const land = pop(seg(u, 0.95, 1.25)); c.save(); c.translate(X, 740 + size * 0.86); c.scale(0.92 + 0.08 * land, 0.92 + 0.08 * land)
       c.shadowColor = p.brand; c.shadowBlur = 40 + 60 * seg(u, 0.9, 1.1) * (1 - seg(u, 1.1, 1.6)); c.fillStyle = '#fff'; c.textAlign = 'left'; smear(c, txt, -6, 0, 0, (1 - cu) * -150, A * seg(u, 0.05, 0.25)); c.restore(); c.shadowBlur = 0
+      const bu = seg(u, 0.95, 1.5); if (bu > 0 && bu < 1) { c.globalAlpha = A * (1 - bu); c.strokeStyle = p.brand; c.lineWidth = 8; c.lineCap = 'round'; const bx = X + c.measureText(full).width / 2, byy = 740 + size * 0.5; for (let i = 0; i < 14; i++) { const a = (i / 14) * Math.PI * 2, r0 = size * 0.9 + outQ(bu) * 150, r1 = r0 + 70 * (1 - bu); c.beginPath(); c.moveTo(bx + Math.cos(a) * r0 * 1.5, byy + Math.sin(a) * r0 * 0.6); c.lineTo(bx + Math.cos(a) * r1 * 1.5, byy + Math.sin(a) * r1 * 0.6); c.stroke() } c.lineCap = 'butt' }
       c.globalAlpha = A * seg(u, 0.5, 0.75); c.fillStyle = 'rgba(255,255,255,.8)'; font(c, 800, 92); c.fillText('an hour', X, 740 + size * 0.86 + 128)
       // the weekly figure draws itself as a pill
       const yb = 740 + size * 0.86 + 220, d = outQ(seg(u, 1.05, 1.6)); if (d > 0) {
@@ -215,8 +225,8 @@ function drawType(c: C, t: number, p: AdProps, opts: { watermark?: boolean } = {
     c.lineCap = 'round'; c.strokeStyle = p.brand; c.lineWidth = 12; c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx + Math.sin(hh + spin) * r * 0.5, cy - Math.cos(hh + spin) * r * 0.5); c.stroke()
     c.strokeStyle = '#fff'; c.lineWidth = 8; c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx + Math.sin(mm + spin * 3) * r * 0.78, cy - Math.cos(mm + spin * 3) * r * 0.78); c.stroke(); c.lineCap = 'butt'
     c.globalAlpha = A * seg(k, 0.1, 0.3); c.fillStyle = p.brand; font(c, 900, 44); c.textAlign = 'left'; c.fillText('THE SHIFT'.split('').join(' '), cx + r + 44, cy + 16); c.globalAlpha = A
-    const parts = p.shift.split(' · '); const one = parts.length > 1 ? Math.min(...parts.map((x) => layout(c, x, TW, 900, 170, 1).size)) : 170
-    let y = 960; for (const part of parts) y += words(c, part, X, y, TW, 900, one, parts.length > 1 ? 1 : 3, seg(k, 0.15, 1), '#fff') + 6
+    const parts = p.shift.split(' · '); const fitOne = parts.length > 1 ? Math.min(...parts.map((x) => layout(c, x, TW, 900, 170, 1).size)) : 170; const one = fitOne < 110 ? 150 : fitOne
+    let y = 960; for (const part of parts) y += words(c, part, X, y, TW, 900, one, parts.length > 1 && fitOne >= 110 ? 1 : 3, seg(k, 0.15, 1), '#fff') + 6
     c.globalAlpha = A * seg(u, 0.8, 1.1); c.fillStyle = 'rgba(255,255,255,.7)'; const N = layout(c, p.note, TW, 700, 60, 3); font(c, 700, N.size); N.lines.forEach((l, i) => c.fillText(l, X, y + 70 + i * N.size * 1.2))
   } else if (b === 3) {
     // a pin drops and the ground ripples
@@ -239,6 +249,7 @@ function drawType(c: C, t: number, p: AdProps, opts: { watermark?: boolean } = {
     if (typed.length < p.cta.length && typed.length > 0) { const tw2 = c.measureText(typed).width; c.fillRect(tw2 / 2 + 6, -size * 0.45, 5, size * 0.9) }
     c.restore()
     const rp = seg(u, 1.6, 2.3); if (rp > 0 && rp < 1) { c.globalAlpha = (1 - rp) * 0.7; c.strokeStyle = '#fff'; c.lineWidth = 6; rr(c, W / 2 - bw / 2 - rp * 50, by - rp * 50, bw + rp * 100, 150 + rp * 100, 75 + rp * 50); c.stroke() }
+    for (let i = 0; i < 2; i++) { const pu = ((u - 2.0 - i * 0.45) % 0.9) / 0.9; if (u > 2.0 + i * 0.45 && pu > 0) { c.globalAlpha = (1 - pu) * 0.45; c.strokeStyle = p.brand; c.lineWidth = 5; rr(c, W / 2 - bw / 2 - pu * 44, by - pu * 44, bw + pu * 88, 150 + pu * 88, 75 + pu * 44); c.stroke() } }
     // the pointer slides in and taps
     const ar = outQ(seg(u, 1.1, 1.55)); if (ar > 0) { const ax = W / 2 + 190 + (1 - ar) * 420, ay = by + 96 + (1 - ar) * 320 - Math.sin(tap * Math.PI) * 10; c.globalAlpha = Math.min(1, ar * 2); c.save(); c.translate(ax, ay); c.scale(1.5, 1.5); c.fillStyle = '#fff'; c.strokeStyle = '#06070b'; c.lineWidth = 5; c.lineJoin = 'round'; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 72); c.lineTo(19, 55); c.lineTo(33, 86); c.lineTo(46, 80); c.lineTo(32, 50); c.lineTo(58, 50); c.closePath(); c.stroke(); c.fill(); c.restore() }
   }
