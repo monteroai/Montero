@@ -22,7 +22,10 @@ export default function Maker({ mode, initial, from = 'video page', madeFor }: {
   const canvas = useRef<HTMLCanvasElement>(null), props = useRef(p), t0 = useRef(0), hold = useRef(false), editRef = useRef<HTMLDivElement>(null)
   props.current = p
   const sound = useRef<AdSound | null>(null); const [snd, setSnd] = useState(false)
-  const toggleSound = () => { if (!sound.current) sound.current = new AdSound(); setSnd(sound.current.toggle()); t0.current = performance.now() }
+  const slug = mode === 'made' && from.startsWith('link ') ? from.slice(5) : ''
+  const seen = (kind: string) => { if (slug) void fetch('/api/video/seen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug, kind }), keepalive: true }).catch(() => null) }
+  useEffect(() => { if (!slug) return; const id = setTimeout(() => seen('view'), 4000); return () => clearTimeout(id) }, [slug])   // eslint-disable-line react-hooks/exhaustive-deps
+  const toggleSound = () => { if (!sound.current) sound.current = new AdSound(); const on = sound.current.toggle(); setSnd(on); if (on) seen('sound'); t0.current = performance.now() }
 
   useEffect(() => {
     let raf = 0, alive = true
@@ -89,7 +92,7 @@ export default function Maker({ mode, initial, from = 'video page', madeFor }: {
   const caption = `${p.title}${p.rate ? `, $${p.rate} an hour` : ''}${p.where ? `, ${p.where}` : ''}. ${p.shift}. ${p.cta}`
 
   const claimBlock = (<>
-            {claim === '' && <button type="button" onClick={() => setClaim('ask')} style={btn(blue)}>Get the video file, free</button>}
+            {claim === '' && <button type="button" onClick={() => { setClaim('ask'); seen('ask') }} style={btn(blue)}>Get the video file, free</button>}
             {(claim === 'ask' || claim === 'down') && (
               <div style={{ display: 'grid', gap: 10, background: '#fff', border: `1px solid ${line}`, borderRadius: 14, padding: 14 }}>
                 <label style={lab}>Where should we send it?<input id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@youragency.com" style={box} /></label>

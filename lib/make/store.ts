@@ -28,3 +28,9 @@ export async function trialSave(key: string, data: object): Promise<boolean> {
   const r = await fetch(`${URL_}/storage/v1/object/trials/${key}.json`, { method: 'POST', headers: { ...H(), 'Content-Type': 'application/json', 'x-upsert': 'true' }, body: JSON.stringify(data) })
   return r.ok
 }
+// One small file per real view of a pre-made video link (see app/api/video/seen). Read back by scripts/outreach_scorecard.py.
+export async function viewSave(slug: string, data: object): Promise<boolean> {
+  const name = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  const r = await fetch(`${URL_}/storage/v1/object/trials/views/${slug}/${name}.json`, { method: 'POST', headers: { ...H(), 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+  return r.ok
+}
