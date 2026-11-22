@@ -6,6 +6,7 @@ const nextConfig = {
       { source: '/test', destination: '/test/index.html' },
       { source: '/p/astonishing', destination: '/p/astonishing/index.html' },
       { source: '/make', destination: '/make/index.html' },
+      { source: '/how', destination: '/how/index.html' },
     ]
   },
   // /recruitment and /recruiting are the same page

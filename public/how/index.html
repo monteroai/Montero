@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How It Works</title>
+<meta name="description" content="The automations from our reels, and how to set each one up yourself.">
+<meta property="og:title" content="How It Works">
+<meta property="og:description" content="The automations from our reels, and how to set each one up yourself.">
+<meta property="og:image" content="https://montero.cool/how/og.jpg">
+<meta name="theme-color" content="#2b3036">
+<link rel="icon" href="/how/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: one column "down the block". Header = street sign; each automation = a shop with a real frame from its reel,
+   then a work order (steps) and the actual texts it sends. Palette taken straight from the reels. */
+:root{
+  --asphalt:#2b3036; --asphalt-2:#353b42; --sky:#cfe6f5; --paper:#f6f8f7; --ink:#11151c; --muted:#5f6b67;
+  --signal:#f2c35a; --go:#2fa772; --stop:#e2493b; --rule:#dfe5e2;
+  --display:'Bricolage Grotesque',Georgia,serif; --body:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif; --mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--asphalt);color:var(--ink);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:600px;margin:0 auto;padding-block:20px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* sign */
+.sign{display:flex;align-items:center;gap:16px;padding:6px 2px 22px}
+.sign img{width:64px;height:64px;border-radius:16px;flex:none;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.sign h1{margin:0;font:800 34px/1 var(--display);color:#fff;letter-spacing:-.5px}
+.sign p{margin:6px 0 0;color:#b9c3bf;font-size:15px;max-width:34ch}
+
+/* lane divider */
+.lane{height:6px;margin:4px 0 22px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 30px,transparent 30px 52px);border-radius:3px;opacity:.5}
+
+.count{font:700 12px var(--mono);letter-spacing:1.5px;text-transform:uppercase;color:var(--signal);margin:0 2px 12px}
+.block{display:grid;gap:18px}
+
+/* shop card */
+.shop{background:var(--paper);border-radius:26px;overflow:hidden;box-shadow:0 10px 0 rgba(0,0,0,.18)}
+.awning{height:16px;background:repeating-linear-gradient(90deg,var(--c1) 0 26px,var(--c2) 26px 52px)}
+.shop figure{margin:0;position:relative;aspect-ratio:1080/760;background:var(--sky)}
+.shop figure img{display:block;width:100%;height:100%;object-fit:cover}
+.tag{position:absolute;left:14px;bottom:14px;background:var(--ink);color:#fff;font:700 12px var(--mono);letter-spacing:1px;padding:6px 10px;border-radius:8px}
+.head{padding:18px 20px 4px}
+.head h2{margin:0;font:800 28px/1.1 var(--display);letter-spacing:-.4px}
+.head p{margin:6px 0 0;color:var(--muted)}
+
+details{border-top:1px solid var(--rule);margin-top:16px}
+summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:16px 20px;font:700 16px var(--body)}
+summary::-webkit-details-marker{display:none}
+summary:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+summary .pill{font:700 12px var(--mono);letter-spacing:1px;background:var(--ink);color:#fff;border-radius:999px;padding:6px 12px}
+details[open] summary .pill{background:var(--go)}
+.inner{padding:0 20px 22px}
+
+h3{font:700 12px var(--mono);letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);margin:18px 0 10px}
+
+/* work order */
+.order{list-style:none;margin:0;padding:0;border:1.5px solid var(--ink);border-radius:14px;overflow:hidden;background:#fff}
+.order li{display:grid;grid-template-columns:44px 1fr;border-top:1.5px dashed #c9d1ce}
+.order li:first-child{border-top:0}
+.order li b{font:700 14px var(--mono);display:grid;place-items:start center;padding-top:13px;background:#eef2f0;border-right:1.5px solid var(--ink)}
+.order li span{padding:11px 14px}
+
+/* phone thread */
+.thread{background:#e9eeec;border-radius:20px;padding:14px;display:grid;gap:8px}
+.thread .from{font:600 12px var(--mono);color:var(--muted);letter-spacing:.5px}
+.bub{justify-self:end;max-width:88%;background:var(--go);color:#fff;border-radius:18px 18px 5px 18px;padding:9px 13px;font-size:15px}
+.bub.in{justify-self:start;background:#fff;color:var(--ink);border-radius:18px 18px 18px 5px}
+
+.tools{display:flex;flex-wrap:wrap;gap:8px}
+.tools span{border:1.5px solid var(--ink);border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600;background:#fff}
+.note{margin:14px 0 0;padding:12px 14px;border-radius:12px;background:#fff6dc;font-size:14px}
+
+/* coming soon lot */
+.lot{border:2px dashed rgba(255,255,255,.28);border-radius:26px;padding:22px;color:#c2ccc8;text-align:center}
+.lot b{display:block;color:#fff;font:800 20px var(--display);margin-bottom:4px}
+
+/* ask */
+.ask{margin-top:26px;background:var(--signal);border-radius:26px;padding:24px 22px}
+.ask h2{margin:0 0 6px;font:800 26px/1.1 var(--display)}
+.ask p{margin:0 0 14px}
+.ask .mail{display:inline-block;font:700 15px var(--mono);background:var(--ink);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;word-break:break-all}
+footer{color:#8f9a96;font-size:13px;text-align:center;margin-top:24px}
+@media (min-width:640px){.sign h1{font-size:40px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="sign">
+    <img src="/how/logo.svg" alt="">
+    <div>
+      <h1>How It Works</h1>
+      <p>The automations from our reels, and how to set each one up yourself.</p>
+    </div>
+  </header>
+  <div class="lane" aria-hidden="true"></div>
+
+  <div class="count">On this block: 2 shops</div>
+  <main class="block">
+
+    <article class="shop" id="shop" style="--c1:#e2493b;--c2:#f6f8f7">
+      <div class="awning" aria-hidden="true"></div>
+      <figure><img src="/how/shop.jpg" alt="Auto shop status board with columns In, Working, Needs OK and Done" width="720" height="507"><span class="tag">REEL: AUTO SHOP</span></figure>
+      <div class="head">
+        <h2>Status texts</h2>
+        <p>Customers stop calling to ask "is my car done?" because the shop texts them first.</p>
+      </div>
+      <details open>
+        <summary>How to build it <span class="pill">5 STEPS</span></summary>
+        <div class="inner">
+          <h3>The texts it sends</h3>
+          <div class="thread">
+            <div class="from">CITY AUTO</div>
+            <div class="bub">Your Civic is checked in. Ready by 4:00 PM.</div>
+            <div class="bub">Front brakes are worn. $240 to replace. Tap to approve.</div>
+            <div class="bub in">Approve</div>
+            <div class="bub">Your Civic is ready. Pay here: [link]</div>
+            <div class="bub">Thanks! Keys are in the lockbox by the door. Code 4821.</div>
+          </div>
+          <h3>Work order</h3>
+          <ol class="order">
+            <li><b>01</b><span>Make the board: a shared sheet, one row per car, with a Status column (In, Working, Needs OK, Done).</span></li>
+            <li><b>02</b><span>Connect a texting service with an automation tool. When a Status cell changes, send that status's text to the owner.</span></li>
+            <li><b>03</b><span>For Needs OK, attach the photo and a reply link. An approval moves the car back to Working.</span></li>
+            <li><b>04</b><span>For Done, include a payment link. Once it's paid, send the lockbox code.</span></li>
+            <li><b>05</b><span>Get the customer's OK to text at check-in and include "Reply STOP to opt out".</span></li>
+          </ol>
+          <h3>Tools that can do it</h3>
+          <div class="tools"><span>Google Sheets</span><span>Zapier or Make</span><span>Twilio</span><span>Square or Stripe links</span></div>
+          <p class="note">Many shop management programs already have texting and photo inspections built in. Check yours before building from scratch.</p>
+        </div>
+      </details>
+    </article>
+
+    <article class="shop" id="deli" style="--c1:#2fa772;--c2:#f6f8f7">
+      <div class="awning" aria-hidden="true"></div>
+      <figure><img src="/how/deli.jpg" alt="A line of customers at a deli counter at noon" width="720" height="507" loading="lazy"><span class="tag">REEL: DELI</span></figure>
+      <div class="head">
+        <h2>Pickup slots</h2>
+        <p>A lunch rush that runs itself: everyone orders ahead and picks a time.</p>
+      </div>
+      <details>
+        <summary>How to build it <span class="pill">5 STEPS</span></summary>
+        <div class="inner">
+          <h3>Work order</h3>
+          <ol class="order">
+            <li><b>01</b><span>Turn on online ordering with scheduled pickup times in your point-of-sale system.</span></li>
+            <li><b>02</b><span>Make slots, for example every 15 minutes, and cap how many orders each one takes.</span></li>
+            <li><b>03</b><span>Send each order to the kitchen a set time before its slot, not the moment it's placed.</span></li>
+            <li><b>04</b><span>Text the customer when it's ready, with the shelf or locker number.</span></li>
+            <li><b>05</b><span>Put the ordering link on the door, your Google listing and your bio.</span></li>
+          </ol>
+          <h3>Tools that can do it</h3>
+          <div class="tools"><span>Square Online</span><span>Toast</span><span>Clover</span><span>Pickup shelf or lockers</span></div>
+          <p class="note">Delivery apps take a cut of every order. Your own ordering page usually costs less on orders you'd have gotten anyway.</p>
+        </div>
+      </details>
+    </article>
+
+    <div class="lot"><b>Empty lot</b>A new shop moves in with every reel.</div>
+  </main>
+
+  <section class="ask">
+    <h2>Want one running at your place?</h2>
+    <p>Email what eats your day. We'll tell you if it can run itself.</p>
+    <a class="mail" href="mailto:emilio@montero.cool">emilio@montero.cool</a>
+  </section>
+  <footer>montero.cool/how</footer>
+</div>
+</body>
+</html>
