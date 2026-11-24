@@ -9,9 +9,12 @@ const nextConfig = {
       { source: '/how', destination: '/how/index.html' },
     ]
   },
-  // /recruitment and /recruiting are the same page
+  // 11/23/2026: staffing/recruiting offer paused. Pages stay in the repo;
+  // every staffing URL sends visitors to the homepage. Remove to restore.
   async redirects() {
-    return [{ source: '/recruitment', destination: '/recruiting', permanent: false }]
+    const paused = ['/recruitment', '/recruiting', '/recruiting/:path*', '/weekly', '/video', '/video/:path*',
+      '/v/:path*', '/ad/:path*', '/apply/:path*', '/start', '/jobmap/:path*']
+    return paused.map((source) => ({ source, destination: '/', permanent: false }))
   },
 }
 export default nextConfig
