@@ -169,6 +169,79 @@ textarea{min-height:96px;resize:vertical}
 footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 24px;padding-block:48px 40px;font:17px var(--mono);color:var(--mute)}
 footer a{text-decoration:none}footer a:hover{color:var(--green)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+.who{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:860px){.who{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.who{grid-template-columns:1fr}}
+.w{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:22px;display:flex;flex-direction:column;gap:8px;text-decoration:none;transition:border-color .2s,transform .2s}
+.w:hover{border-color:var(--green);transform:translateY(-3px)}
+.w h3{font:400 24px var(--display);margin:0}.w p{margin:0;color:var(--mute)}
+.w .st{font:16px var(--mono);color:var(--green);display:flex;align-items:center;gap:8px}
+.w .st::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.w .arrow{font:500 17px var(--mono);color:var(--green);margin-top:auto}.w.alt .arrow{color:var(--cyan)}
+.w.ready{border-color:#24433a}
+header nav .mailh{color:var(--text)}
+@media (max-width:720px){header.top{flex-wrap:wrap}header nav{gap:14px;font-size:15px}}
+@supports (animation-timeline: view()){
+  @media (prefers-reduced-motion:no-preference){
+    .cap,.w,.stats,.try,.contact{animation:rise linear both;animation-timeline:view();animation-range:entry 0% entry 45%}
+  }
+}
+@keyframes rise{from{opacity:.35;transform:translateY(46px)}}
+
+.chip{transition:opacity .6s ease,transform .6s ease}
+.chip.off{opacity:0;transform:translateY(6px) scale(.96)}
+.chip.pop{animation:chippop .5s cubic-bezier(.2,1.5,.4,1)}
+@keyframes chippop{0%{opacity:0;transform:translateY(8px) scale(.85)}100%{opacity:1;transform:none}}
+.bars{display:flex;align-items:flex-end;gap:10px;padding:16px 18px}
+.bars i{flex:1;height:var(--h);background:linear-gradient(var(--green),rgba(30,168,102,.35));border-radius:3px 3px 0 0;transform-origin:bottom;animation:grow 2.4s ease-in-out infinite alternate}
+@keyframes grow{from{transform:scaleY(.55)}}
+.hub{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:760px){.hub{grid-template-columns:1fr}}
+.hb{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.hb h3{font:400 26px var(--display);margin:10px 0 0}.hb p{margin:0;color:var(--mute)}
+.stage{height:260px;border-radius:8px;background:var(--panel-2);border:1px solid var(--line);position:relative;overflow:hidden;display:grid;place-items:center}
+.ph9{width:128px;height:228px;border:2px solid var(--text);border-radius:16px;position:relative;overflow:hidden;background:#0d1112}
+.ph9 .pbar{position:absolute;top:8px;left:8px;right:8px;height:3px;background:rgba(255,255,255,.2);z-index:3}
+.ph9 .pbar i{position:absolute;inset:0;background:#fff;transform-origin:left;animation:prog9 9s linear infinite}
+@keyframes prog9{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.ph9 .sc{position:absolute;inset:0;opacity:0;animation:scn 9s infinite}
+.ph9 .s1{background:radial-gradient(circle at 30% 35%,#ff6a13 0 14%,transparent 15%),linear-gradient(170deg,#16302a,#0d1112)}
+.ph9 .s2{background:radial-gradient(circle at 70% 60%,#35d6c6 0 22%,transparent 23%),linear-gradient(200deg,#1d2a3a,#0d1112);animation-delay:3s}
+.ph9 .s3{background:linear-gradient(0deg,#1ea866 0 30%,transparent 30%),radial-gradient(circle at 50% 30%,#eef3f0 0 10%,transparent 11%),#0f1a1c;animation-delay:6s}
+@keyframes scn{0%{opacity:0;transform:scale(1.15)}4%{opacity:1}33%{opacity:1;transform:scale(1)}37%,100%{opacity:0}}
+.ph9 .ln{position:absolute;left:12px;height:9px;border-radius:3px;z-index:2;animation:lnpop 3s infinite}
+.ph9 .l1{right:12px;bottom:26px;background:#fff}.ph9 .l2{right:40px;bottom:42px;background:var(--green);animation-delay:.25s}
+@keyframes lnpop{0%,10%{opacity:0;transform:translateY(6px)}20%,85%{opacity:1;transform:none}100%{opacity:0}}
+.ph9 .heart{position:absolute;right:14px;bottom:72px;width:14px;height:14px;background:var(--orange);z-index:2;animation:hrt 3s infinite}
+.ph9 .heart::before,.ph9 .heart::after{content:"";position:absolute;width:14px;height:14px;border-radius:50%;background:var(--orange)}
+.ph9 .heart::before{left:-7px;top:0}.ph9 .heart::after{top:-7px;left:0}
+@keyframes hrt{0%,60%{transform:rotate(45deg) scale(.6);opacity:.4}70%{transform:rotate(45deg) scale(1.2);opacity:1}100%{transform:rotate(45deg) scale(1);opacity:1}}
+.win{width:86%;height:210px;border:1px solid var(--line);border-radius:8px;background:#0b0f10;overflow:hidden;position:relative}
+.win .tb{display:flex;gap:6px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line);position:relative;z-index:2;background:#0b0f10}
+.win .tb i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.win .tb span{flex:1;height:10px;border-radius:5px;background:var(--panel-2);margin-left:8px}
+.pg{padding:12px;animation:scrollpg 8s ease-in-out infinite}
+.hero2{height:70px;border-radius:5px;background:linear-gradient(120deg,#16302a,#1d2a3a);margin-bottom:10px}
+.row3{display:flex;gap:8px;margin-bottom:10px}.row3 b{flex:1;height:44px;border-radius:4px;background:var(--panel-2);border:1px solid var(--line)}
+.txt{height:9px;border-radius:3px;background:var(--line);margin-bottom:8px}.txt.s{width:60%}
+@keyframes scrollpg{0%,15%{transform:translateY(0)}50%,65%{transform:translateY(-110px)}100%{transform:translateY(0)}}
+.callnow{position:absolute;right:12px;bottom:12px;background:var(--green);color:#04150c;font:600 14px var(--body);padding:7px 12px;border-radius:6px;z-index:2;animation:pulse 2s infinite}
+.ml{width:86%;display:flex;flex-direction:column;gap:10px}
+.mr{display:flex;align-items:center;gap:10px;background:#0b0f10;border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.mr .av{width:26px;height:26px;border-radius:50%;background:var(--line);flex:none}.mr .av.g{background:var(--green)}
+.mr .t1{flex:1;height:9px;border-radius:3px;background:var(--line)}
+.mr em{font:normal 14px var(--mono);color:var(--mute)}.mr em.op{color:var(--cyan)}.mr em.rp{color:var(--green)}
+.mr .rt{flex:1;font-size:15px;line-height:1.3}.mr .rt small{color:var(--mute);font-size:14px}
+.mr.new{border-color:#24433a;animation:arrive 6s infinite}
+@keyframes arrive{0%,15%{opacity:.15;transform:translateY(16px)}30%,90%{opacity:1;transform:none}100%{opacity:.15}}
+.dash{display:block;padding:18px}
+.kp{position:relative;z-index:1}.kp span{display:block;font-size:15px;color:var(--mute)}.kp b{font:400 44px var(--display);font-variant-numeric:tabular-nums}
+.dash svg{position:absolute;left:0;right:0;bottom:0;width:100%;height:58%}
+.dash .area{fill:rgba(30,168,102,.15)}
+.dash .line{fill:none;stroke:var(--green);stroke-width:3;stroke-dasharray:400;animation:draw 5s ease-in-out infinite}
+@keyframes draw{0%{stroke-dashoffset:400}50%,100%{stroke-dashoffset:0}}
+@supports (animation-timeline: view()){@media (prefers-reduced-motion:no-preference){.hb{animation:rise linear both;animation-timeline:view();animation-range:entry 0% entry 45%}}}
 </style>
 </head>
 <body>
@@ -178,13 +251,13 @@ footer a{text-decoration:none}footer a:hover{color:var(--green)}
     <svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="81" cy="130" r="27" fill="#35d6c6"/><circle cx="76" cy="126" r="27" fill="#ff6a13"/><circle cx="100" cy="100" r="76" fill="none" stroke="currentColor" stroke-width="22"/><path fill="currentColor" d="M24 92 A76 76 0 0 1 176 92 C150 104 50 104 24 92 Z"/></svg>
     MONTERO
   </a>
-  <nav aria-label="Main"><a href="#build">what we do</a><a href="/builders" class="keep">for builders</a><a href="#contact">contact</a><a class="login" href="/login">login</a></nav>
+  <nav aria-label="Main"><a href="#build">what we do</a><a href="#work">our work</a><a href="#who">who we help</a><a href="#contact">contact</a><a class="mailh keep" href="mailto:emilio@montero.cool">emilio@montero.cool</a><a class="login" href="/login">login</a></nav>
 </header>
 
 <div class="hero">
   <div>
-    <h1>We find people <em>ready to buy</em> from you.</h1>
-    <p class="lede">Then we help you reach them. A short list in your email every Monday.</p>
+    <h1>We find your <em>next customers.</em></h1>
+    <p class="lede">Then we help you reach them. A fresh list in your email every week.</p>
     <div class="ctas">
       <a class="btn go" href="tel:+14759771707">Call 475-977-1707</a>
       <a class="btn" href="#contact">Send a message</a>
@@ -201,22 +274,33 @@ footer a{text-decoration:none}footer a:hover{color:var(--green)}
 </div>
 
 <div class="stats" aria-label="Running now">
-  <div><b>16,905</b><span>Greenwich lots we check</span></div>
-  <div><b>254</b><span>houses builders rebuilt</span></div>
-  <div><b>1,418</b><span>old houses on mostly land</span></div>
-  <div><b>Mon 7 AM</b><span>your list arrives</span></div>
+  <div><b>Weekly</b><span>a fresh list arrives</span></div>
+  <div><b>Only yours</b><span>never shared with a competitor</span></div>
+  <div><b>No login</b><span>it comes to your email</span></div>
+  <div><b>Done for you</b><span>we build it and run it</span></div>
 </div>
 
 <section id="build" aria-labelledby="h-build">
   <div class="label">What we do</div>
   <h2 id="h-build">Six ways we help.</h2>
   <div class="grid">
-    <div class="cap"><div class="viz radar" id="radar"><span class="ring" style="width:60px;height:60px"></span><span class="ring" style="width:120px;height:120px"></span><span class="ring" style="width:180px;height:180px"></span></div><div><h3>Find buyers</h3><p>Who is ready to buy, this week.</p></div></div>
+    <div class="cap"><div class="viz radar" id="radar"><span class="ring" style="width:60px;height:60px"></span><span class="ring" style="width:120px;height:120px"></span><span class="ring" style="width:180px;height:180px"></span></div><div><h3>Find customers</h3><p>Who needs what you sell, this week.</p></div></div>
     <div class="cap"><div class="viz nodes"><span class="n">IN</span><span class="w"></span><span class="n">IF</span><span class="w" style="animation-delay:-.4s"></span><span class="n">OUT</span></div><div><h3>Busywork, done</h3><p>Emails, reminders and reports that run themselves.</p></div></div>
     <div class="cap"><div class="viz browser"><div class="tb"><i></i><i></i><i></i></div><div class="blk" style="width:70%;height:14px"></div><div class="blk" style="width:92%"></div><div class="blk" style="width:84%"></div><div class="blk" style="width:60%;margin-bottom:12px"></div><div class="cta"></div></div><div><h3>Websites</h3><p>Simple pages that get calls.</p></div></div>
     <div class="cap"><div class="viz reel"><div class="phone"><div class="prog"></div><div class="sun"></div><div class="cap2"></div><div class="cap1"></div></div><div class="wave" id="wave"></div></div><div><h3>Short videos</h3><p>Ads for Instagram and Facebook. No filming.</p></div></div>
-    <div class="cap"><div class="viz"><div class="mapgrid" id="mapgrid"></div></div><div><h3>Maps</h3><p>Every property in town, checked.</p></div></div>
+    <div class="cap"><div class="viz bars"><i style="--h:40%"></i><i style="--h:62%;animation-delay:-.3s"></i><i style="--h:48%;animation-delay:-.6s"></i><i style="--h:78%;animation-delay:-.9s"></i><i style="--h:66%;animation-delay:-1.2s"></i><i style="--h:90%;animation-delay:-1.5s"></i></div><div><h3>Dashboards</h3><p>Your numbers, on one screen.</p></div></div>
     <div class="cap"><div class="viz inbox" id="inbox"></div><div><h3>Emails that get answers</h3><p>Sent, tracked, followed up.</p></div></div>
+  </div>
+</section>
+
+<section id="work" aria-labelledby="h-work">
+  <div class="label">Our work</div>
+  <h2 id="h-work">See it in motion.</h2>
+  <div class="hub">
+    <div class="hb"><div class="stage vid" aria-hidden="true"><div class="ph9"><div class="pbar"><i></i></div><div class="sc s1"></div><div class="sc s2"></div><div class="sc s3"></div><div class="ln l1"></div><div class="ln l2"></div><div class="heart"></div></div></div><h3>Short videos</h3><p>Ads for Instagram, TikTok and Facebook. No filming.</p></div>
+    <div class="hb"><div class="stage web" aria-hidden="true"><div class="win"><div class="tb"><i></i><i></i><i></i><span></span></div><div class="pg"><div class="hero2"></div><div class="row3"><b></b><b></b><b></b></div><div class="txt"></div><div class="txt s"></div><div class="row3"><b></b><b></b><b></b></div><div class="txt"></div></div><div class="callnow">Call now</div></div></div><h3>Websites</h3><p>Simple pages that bring in calls.</p></div>
+    <div class="hb"><div class="stage mail" aria-hidden="true"><div class="ml"><div class="mr"><span class="av"></span><span class="t1"></span><em>sent</em></div><div class="mr"><span class="av"></span><span class="t1"></span><em class="op">opened</em></div><div class="mr new"><span class="av g"></span><span class="rt">Re: your note<br><small>Yes, call me Tuesday.</small></span><em class="rp">replied</em></div></div></div><h3>Emails</h3><p>Sent, tracked and followed up for you.</p></div>
+    <div class="hb"><div class="stage dash" aria-hidden="true"><div class="kp"><span>new leads this week</span><b id="kpn">37</b></div><svg viewBox="0 0 300 110" preserveAspectRatio="none"><path class="area" d="M0 110 L0 86 L50 74 L100 80 L150 55 L200 48 L250 30 L300 18 L300 110 Z"/><path class="line" d="M0 86 L50 74 L100 80 L150 55 L200 48 L250 30 L300 18"/></svg></div><h3>Dashboards</h3><p>Every number that matters, live.</p></div>
   </div>
 </section>
 
@@ -225,32 +309,25 @@ footer a{text-decoration:none}footer a:hover{color:var(--green)}
   <h2 id="h-try">Pick a business. See what we'd find.</h2>
   <div class="try">
     <div class="picks" role="group" aria-label="Business type">
-      <button class="pick" type="button" data-k="builder" aria-pressed="true">home builder <small class="live">live</small></button>
-      <button class="pick" type="button" data-k="contractor" aria-pressed="false">contractor <small>example</small></button>
-      <button class="pick" type="button" data-k="service" aria-pressed="false">local service <small>example</small></button>
-      <button class="pick" type="button" data-k="b2b" aria-pressed="false">b2b / agency <small>example</small></button>
+      <button class="pick" type="button" data-k="builder" aria-pressed="true">home builder</button>
+      <button class="pick" type="button" data-k="contractor" aria-pressed="false">contractor</button>
+      <button class="pick" type="button" data-k="service" aria-pressed="false">dental office</button>
+      <button class="pick" type="button" data-k="b2b" aria-pressed="false">recruiter</button>
     </div>
     <div class="term"><div class="bar"><i></i><i></i><i></i><span class="t" id="tname">example</span></div><pre id="out" aria-live="polite"></pre></div>
   </div>
 </section>
 
-<section aria-labelledby="h-prod">
-  <div class="label">Ready now</div>
-  <h2 id="h-prod">For builders in Greenwich.</h2>
-  <div class="prods">
-    <a class="prod main" href="/builders">
-      <span class="st">live · Greenwich, CT</span>
-      <h3>Next Lot</h3>
-      <p>Five lots that aren't for sale, every Monday, matched to what you build.</p>
-      <div class="meta"><span>$399/mo</span><span>first month free</span><span>only yours</span></div>
-      <span class="arrow">See how it works →</span>
-    </a>
-    <a class="prod alt" href="#contact">
-      <span class="st">custom</span>
-      <h3>Your system</h3>
-      <p>Tell us what you wish you knew sooner. We build it for you.</p>
-      <span class="arrow">Talk to us →</span>
-    </a>
+<section id="who" aria-labelledby="h-who">
+  <div class="label">Who we help</div>
+  <h2 id="h-who">Different businesses. Same idea.</h2>
+  <div class="who">
+    <a class="w ready" href="/builders"><span class="st">ready now</span><h3>Home builders</h3><p>Land before it's for sale.</p><span class="arrow">See it →</span></a>
+    <a class="w" href="#contact"><h3>Contractors</h3><p>Homeowners about to need you.</p></a>
+    <a class="w" href="#contact"><h3>Dental and medical</h3><p>New patients close by.</p></a>
+    <a class="w" href="#contact"><h3>Recruiters</h3><p>Companies that just started hiring.</p></a>
+    <a class="w" href="#contact"><h3>Local services</h3><p>New neighbors and new businesses.</p></a>
+    <a class="w alt" href="#contact"><h3>Your business</h3><p>Tell us who you want. We find them.</p><span class="arrow">Talk to us →</span></a>
   </div>
 </section>
 
@@ -289,8 +366,10 @@ footer a{text-decoration:none}footer a:hover{color:var(--green)}
   var pupil=document.getElementById('pupil'), eye=document.getElementById('eye'), tx=0,ty=0,x=0,y=0,raf=null;
   function fr(){x+=(tx-x)*.15;y+=(ty-y)*.15;pupil.setAttribute('transform','translate('+x.toFixed(1)+' '+y.toFixed(1)+')');raf=(Math.abs(tx-x)>.05||Math.abs(ty-y)>.05)?requestAnimationFrame(fr):null}
   if(!reduce) addEventListener('pointermove',function(e){var r=eye.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2),d=Math.hypot(dx,dy)||1,m=Math.min(1,d/300);tx=dx/d*m*30+24;ty=dy/d*m*18-12;if(!raf)raf=requestAnimationFrame(fr)},{passive:true});
-  var lines=[['watching:','public records'],['found:','a new business filing'],['matched:','3 buyers who fit'],['sent:','Monday list, 7:00 AM']],li=0,tk=document.getElementById('tick');
-  if(!reduce) setInterval(function(){li=(li+1)%lines.length;tk.innerHTML='<b>'+lines[li][0]+'</b> '+lines[li][1]},2400);
+  var lines=[['watching:','public records'],['found:','a new business filing'],['matched:','3 customers who fit'],['sent:','your weekly list']],li=0,tk=document.getElementById('tick');
+  var chip=tk.parentNode;
+  function cyc(){setTimeout(function(){chip.classList.add('off');setTimeout(function(){li=(li+1)%lines.length;tk.innerHTML='<b>'+lines[li][0]+'</b> '+lines[li][1];chip.classList.remove('off','pop');void chip.offsetWidth;chip.classList.add('pop');cyc()},3500+Math.random()*5500)},3200)}
+  if(!reduce) cyc();
 
   /* pipeline canvas */
   var cv=document.getElementById('flow'),c=cv.getContext('2d'),W=cv.width,H=cv.height;
@@ -321,9 +400,8 @@ footer a{text-decoration:none}footer a:hover{color:var(--green)}
   /* eq */
   var wv=document.getElementById('wave');for(var i=0;i<9;i++){var e=document.createElement('i');e.style.height=(14+((i*7)%26))+'px';e.style.animationDelay=(-i*.12)+'s';wv.appendChild(e)}
   /* map grid */
-  var mg=document.getElementById('mapgrid'),cells=[];for(var j=0;j<18*7;j++){var q=document.createElement('i');mg.appendChild(q);cells.push(q)}
-  function mapTick(){cells.forEach(function(q){q.className=''});for(var k=0;k<10;k++)cells[Math.random()*cells.length|0].className='on';cells[Math.random()*cells.length|0].className='hot'}
-  mapTick();if(!reduce)setInterval(mapTick,1400);
+  /* dashboard counter */
+  var kp=document.getElementById('kpn');(function cnt(){if(reduce)return;var v=0,t=37;var id=setInterval(function(){v++;kp.textContent=v;if(v>=t){clearInterval(id);setTimeout(cnt,3500)}},60)})();
   /* inbox */
   var ib=document.getElementById('inbox'),states=[['sent','st'],['opened','st op'],['replied','st rep']],rows=[];
   for(var r=0;r<3;r++){var d=document.createElement('div');d.className='row';d.innerHTML='<s style="width:'+(55+r*11)+'%"></s><span class="st">sent</span>';ib.appendChild(d);rows.push({el:d.lastChild,s:0})}
@@ -331,10 +409,10 @@ footer a{text-decoration:none}footer a:hover{color:var(--green)}
 
   /* try it terminal */
   var D={
-    builder:[['k','Where we look:'],['c','  town property and sales records'],['k','What we spot:'],['g','  builder sold a new house 4 days ago'],['k','What we pick:'],['','  5 lots not for sale, same size as yours'],['','  old house, same owner for years, dry land'],['k','What you get:'],['o','  Monday 7 AM email, with owner addresses'],['g','  Live now in Greenwich, CT']],
+    builder:[['k','Where we look:'],['c','  town property and sales records'],['k','What we spot:'],['g','  builder sold a new house 4 days ago'],['k','What we pick:'],['','  5 lots not for sale, same size as yours'],['','  old house, same owner for years, dry land'],['k','What you get:'],['o','  weekly email, with owner addresses'],['k','  (example)']],
     contractor:[['k','Where we look:'],['c','  building permits + home sales'],['k','What we spot:'],['g','  new owner closed, permit not filed yet'],['k','What we pick:'],['','  older homes in the towns you work'],['k','What you get:'],['o','  weekly list with addresses'],['k','  (example)']],
-    service:[['k','Where we look:'],['c','  state business filings'],['k','What we spot:'],['g','  new business registered this week'],['k','What we pick:'],['','  in your towns, no website yet'],['k','What you get:'],['o','  weekly list with owner names'],['k','  (example)']],
-    b2b:[['k','Where we look:'],['c','  job posts + company sites'],['k','What we spot:'],['g','  company posted the role you fill'],['k','What we pick:'],['','  size, location, how long it has been open'],['k','What you get:'],['o','  daily list of who to call'],['k','  (example)']]
+    service:[['k','Where we look:'],['c','  home sales + new business filings'],['k','What we spot:'],['g','  families and offices that just moved in'],['k','What we pick:'],['','  within a short drive of your office'],['k','What you get:'],['o','  weekly list, plus ads that reach them'],['k','  (example)']],
+    b2b:[['k','Where we look:'],['c','  job posts + company sites'],['k','What we spot:'],['g','  a company posted the role you fill'],['k','What we pick:'],['','  near you, open more than 2 weeks'],['k','What you get:'],['o','  daily list of who to call'],['k','  (example)']]
   };
   var out=document.getElementById('out'),tn=document.getElementById('tname'),timer=null;
   function show(k){clearInterval(timer);tn.textContent='example';var ls=D[k];

@@ -5,7 +5,7 @@
 <title>Next Lot</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Five lots in Greenwich that are not for sale, picked to match what you build, in your email every Monday with the owner's mailing address.">
+<meta name="description" content="Five lots in Connecticut that are not for sale, picked to match what you build, in your email every Monday with the owner's mailing address.">
 <meta property="og:title" content="Next Lot by Montero">
 <meta property="og:description" content="Your next lot, in your email every Monday.">
 <meta name="theme-color" content="#07090a">
@@ -124,6 +124,33 @@ input:focus{border-color:var(--green);outline:none}
 footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 24px;padding-block:56px 44px;font-size:17px;color:var(--mute)}
 footer a{text-decoration:none}footer a:hover{color:var(--green)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+.hr{display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:flex-end}
+.mail{font:500 17px var(--body);color:var(--mute);text-decoration:none}.mail:hover{color:var(--green)}
+@media (max-width:560px){header.top{flex-wrap:wrap}.hr{gap:10px 14px}.mail{font-size:16px}}
+.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr);gap:40px;align-items:center;max-width:none}
+@media (max-width:900px){.hero{grid-template-columns:1fr;gap:30px}}
+.mon{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.mon-h{display:flex;align-items:center;gap:10px;font:500 17px var(--body);color:var(--mute);margin-bottom:12px}
+.mon-h .dot{width:10px;height:10px;border-radius:50%;background:var(--green);animation:pl 1.6s infinite}
+.mon-n{margin-left:auto;color:var(--green);font-variant-numeric:tabular-nums}
+@keyframes pl{50%{opacity:.25}}
+.mrow{display:flex;gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--line);animation:mi .5s ease both}
+.mrow i{flex:none;width:44px;height:44px;border-radius:8px;border:2px solid var(--green);background:rgba(30,168,102,.14);display:grid;place-items:center;font:500 17px var(--display);color:var(--green);font-style:normal}
+.mrow b{display:block;font:500 18px var(--body)}.mrow span{font-size:16px;color:var(--mute)}
+@keyframes mi{from{opacity:0;transform:translateY(10px)}}
+.mon-f{border-top:1px solid var(--line);padding-top:12px;font-size:16px;color:var(--cyan)}
+.step p.cite,.cite{font-size:16px;color:var(--mute);opacity:.85;margin-top:14px}
+.cite a{color:inherit;text-decoration:underline}
+#btown{margin-bottom:10px}
+@supports (animation-timeline: view()){
+  @media (prefers-reduced-motion:no-preference){
+    .step,.fact,.buy,.qa>div{animation:rise linear both;animation-timeline:view();animation-range:entry 0% entry 45%}
+    .step .pic{animation:zoomin linear both;animation-timeline:view();animation-range:entry 10% cover 40%}
+  }
+}
+@keyframes rise{from{opacity:.35;transform:translateY(46px)}}
+@keyframes zoomin{from{transform:scale(.9)}}
 </style>
 </head>
 <body>
@@ -133,40 +160,66 @@ footer a{text-decoration:none}footer a:hover{color:var(--green)}
     <svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="81" cy="130" r="27" fill="#35d6c6"/><circle cx="76" cy="126" r="27" fill="#ff6a13"/><circle cx="100" cy="100" r="76" fill="none" stroke="currentColor" stroke-width="22"/><path fill="currentColor" d="M24 92 A76 76 0 0 1 176 92 C150 104 50 104 24 92 Z"/></svg>
     MONTERO
   </a>
-  <a class="call" href="tel:+14759771707">Call 475-977-1707</a>
+  <div class="hr"><a class="mail" href="mailto:emilio@montero.cool?subject=Next%20Lot">emilio@montero.cool</a><a class="call" href="tel:+14759771707">Call 475-977-1707</a></div>
 </header>
 
 <div class="hero">
-  <span class="live">Now in Greenwich, CT</span>
-  <h1>Your next lot, <em>in your email every Monday.</em></h1>
-  <p class="lede">Five lots that aren't for sale, picked to match what you build. With the owner's mailing address.</p>
+  <div class="hero-l">
+  <span class="live">Greenwich ready now. Any Connecticut town on request.</span>
+  <h1>Get your next lot <em>before another builder does.</em></h1>
+  <p class="lede">Five lots that aren't for sale, in your email every Monday. Picked to match what you build, with the owner's mailing address.</p>
   <div class="ctas">
     <a class="btn go" href="#price">Start free</a>
     <a class="btn" href="#how">See how it works</a>
+  </div>
+  </div>
+  <div class="mon" aria-label="Example of this Monday's email">
+    <div class="mon-h"><span class="dot"></span>Monday, 7:00 AM<span class="mon-n" id="monN">0 of 5 lots</span></div>
+    <div id="monRows"></div>
+    <div class="mon-f">+ owner names and mailing addresses</div>
   </div>
 </div>
 
 <div class="story" id="how">
   <div class="step">
-    <div><div class="num">1</div><h2>You sell a house you built.</h2><p>Now you need the next lot.</p></div>
+    <div><div class="num">1</div><h2>You sell a house you built.</h2><p>Good money. Now you need the next lot, and so does every other builder in town.</p><p class="cite">63% of builders say finding lots is a serious problem. <a href="https://www.nahb.org/blog/2026/02/builders-top-concerns-2026">NAHB survey, 2026</a></p></div>
     <div class="pic sold" aria-hidden="true">
       <svg viewBox="0 0 360 270">
         <rect x="0" y="228" width="360" height="42" fill="#18342a"/>
-        <path d="M150 120 L245 58 L340 120 Z" fill="#35d6c6" opacity=".9"/>
-        <rect x="166" y="118" width="158" height="112" fill="#eef3f0"/>
-        <rect x="186" y="140" width="34" height="30" fill="#141b1d"/><rect x="270" y="140" width="34" height="30" fill="#141b1d"/>
-        <rect x="230" y="178" width="30" height="52" fill="#ff6a13"/>
-        <rect x="40" y="96" width="8" height="134" fill="#eef3f0"/>
-        <rect x="40" y="96" width="92" height="8" fill="#eef3f0"/>
-        <rect x="70" y="104" width="4" height="16" fill="#eef3f0"/><rect x="118" y="104" width="4" height="16" fill="#eef3f0"/>
-        <rect x="56" y="120" width="80" height="52" rx="4" fill="#1ea866"/>
-        <text x="96" y="155" text-anchor="middle" font-family="Space Grotesk,Arial,sans-serif" font-size="26" font-weight="500" fill="#04150c">SOLD</text>
-      </svg>
+        <rect x="190" y="66" width="12" height="34" fill="#b2bfba"/><rect x="258" y="66" width="12" height="34" fill="#b2bfba"/>
+        <path d="M104 142 L146 112 L188 142 Z" fill="#2bb5a8"/><path d="M272 142 L314 112 L356 142 Z" fill="#2bb5a8"/>
+        <rect x="110" y="140" width="70" height="90" fill="#dfe7e3"/><rect x="280" y="140" width="70" height="90" fill="#dfe7e3"/>
+        <path d="M164 112 L230 62 L296 112 Z" fill="#35d6c6"/>
+        <rect x="172" y="110" width="116" height="120" fill="#eef3f0"/>
+        <circle cx="230" cy="94" r="8" fill="#141b1d"/>
+        <rect x="186" y="124" width="16" height="24" fill="#141b1d"/>
+        <rect x="210" y="124" width="16" height="24" fill="#ffb37a"/>
+        <rect x="234" y="124" width="16" height="24" fill="#141b1d"/>
+        <rect x="258" y="124" width="16" height="24" fill="#ffb37a"/>
+        <rect x="184" y="182" width="16" height="30" fill="#141b1d"/>
+        <rect x="260" y="182" width="16" height="30" fill="#ffb37a"/>
+        <path d="M198 172 L230 152 L262 172 Z" fill="#d6e1dc" stroke="#b2bfba" stroke-width="2"/>
+        <rect x="202" y="172" width="5" height="58" fill="#c9d4cf"/><rect x="214" y="172" width="5" height="58" fill="#c9d4cf"/><rect x="241" y="172" width="5" height="58" fill="#c9d4cf"/><rect x="253" y="172" width="5" height="58" fill="#c9d4cf"/>
+        <path d="M221 230 V194 a9 9 0 0 1 18 0 V230 Z" fill="#ff6a13"/>
+        <rect x="122" y="154" width="18" height="24" fill="#141b1d"/>
+        <rect x="150" y="154" width="18" height="24" fill="#ffb37a"/>
+        <rect x="122" y="192" width="18" height="26" fill="#ffb37a"/>
+        <rect x="150" y="192" width="18" height="26" fill="#141b1d"/>
+        <rect x="292" y="154" width="18" height="24" fill="#ffb37a"/>
+        <rect x="320" y="154" width="18" height="24" fill="#141b1d"/>
+        <rect x="292" y="192" width="18" height="26" fill="#141b1d"/>
+        <rect x="320" y="192" width="18" height="26" fill="#ffb37a"/>
+        <ellipse cx="128" cy="228" rx="22" ry="9" fill="#1e5a3c"/><ellipse cx="166" cy="229" rx="16" ry="8" fill="#1e5a3c"/><ellipse cx="294" cy="229" rx="16" ry="8" fill="#1e5a3c"/><ellipse cx="332" cy="228" rx="22" ry="9" fill="#1e5a3c"/>
+        <rect x="22" y="108" width="7" height="122" fill="#eef3f0"/><rect x="22" y="108" width="76" height="7" fill="#eef3f0"/>
+        <rect x="46" y="115" width="3" height="14" fill="#eef3f0"/><rect x="88" y="115" width="3" height="14" fill="#eef3f0"/>
+        <rect x="36" y="129" width="66" height="44" rx="4" fill="#1ea866"/>
+        <text x="69" y="159" text-anchor="middle" font-family="Space Grotesk,Arial,sans-serif" font-size="22" font-weight="500" fill="#04150c">SOLD</text>
+        </svg>
     </div>
   </div>
 
   <div class="step">
-    <div><div class="num">2</div><h2>We look at every lot in town.</h2><p>All 16,905 in Greenwich, from the town's own records. Every week.</p></div>
+    <div><div class="num">2</div><h2>We look at every lot in town.</h2><p>All 16,905 in Greenwich, from the town's own records. Every week. We can do the same for any town in Connecticut.</p></div>
     <div class="pic">
       <canvas id="map" width="900" height="900" role="img" aria-label="Map of every lot in Greenwich"></canvas>
       <span class="count" id="count">16,905 lots</span>
@@ -224,8 +277,8 @@ footer a{text-decoration:none}footer a:hover{color:var(--green)}
 <section id="price" aria-labelledby="h-price">
   <div class="buy">
     <div>
-      <h2 class="sh" id="h-price" style="margin-bottom:12px">Greenwich</h2>
-      <div class="big">$399<span> a month</span></div>
+      <h2 class="sh" id="h-price" style="margin-bottom:12px">Your town</h2>
+      <div class="big">$399<span> a month</span></div><p class="cite" style="margin:0 0 6px">Greenwich or any Connecticut town</p>
       <ul class="plain">
         <li>First month free</li>
         <li>Stop any time. Just reply "stop."</li>
@@ -239,6 +292,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--green)}
         <input type="hidden" name="form-name" value="montero-contact">
         <input type="hidden" name="page" value="builders">
         <label class="hp">skip <input name="bot-field"></label>
+        <input id="btown" name="what" type="text" placeholder="Your town (Greenwich, Stamford...)" aria-label="Your town">
         <input id="bemail" name="email" type="email" placeholder="Your email" autocomplete="email" required aria-label="Your email">
         <button class="btn" type="submit" style="width:100%">Send me Monday's lots</button>
         <p id="sent" role="status"></p>
@@ -252,7 +306,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--green)}
   <div class="qa">
     <div><b>Are you a broker?</b><span>No. We send the lots. You talk to the owner.</span></div>
     <div><b>Does anyone else get my lots?</b><span>No. Each lot goes to one builder only.</span></div>
-    <div><b>Other towns?</b><span>Stamford, Darien, New Canaan and Westport are next. Call and ask.</span></div>
+    <div><b>Other towns?</b><span>Yes. Any town in Connecticut. Tell us yours and we'll set it up.</span></div>
     <div><b>Who do I talk to?</b><span>Emilio. 475-977-1707 or emilio@montero.cool</span></div>
   </div>
 </section>
@@ -273,6 +327,15 @@ var DOTS = {"b64": "akR1UwDLQ/RUALO1wrwAFl6KkQD02VG2AHdTNK0A2FMerQBcxcidALLz28cA
   function money(x){return x>=1e6?'$'+(x/1e6).toFixed(1).replace(/\.0$/,'')+' million':'$'+Math.round(x/1e3)+'K'}
   function size(s){var ac=s/43560;return ac>=0.9?ac.toFixed(1)+' acre lot':(ac>=0.45?'Half acre lot':(ac>=0.25?'Quarter acre lot':n(s)+' sq ft lot'))}
 
+
+  /* hero card: this Monday's lots, rows appear one by one */
+  (function(){var box=document.getElementById('monRows'),nn=document.getElementById('monN');
+    var rows=LOTS.map(function(l){return [size(l.lot)+' · '+l.zone, l.ayb+' house · same owner '+(2026-l.yr_owned)+' years']});
+    rows.push(['+ 2 more lots','matched to what you build']);
+    function run(){box.innerHTML='';var k=0;nn.textContent='0 of 5 lots';
+      (function add(){if(k>=rows.length){setTimeout(run,6000);return}var r=rows[k];var d=document.createElement('div');d.className='mrow';
+        d.innerHTML='<i>'+(k<3?k+1:'+')+'</i><div><b>'+r[0]+'</b><span>'+r[1]+'</span></div>';box.appendChild(d);k++;nn.textContent=Math.min(k<4?k:5,5)+' of 5 lots';setTimeout(add,reduce?0:900)})()}
+    run()})();
   /* step 3: three real lots */
   var th=document.getElementById('three');
   LOTS.forEach(function(l){var d=document.createElement('div');d.className='al';
