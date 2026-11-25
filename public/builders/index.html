@@ -5,147 +5,125 @@
 <title>Next Lot</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Five unlisted Greenwich lots every Monday, matched to how you build, with the owner's mailing address. No other builder gets them.">
+<meta name="description" content="Five lots in Greenwich that are not for sale, picked to match what you build, in your email every Monday with the owner's mailing address.">
 <meta property="og:title" content="Next Lot by Montero">
-<meta property="og:description" content="Your next lot, every Monday.">
+<meta property="og:description" content="Your next lot, in your email every Monday.">
 <meta name="theme-color" content="#07090a">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='40' fill='%2307090a'/%3E%3Ccircle cx='81' cy='130' r='27' fill='%2335d6c6'/%3E%3Ccircle cx='76' cy='126' r='27' fill='%23ff6a13'/%3E%3Ccircle cx='100' cy='100' r='70' fill='none' stroke='%23d6e1dc' stroke-width='20'/%3E%3Cpath fill='%23d6e1dc' d='M30 92 A70 70 0 0 1 170 92 C146 103 54 103 30 92 Z'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500&family=Inter:wght@400;500;600&display=swap">
 <style>
-/* Layout: product page. Hero = promise + the actual Monday email; then the town scan map, the funnel, an interactive lot card with aerial, how you use it, price. Same dark terminal system as montero.cool. */
+/* Layout: a picture story for builders, one step per row: you sell -> we look at every lot -> we pick 5 -> Monday email -> you reach the owner. Big type, plain words, phone number always visible. */
 :root{
-  --bg:#07090a;--panel:#0d1112;--panel-2:#111719;--line:#1c2528;--text:#d6e1dc;--mute:#71817b;
+  --bg:#07090a;--panel:#0f1415;--panel-2:#141b1d;--line:#253033;--text:#eef3f0;--mute:#b2bfba;
   --green:#1ea866;--cyan:#35d6c6;--orange:#ff6a13;
-  --display:"Space Grotesk",system-ui,sans-serif;--body:"Inter",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --display:"Space Grotesk",system-ui,sans-serif;--body:"Inter",system-ui,sans-serif;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg);color:var(--text);font:300 16px/1.55 var(--body);-webkit-font-smoothing:antialiased;position:relative;z-index:0;
-  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:56px 56px;background-attachment:fixed}
-body::after{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 0%,transparent 0%,var(--bg) 75%);opacity:.92;z-index:-1}
-.wrap{max-width:1160px;margin:0 auto;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
+body{background:var(--bg);color:var(--text);font:400 19px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
 a{color:inherit}
-:focus-visible{outline:2px solid var(--green);outline-offset:3px}
-header.top{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-block:20px}
-.brand{display:flex;align-items:center;gap:10px;font:400 17px var(--display);letter-spacing:.16em;text-decoration:none}
-.brand svg{width:28px;height:28px}
-.brand small{font:500 12px var(--mono);letter-spacing:0;color:var(--green);border:1px solid #24433a;padding:3px 7px;border-radius:3px}
-header nav{display:flex;gap:20px;font:500 13px var(--mono);align-items:center}
-header nav a{text-decoration:none;color:var(--mute)} header nav a:hover{color:var(--green)}
-header nav .login{border:1px solid var(--line);padding:6px 10px;border-radius:4px;color:var(--text)}
-@media (max-width:720px){header nav a:not(.login){display:none}}
+:focus-visible{outline:3px solid var(--green);outline-offset:3px}
+header.top{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-block:20px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;font:500 20px var(--display);letter-spacing:.14em;text-decoration:none}
+.brand svg{width:34px;height:34px}
+.call{font:500 18px var(--body);text-decoration:none;border:1px solid var(--line);padding:10px 16px;border-radius:8px;white-space:nowrap}
+.call:hover{border-color:var(--green)}
 
-.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:44px;align-items:center;padding-block:40px 56px}
-@media (max-width:900px){.hero{grid-template-columns:1fr;gap:30px;padding-block:20px 40px}}
-.live{display:inline-flex;align-items:center;gap:8px;font:500 13px var(--mono);color:var(--green)}
-.live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(30,168,102,.5)}70%{box-shadow:0 0 0 9px rgba(30,168,102,0)}100%{box-shadow:0 0 0 0 rgba(30,168,102,0)}}
-h1{font:400 clamp(40px,6.2vw,72px)/1 var(--display);letter-spacing:-.02em;margin:14px 0 16px;text-wrap:balance}
+.hero{padding-block:56px 40px;text-align:left;max-width:820px}
+.live{display:inline-flex;align-items:center;gap:10px;font:500 17px var(--body);color:var(--green)}
+.live::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--green)}
+h1{font:400 clamp(42px,6.4vw,76px)/1.04 var(--display);letter-spacing:-.02em;margin:16px 0 18px;text-wrap:balance}
 h1 em{font-style:normal;color:var(--green)}
-.lede{font-size:18px;color:var(--mute);max-width:42ch;margin:0}
-.ticks{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:8px;font:14px var(--mono)}
-.ticks li::before{content:"[x] ";color:var(--green)}
-.ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px;align-items:center}
-.btn{display:inline-flex;align-items:center;gap:8px;font:500 14px var(--mono);padding:13px 18px;border-radius:4px;text-decoration:none;border:1px solid var(--line);background:var(--panel);cursor:pointer;color:var(--text)}
-.btn.go{background:var(--green);border-color:var(--green);color:#03140a}
-.price{font:13px var(--mono);color:var(--mute)} .price b{font:400 22px var(--display);color:var(--text)}
+.lede{font-size:clamp(20px,2.2vw,24px);color:var(--mute);margin:0;max-width:34ch}
+.ctas{display:flex;flex-wrap:wrap;gap:14px;margin-top:30px;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font:600 19px var(--body);padding:17px 26px;border-radius:10px;text-decoration:none;border:2px solid var(--line);background:var(--panel);cursor:pointer;color:var(--text)}
+.btn.go{background:var(--green);border-color:var(--green);color:#04150c}
+.btn:hover{border-color:var(--green)}
 
-/* the Monday email mock */
-.mail{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 30px 80px -40px rgba(30,168,102,.3)}
-.mail .hd{padding:14px 16px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
-.av{width:34px;height:34px;border-radius:50%;background:#0a0d0e;border:1px solid var(--line);display:grid;place-items:center}
-.av svg{width:22px;height:22px}
-.mail .from{font:500 14px var(--body)} .mail .from span{display:block;font:12px var(--mono);color:var(--mute);font-weight:400}
-.mail .time{font:12px var(--mono);color:var(--mute)}
-.mail .subj{padding:14px 16px 4px;font:400 18px var(--display)}
-.mail .sub2{padding:0 16px 10px;font:12px var(--mono);color:var(--mute)}
-.lot{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:10px 16px;border-top:1px solid var(--line);align-items:center;opacity:0;transform:translateY(6px);animation:in .5s forwards}
-.lot:nth-of-type(1){animation-delay:.2s}.lot:nth-of-type(2){animation-delay:.5s}.lot:nth-of-type(3){animation-delay:.8s}
-@keyframes in{to{opacity:1;transform:none}}
-.thumb{position:relative;width:96px;aspect-ratio:3/2;border-radius:4px;overflow:hidden;border:1px solid var(--line)}
-.thumb img,.thumb svg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.lot b{font:500 14px var(--display);display:block}
-.lot .k{font:12px var(--mono);color:var(--mute)}
-.lot .addr{display:inline-block;margin-top:4px;font:11px var(--mono);color:var(--cyan)}
-.addr i{display:inline-block;width:110px;height:8px;border-radius:2px;background:linear-gradient(90deg,#1f3a35,#2a4b45);vertical-align:middle;filter:blur(1px)}
-.mail .more{padding:10px 16px 14px;font:12px var(--mono);color:var(--mute);border-top:1px solid var(--line)}
+/* story */
+.story{display:flex;flex-direction:column;gap:22px;padding-block:20px 10px}
+.step{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:34px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:30px}
+.step:nth-child(even) .pic{order:-1}
+@media (max-width:860px){.step{grid-template-columns:1fr;gap:22px;padding:22px}.step:nth-child(even) .pic{order:0}}
+.num{width:52px;height:52px;border-radius:50%;background:var(--green);color:#04150c;display:grid;place-items:center;font:500 26px var(--display)}
+.step h2{font:400 clamp(30px,3.6vw,42px)/1.12 var(--display);margin:16px 0 10px;letter-spacing:-.01em;text-wrap:balance}
+.step p{margin:0;color:var(--mute);font-size:20px;max-width:30ch}
+.pic{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;overflow:hidden;position:relative}
 
-section{padding-block:72px 8px}
-.label{font:500 12px var(--mono);color:var(--cyan);letter-spacing:.08em;text-transform:uppercase}
-h2{font:400 clamp(26px,3.4vw,38px)/1.1 var(--display);letter-spacing:-.015em;margin:8px 0 26px;text-wrap:balance}
+/* step 1: sold sign */
+.sold{display:flex;align-items:center;justify-content:center;padding:22px;aspect-ratio:4/3}
+.sold svg{width:100%;max-width:360px;height:auto}
 
-/* scan */
-.scan{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:stretch}
-@media (max-width:860px){.scan{grid-template-columns:1fr}}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.panel .bar{display:flex;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);font:12px var(--mono);color:var(--mute)}
-.panel .bar .r{color:var(--green)}
+/* step 2: map */
 #map{display:block;width:100%;height:auto}
-.legend{display:flex;flex-wrap:wrap;gap:8px 18px;padding:10px 14px;border-top:1px solid var(--line);font:12px var(--mono);color:var(--mute)}
-.legend span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;background:var(--c)}
-.funnel{padding:18px 16px;display:flex;flex-direction:column;gap:16px}
-.fstep .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font:13px var(--mono);color:var(--mute);margin-bottom:6px}
-.fstep .row b{font:400 24px var(--display);color:var(--text);font-variant-numeric:tabular-nums}
-.fbar{height:10px;border-radius:2px;background:var(--panel-2);border:1px solid var(--line);overflow:hidden}
-.fbar i{display:block;height:100%;background:var(--cyan);width:var(--w);transform-origin:left;animation:grow 1.4s cubic-bezier(.2,.8,.2,1) both}
-.fstep.last .fbar i{background:var(--green);box-shadow:0 0 12px var(--green)}
-.fstep.last .row b{color:var(--green)}
-@keyframes grow{from{transform:scaleX(0)}}
-.drops{font:12px var(--mono);color:var(--mute);display:flex;flex-wrap:wrap;gap:6px}
-.drops span{border:1px solid var(--line);padding:3px 7px;border-radius:3px}
-.drops span::before{content:"- ";color:var(--orange)}
+.key{display:flex;flex-wrap:wrap;gap:8px 22px;padding:14px 18px;border-top:1px solid var(--line);font-size:17px;color:var(--mute)}
+.key span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:9px;background:var(--c);vertical-align:-1px}
+.count{position:absolute;left:14px;top:14px;background:rgba(7,9,10,.85);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font:500 18px var(--body)}
+.count b{color:var(--green);font-weight:600}
 
-/* lot card */
-.card{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:0}
-@media (max-width:860px){.card{grid-template-columns:1fr}}
-.tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.tab{font:500 13px var(--mono);padding:9px 12px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--mute);cursor:pointer}
-.tab[aria-selected="true"]{color:var(--text);border-color:var(--green);box-shadow:inset 0 -2px 0 var(--green)}
-.aerial{position:relative;aspect-ratio:3/2;background:#0a0d0e;border-right:1px solid var(--line)}
-@media (max-width:860px){.aerial{border-right:0;border-bottom:1px solid var(--line)}}
-.aerial img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.75) contrast(1.05)}
-.aerial svg{position:absolute;inset:0;width:100%;height:100%}
-.aerial polygon{fill:rgba(30,168,102,.14);stroke:var(--green);stroke-width:3;stroke-dasharray:10 6;animation:march 1.2s linear infinite}
-@keyframes march{to{stroke-dashoffset:-32}}
-.aerial .tag{position:absolute;left:12px;top:12px;font:12px var(--mono);background:rgba(7,9,10,.82);border:1px solid var(--line);padding:5px 8px;border-radius:3px}
-.aerial .tag b{color:var(--green);font-weight:500}
-.specs{padding:16px;display:flex;flex-direction:column;gap:14px}
-.spec .row{display:flex;justify-content:space-between;gap:12px;font:13px var(--mono);color:var(--mute)}
-.spec .row b{color:var(--text);font-weight:500;font-variant-numeric:tabular-nums;text-align:right}
-.meter{height:8px;margin-top:6px;border-radius:2px;background:var(--panel-2);border:1px solid var(--line);position:relative;overflow:hidden}
-.meter i{position:absolute;left:0;top:0;bottom:0;background:var(--cyan);transition:width .6s}
-.meter i.g{background:var(--green)}
-.meter i.o{background:var(--orange)}
-.spec small{display:block;font:11px var(--mono);color:var(--mute);margin-top:4px}
-.owner{border:1px dashed #24433a;border-radius:4px;padding:10px;font:12px var(--mono);color:var(--mute)}
-.owner b{color:var(--green);font-weight:500}
+/* step 3: three aerials */
+.three{display:grid;grid-template-columns:1fr;gap:0}
+.al{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center;padding:14px;border-bottom:1px solid var(--line)}
+.al:last-child{border-bottom:0}
+@media (max-width:480px){.al{grid-template-columns:110px 1fr;gap:12px}}
+.ph{position:relative;aspect-ratio:3/2;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.ph img,.ph svg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.al b{display:block;font:500 20px var(--display);line-height:1.25}
+.al span{display:block;font-size:17px;color:var(--mute);line-height:1.4;margin-top:4px}
 
-/* steps */
-.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-@media (max-width:760px){.steps{grid-template-columns:1fr}}
-.step{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px}
-.step .t{font:500 12px var(--mono);color:var(--green)}
-.step h3{font:500 19px var(--display);margin:6px 0 4px}
-.step p{margin:0;font:13px var(--mono);color:var(--mute)}
+/* step 4: email */
+.mail .hd{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line)}
+.av{width:44px;height:44px;border-radius:50%;background:#0a0d0e;border:1px solid var(--line);display:grid;place-items:center}
+.av svg{width:28px;height:28px}
+.mail .from{font:600 18px var(--body);line-height:1.3}.mail .from span{display:block;font-weight:400;font-size:16px;color:var(--mute)}
+.mail .time{font-size:16px;color:var(--mute)}
+.mail .subj{padding:16px 18px 6px;font:500 23px var(--display)}
+.mail ol{margin:0;padding:6px 18px 18px 46px;font-size:18px;color:var(--text);display:flex;flex-direction:column;gap:8px}
+.mail ol li span{color:var(--mute)}
 
-/* pricing */
-.buy{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:center;background:var(--panel);border:1px solid #24433a;border-radius:8px;padding:28px}
-@media (max-width:820px){.buy{grid-template-columns:1fr;padding:20px}}
-.big{font:400 64px/1 var(--display);letter-spacing:-.02em}
-.big span{font:500 16px var(--mono);color:var(--mute);letter-spacing:0}
-.faq{display:flex;flex-direction:column;gap:12px;font:13px var(--mono)}
-.faq b{display:block;color:var(--text);font-weight:500}
-.faq span{color:var(--mute)}
-form{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
-input{font:15px var(--body);color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:12px;flex:1 1 220px;min-width:0}
+/* step 5: envelope */
+.env{display:flex;align-items:center;justify-content:center;padding:26px;aspect-ratio:4/3}
+.env svg{width:100%;max-width:380px;height:auto}
+
+/* what's on every lot */
+section{padding-block:60px 10px}
+.sh{font:400 clamp(30px,3.8vw,44px)/1.12 var(--display);margin:0 0 24px;letter-spacing:-.01em;text-wrap:balance}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:860px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.facts{grid-template-columns:1fr}}
+.fact{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;gap:16px;align-items:flex-start}
+.fact svg{width:44px;height:44px;flex:none}
+.fact b{display:block;font:500 21px var(--display);line-height:1.25}
+.fact span{display:block;color:var(--mute);font-size:17px;margin-top:4px}
+
+/* price */
+.buy{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:36px;align-items:center;background:var(--panel);border:2px solid var(--green);border-radius:18px;padding:36px}
+@media (max-width:820px){.buy{grid-template-columns:1fr;padding:24px;gap:24px}}
+.big{font:400 clamp(64px,9vw,96px)/1 var(--display);letter-spacing:-.02em}
+.big span{font:400 24px var(--body);color:var(--mute);letter-spacing:0}
+.plain{list-style:none;margin:18px 0 0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:20px}
+.plain li::before{content:"\2713";color:var(--green);font-weight:600;margin-right:12px}
+.ways{display:flex;flex-direction:column;gap:14px}
+.ways .btn{width:100%;font-size:20px;padding:20px}
+.ways .or{text-align:center;color:var(--mute);font-size:17px}
+form{display:flex;flex-direction:column;gap:12px}
+input{font:400 20px var(--body);color:var(--text);background:var(--bg);border:2px solid var(--line);border-radius:10px;padding:16px;width:100%}
 input:focus{border-color:var(--green);outline:none}
 .hp{position:absolute;left:-9999px}
-#sent{font:13px var(--mono);color:var(--green);min-height:1.4em;margin:8px 0 0;flex-basis:100%}
-footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 24px;padding-block:48px 40px;font:12px var(--mono);color:var(--mute)}
+#sent{font-size:18px;color:var(--green);min-height:1.5em;margin:0}
+
+.qa{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:760px){.qa{grid-template-columns:1fr}}
+.qa div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}
+.qa b{display:block;font:500 21px var(--display);margin-bottom:6px}
+.qa span{color:var(--mute);font-size:18px}
+
+footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 24px;padding-block:56px 44px;font-size:17px;color:var(--mute)}
 footer a{text-decoration:none}footer a:hover{color:var(--green)}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.lot{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -153,111 +131,135 @@ footer a{text-decoration:none}footer a:hover{color:var(--green)}
 <header class="top">
   <a class="brand" href="/" aria-label="Montero home">
     <svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="81" cy="130" r="27" fill="#35d6c6"/><circle cx="76" cy="126" r="27" fill="#ff6a13"/><circle cx="100" cy="100" r="76" fill="none" stroke="currentColor" stroke-width="22"/><path fill="currentColor" d="M24 92 A76 76 0 0 1 176 92 C150 104 50 104 24 92 Z"/></svg>
-    MONTERO <small>next lot</small>
+    MONTERO
   </a>
-  <nav aria-label="Main"><a href="#scan">how we pick</a><a href="#lot">a lot</a><a href="#price">price</a><a class="login" href="/login">login</a></nav>
+  <a class="call" href="tel:+14759771707">Call 475-977-1707</a>
 </header>
 
 <div class="hero">
-  <div>
-    <span class="live">live in Greenwich, CT</span>
-    <h1>Your next lot. <em>Every Monday.</em></h1>
-    <p class="lede">Five unlisted lots matched to how you build.</p>
-    <ul class="ticks">
-      <li>same zone + size as your last builds</li>
-      <li>owner name + mailing address</li>
-      <li>no other builder gets them</li>
-    </ul>
-    <div class="ctas">
-      <a class="btn go" href="#price">Get Monday's list</a>
-      <span class="price"><b>$399</b>/mo · first month free</span>
-    </div>
-  </div>
-
-  <div class="mail" aria-label="What lands in your inbox on Monday">
-    <div class="hd">
-      <div class="av"><svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="81" cy="130" r="27" fill="#35d6c6"/><circle cx="76" cy="126" r="27" fill="#ff6a13"/><circle cx="100" cy="100" r="76" fill="none" stroke="#d6e1dc" stroke-width="22"/><path fill="#d6e1dc" d="M24 92 A76 76 0 0 1 176 92 C150 104 50 104 24 92 Z"/></svg></div>
-      <div class="from">Montero <span>to you</span></div>
-      <div class="time">Mon 7:00 AM</div>
-    </div>
-    <div class="subj">Your 5 lots this week</div>
-    <div class="sub2">sample · real Greenwich lots, addresses hidden</div>
-    <div id="maillots"></div>
-    <div class="more">+ 2 more · private page with maps and owner details</div>
+  <span class="live">Now in Greenwich, CT</span>
+  <h1>Your next lot, <em>in your email every Monday.</em></h1>
+  <p class="lede">Five lots that aren't for sale, picked to match what you build. With the owner's mailing address.</p>
+  <div class="ctas">
+    <a class="btn go" href="#price">Start free</a>
+    <a class="btn" href="#how">See how it works</a>
   </div>
 </div>
 
-<section id="scan" aria-labelledby="h-scan">
-  <div class="label">// how we pick</div>
-  <h2 id="h-scan">Every parcel in town. Five for you.</h2>
-  <div class="scan">
-    <div class="panel">
-      <div class="bar"><span>greenwich.scan</span><span class="r" id="scanct">scanning</span></div>
-      <canvas id="map" width="900" height="900" role="img" aria-label="Map of every Greenwich parcel, with teardown fits and past builder rebuilds highlighted"></canvas>
-      <div class="legend"><span style="--c:#2a3538">all parcels</span><span style="--c:#35d6c6">teardown fits</span><span style="--c:#ff6a13">builder rebuilds since 2012</span></div>
+<div class="story" id="how">
+  <div class="step">
+    <div><div class="num">1</div><h2>You sell a house you built.</h2><p>Now you need the next lot.</p></div>
+    <div class="pic sold" aria-hidden="true">
+      <svg viewBox="0 0 360 270">
+        <rect x="0" y="228" width="360" height="42" fill="#18342a"/>
+        <path d="M150 120 L245 58 L340 120 Z" fill="#35d6c6" opacity=".9"/>
+        <rect x="166" y="118" width="158" height="112" fill="#eef3f0"/>
+        <rect x="186" y="140" width="34" height="30" fill="#141b1d"/><rect x="270" y="140" width="34" height="30" fill="#141b1d"/>
+        <rect x="230" y="178" width="30" height="52" fill="#ff6a13"/>
+        <rect x="40" y="96" width="8" height="134" fill="#eef3f0"/>
+        <rect x="40" y="96" width="92" height="8" fill="#eef3f0"/>
+        <rect x="70" y="104" width="4" height="16" fill="#eef3f0"/><rect x="118" y="104" width="4" height="16" fill="#eef3f0"/>
+        <rect x="56" y="120" width="80" height="52" rx="4" fill="#1ea866"/>
+        <text x="96" y="155" text-anchor="middle" font-family="Space Grotesk,Arial,sans-serif" font-size="26" font-weight="500" fill="#04150c">SOLD</text>
+      </svg>
     </div>
-    <div class="panel">
-      <div class="bar"><span>filter.log</span><span class="r">this week</span></div>
-      <div class="funnel">
-        <div class="fstep"><div class="row"><span>parcels in Greenwich</span><b>16,905</b></div><div class="fbar"><i style="--w:100%"></i></div></div>
-        <div class="drops"><span>houses newer than 1972</span><span>building over 30% of value</span><span>owner under 8 years</span><span>odd-size lots</span></div>
-        <div class="fstep"><div class="row"><span>teardown fits</span><b>1,418</b></div><div class="fbar"><i style="--w:8.4%;animation-delay:.3s"></i></div></div>
-        <div class="drops"><span>listed for sale</span><span>wetland soils</span><span>not your zone + size</span><span>sent to another builder</span></div>
-        <div class="fstep last"><div class="row"><span>yours this Monday</span><b>5</b></div><div class="fbar"><i style="--w:1.2%;min-width:6px;animation-delay:.6s"></i></div></div>
-        <div class="drops" style="margin-top:4px"><span style="border-color:#24433a">we learn your pattern from 254 past builder rebuilds</span></div>
+  </div>
+
+  <div class="step">
+    <div><div class="num">2</div><h2>We look at every lot in town.</h2><p>All 16,905 in Greenwich, from the town's own records. Every week.</p></div>
+    <div class="pic">
+      <canvas id="map" width="900" height="900" role="img" aria-label="Map of every lot in Greenwich"></canvas>
+      <span class="count" id="count">16,905 lots</span>
+      <div class="key"><span style="--c:#3a4a4e">every lot</span><span style="--c:#35d6c6">old house, mostly land</span><span style="--c:#ff6a13">builders rebuilt here</span></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div><div class="num">3</div><h2>We pick 5 that match what you build.</h2><p>Same size and zone as your last houses. Old house, same owner for years, not for sale.</p></div>
+    <div class="pic three" id="three"></div>
+  </div>
+
+  <div class="step">
+    <div><div class="num">4</div><h2>Monday morning, they're in your email.</h2><p>Just open it. No app, no password.</p></div>
+    <div class="pic mail" aria-label="Example Monday email">
+      <div class="hd">
+        <div class="av"><svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="81" cy="130" r="27" fill="#35d6c6"/><circle cx="76" cy="126" r="27" fill="#ff6a13"/><circle cx="100" cy="100" r="76" fill="none" stroke="#eef3f0" stroke-width="22"/><path fill="#eef3f0" d="M24 92 A76 76 0 0 1 176 92 C150 104 50 104 24 92 Z"/></svg></div>
+        <div class="from">Montero<span>to you</span></div>
+        <div class="time">Mon 7:00 AM</div>
       </div>
+      <div class="subj">Your 5 lots this week</div>
+      <ol id="maillist"></ol>
     </div>
   </div>
-</section>
 
-<section id="lot" aria-labelledby="h-lot">
-  <div class="label">// one lot, up close</div>
-  <h2 id="h-lot">What you get on every lot.</h2>
-  <div class="tabs" role="tablist" aria-label="Sample lots" id="tabs"></div>
-  <div class="panel card">
-    <div class="aerial" id="aerial"><img id="aimg" alt="Aerial view of the sample lot"><svg id="asvg" viewBox="0 0 720 480" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><polygon id="apoly"/></svg><span class="tag" id="atag"></span></div>
-    <div class="specs" id="specs"></div>
+  <div class="step">
+    <div><div class="num">5</div><h2>You write or call the owner.</h2><p>Buy it before it's ever listed. No bidding war.</p></div>
+    <div class="pic env" aria-hidden="true">
+      <svg viewBox="0 0 380 285">
+        <rect x="20" y="40" width="340" height="210" rx="10" fill="#eef3f0"/>
+        <path d="M20 50 L190 160 L360 50" fill="none" stroke="#b2bfba" stroke-width="3"/>
+        <rect x="292" y="58" width="48" height="56" rx="3" fill="#ff6a13"/>
+        <circle cx="316" cy="86" r="13" fill="none" stroke="#eef3f0" stroke-width="3"/>
+        <rect x="104" y="176" width="172" height="12" rx="3" fill="#14201d"/>
+        <rect x="104" y="196" width="140" height="12" rx="3" fill="#14201d" opacity=".75"/>
+        <rect x="104" y="216" width="110" height="12" rx="3" fill="#14201d" opacity=".55"/>
+        <text x="104" y="166" font-family="Inter,Arial,sans-serif" font-size="15" fill="#1ea866" font-weight="600">Owner's mailing address</text>
+      </svg>
+    </div>
   </div>
-</section>
+</div>
 
-<section aria-labelledby="h-use">
-  <div class="label">// how you use it</div>
-  <h2 id="h-use">Monday to offer.</h2>
-  <div class="steps">
-    <div class="step"><div class="t">mon 7:00</div><h3>Open the list</h3><p>5 lots, maps, owner details.</p></div>
-    <div class="step"><div class="t">this week</div><h3>Reach the owner</h3><p>Letter, call or knock. Your way.</p></div>
-    <div class="step"><div class="t">next</div><h3>Buy before it lists</h3><p>No bidding war.</p></div>
+<section aria-labelledby="h-facts">
+  <h2 class="sh" id="h-facts">What you get on every lot</h2>
+  <div class="facts">
+    <div class="fact"><svg viewBox="0 0 44 44" aria-hidden="true"><rect x="4" y="4" width="36" height="36" rx="4" fill="none" stroke="#1ea866" stroke-width="3" stroke-dasharray="6 4"/><rect x="13" y="13" width="18" height="18" fill="#1ea866" opacity=".5"/></svg><div><b>Lot size and zone</b><span>And roughly how big a house fits.</span></div></div>
+    <div class="fact"><svg viewBox="0 0 44 44" aria-hidden="true"><path d="M6 22 L22 8 L38 22 V38 H6 Z" fill="none" stroke="#35d6c6" stroke-width="3"/><rect x="18" y="26" width="8" height="12" fill="#35d6c6"/></svg><div><b>The house on it</b><span>Year built, and what it's worth next to the land.</span></div></div>
+    <div class="fact"><svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="15" r="8" fill="none" stroke="#ff6a13" stroke-width="3"/><path d="M7 40 C9 28 35 28 37 40" fill="none" stroke="#ff6a13" stroke-width="3"/></svg><div><b>The owner</b><span>Name, mailing address, and how long they've owned it.</span></div></div>
+    <div class="fact"><svg viewBox="0 0 44 44" aria-hidden="true"><path d="M22 5 C14 17 10 23 10 29 a12 12 0 0 0 24 0 C34 23 30 17 22 5 Z" fill="none" stroke="#35d6c6" stroke-width="3"/><path d="M8 38 L36 8" stroke="#ff6a13" stroke-width="3"/></svg><div><b>Wetlands check</b><span>We drop lots with wet soils.</span></div></div>
+    <div class="fact"><svg viewBox="0 0 44 44" aria-hidden="true"><rect x="6" y="22" width="8" height="16" fill="#1ea866"/><rect x="18" y="14" width="8" height="24" fill="#1ea866"/><rect x="30" y="6" width="8" height="32" fill="#1ea866"/></svg><div><b>What new houses sold for</b><span>Within a mile, since 2022.</span></div></div>
+    <div class="fact"><svg viewBox="0 0 44 44" aria-hidden="true"><rect x="9" y="19" width="26" height="20" rx="3" fill="none" stroke="#1ea866" stroke-width="3"/><path d="M14 19 V13 a8 8 0 0 1 16 0 V19" fill="none" stroke="#1ea866" stroke-width="3"/></svg><div><b>Only yours</b><span>No other builder gets the same lots.</span></div></div>
   </div>
 </section>
 
 <section id="price" aria-labelledby="h-price">
   <div class="buy">
     <div>
-      <div class="label">// price</div>
-      <h2 id="h-price" style="margin-bottom:10px">Greenwich</h2>
-      <div class="big">$399<span> /month</span></div>
-      <p class="lede" style="font-size:15px;margin-top:10px">First month free. Stop any time by replying.</p>
+      <h2 class="sh" id="h-price" style="margin-bottom:12px">Greenwich</h2>
+      <div class="big">$399<span> a month</span></div>
+      <ul class="plain">
+        <li>First month free</li>
+        <li>Stop any time. Just reply "stop."</li>
+        <li>No contract</li>
+      </ul>
+    </div>
+    <div class="ways">
+      <a class="btn go" href="tel:+14759771707">Call 475-977-1707</a>
+      <div class="or">or leave your email and we'll start Monday</div>
       <form id="bform" name="montero-contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
         <input type="hidden" name="form-name" value="montero-contact">
         <input type="hidden" name="page" value="builders">
         <label class="hp">skip <input name="bot-field"></label>
-        <input id="bemail" name="email" type="email" placeholder="you@yourcompany.com" autocomplete="email" required aria-label="Email">
-        <button class="btn go" type="submit">Get Monday's list</button>
+        <input id="bemail" name="email" type="email" placeholder="Your email" autocomplete="email" required aria-label="Your email">
+        <button class="btn" type="submit" style="width:100%">Send me Monday's lots</button>
         <p id="sent" role="status"></p>
       </form>
     </div>
-    <div class="faq">
-      <div><b>Do you broker the deal?</b><span>No. Data only. You contact the owner.</span></div>
-      <div><b>Who else sees my lots?</b><span>Nobody. Each lot goes to one builder.</span></div>
-      <div><b>Other towns?</b><span>Stamford, Darien, New Canaan, Westport next. Ask.</span></div>
-      <div><b>Questions?</b><span><a href="mailto:emilio@montero.cool?subject=Next%20Lot">emilio@montero.cool</a> · 475-977-1707</span></div>
-    </div>
+  </div>
+</section>
+
+<section aria-labelledby="h-qa">
+  <h2 class="sh" id="h-qa">Questions</h2>
+  <div class="qa">
+    <div><b>Are you a broker?</b><span>No. We send the lots. You talk to the owner.</span></div>
+    <div><b>Does anyone else get my lots?</b><span>No. Each lot goes to one builder only.</span></div>
+    <div><b>Other towns?</b><span>Stamford, Darien, New Canaan and Westport are next. Call and ask.</span></div>
+    <div><b>Who do I talk to?</b><span>Emilio. 475-977-1707 or emilio@montero.cool</span></div>
   </div>
 </section>
 
 <footer>
   <span>Montero · Stamford, CT</span>
-  <span><a href="/">montero.cool</a> · <a href="/login">client login</a></span>
+  <span><a href="/">montero.cool</a> · <a href="tel:+14759771707">475-977-1707</a> · <a href="mailto:emilio@montero.cool?subject=Next%20Lot">emilio@montero.cool</a></span>
 </footer>
 </div>
 
@@ -268,57 +270,41 @@ var DOTS = {"b64": "akR1UwDLQ/RUALO1wrwAFl6KkQD02VG2AHdTNK0A2FMerQBcxcidALLz28cA
 (function(){
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   function n(x){return Math.round(x).toLocaleString('en-US')}
-  function money(x){return x>=1e6?'$'+(x/1e6).toFixed(1).replace(/\.0$/,'')+'M':'$'+Math.round(x/1e3)+'K'}
-  function lotsz(s){return s>=43560?(s/43560).toFixed(2).replace(/0$/,'')+' ac':n(s)+' SF'}
+  function money(x){return x>=1e6?'$'+(x/1e6).toFixed(1).replace(/\.0$/,'')+' million':'$'+Math.round(x/1e3)+'K'}
+  function size(s){var ac=s/43560;return ac>=0.9?ac.toFixed(1)+' acre lot':(ac>=0.45?'Half acre lot':(ac>=0.25?'Quarter acre lot':n(s)+' sq ft lot'))}
 
-  /* mail rows */
-  var ml=document.getElementById('maillots');
-  LOTS.forEach(function(l){var d=document.createElement('div');d.className='lot';
-    d.innerHTML='<div class="thumb"><img src="'+IMG+l.img+'" alt=""><svg viewBox="0 0 720 480" preserveAspectRatio="xMidYMid slice"><polygon points="'+l.poly+'" fill="rgba(30,168,102,.18)" stroke="#1ea866" stroke-width="6"/></svg></div>'+
-      '<div><b>'+l.zone+' · '+lotsz(l.lot)+' · room for ~'+n(Math.round(l.far_sf/100)*100)+' SF</b><span class="k">'+l.ayb+' house · same owner since '+l.yr_owned+' · no wetland soils</span><br><span class="addr">address <i></i></span></div>';
-    ml.appendChild(d)});
+  /* step 3: three real lots */
+  var th=document.getElementById('three');
+  LOTS.forEach(function(l){var d=document.createElement('div');d.className='al';
+    d.innerHTML='<div class="ph"><img src="'+IMG+l.img+'" alt="Aerial photo of a sample lot"><svg viewBox="0 0 720 480" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><polygon points="'+l.poly+'" fill="rgba(30,168,102,.2)" stroke="#1ea866" stroke-width="7"/></svg></div>'+
+      '<div><b>'+size(l.lot)+' · '+l.zone+'</b><span>'+l.ayb+' house · same owner '+(2026-l.yr_owned)+' years · room for a '+n(Math.round(l.far_sf/500)*500)+' sq ft house</span></div>';
+    th.appendChild(d)});
 
-  /* lot card */
-  var tabs=document.getElementById('tabs'),cur=0;
-  function meter(label,val,pct,cls,note){return '<div class="spec"><div class="row"><span>'+label+'</span><b>'+val+'</b></div>'+(pct!=null?'<div class="meter"><i class="'+(cls||'')+'" style="width:'+Math.max(2,Math.min(100,pct))+'%"></i></div>':'')+(note?'<small>'+note+'</small>':'')+'</div>'}
-  function render(i){var l=LOTS[i];cur=i;
-    document.getElementById('aimg').src=IMG+l.img;document.getElementById('apoly').setAttribute('points',l.poly);
-    document.getElementById('atag').innerHTML='<b>'+l.zone+'</b> · '+lotsz(l.lot);
-    var yrs=2026-l.yr_owned;
-    document.getElementById('specs').innerHTML=
-      meter('room to build','~'+n(Math.round(l.far_sf/100)*100)+' SF',l.far_sf/6500*100,'g','today: '+n(l.liv)+' SF house (est. from zone rules)')+
-      meter('house built',String(l.ayb),null)+
-      meter('same owner since',l.yr_owned+' ('+yrs+' yrs)',yrs/60*100,'')+
-      meter('house share of value',l.share+'%',l.share,'o','under 30% = mostly land')+
-      meter('wetland soils',l.wet+'%',0.5,'g')+
-      meter('new builds within 1 mi',l.nn+' since 2022',null,null,'middle sale price '+money(l.nn_med))+
-      '<div class="owner">in your list: <b>street address</b>, <b>owner name</b>, <b>owner mailing address</b></div>';
-    Array.prototype.forEach.call(tabs.children,function(t,j){t.setAttribute('aria-selected',j===i?'true':'false');t.tabIndex=j===i?0:-1})}
-  LOTS.forEach(function(l,i){var b=document.createElement('button');b.className='tab';b.type='button';b.setAttribute('role','tab');b.textContent='lot '+(i+1)+' · '+l.zone;b.addEventListener('click',function(){render(i)});tabs.appendChild(b)});
-  tabs.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowLeft'){var k=(cur+(e.key==='ArrowRight'?1:LOTS.length-1))%LOTS.length;render(k);tabs.children[k].focus()}});
-  render(0);
+  /* step 4: email list */
+  var ol=document.getElementById('maillist');
+  LOTS.forEach(function(l){var li=document.createElement('li');li.innerHTML=size(l.lot)+', '+l.zone+' <span>· owner since '+l.yr_owned+'</span>';ol.appendChild(li)});
+  ['+ 2 more lots','+ owner names and mailing addresses'].forEach(function(t){var li=document.createElement('li');li.innerHTML='<span>'+t+'</span>';li.style.listStyle='none';ol.appendChild(li)});
 
-  /* town map */
+  /* step 2: map */
   var raw=atob(DOTS.b64),N=raw.length/5,cv=document.getElementById('map'),c=cv.getContext('2d');
   var Wc=cv.width,Hc=cv.height,pad=30,ah=Hc-2*pad,aw=ah*DOTS.aspect,ox=(Wc-aw)/2;
   var px=new Float32Array(N),py=new Float32Array(N),kd=new Uint8Array(N);
   for(var i=0;i<N;i++){var o=i*5;px[i]=ox+((raw.charCodeAt(o)|raw.charCodeAt(o+1)<<8)/65535)*aw;py[i]=pad+((raw.charCodeAt(o+2)|raw.charCodeAt(o+3)<<8)/65535)*ah;kd[i]=raw.charCodeAt(o+4)}
-  var ct=document.getElementById('scanct');
-  function drawTo(lim){c.fillStyle='#0d1112';c.fillRect(0,0,Wc,Hc);
-    for(var i=0;i<N;i++){if(kd[i]!==0)continue;c.fillStyle='#253033';c.fillRect(px[i]-1,py[i]-1,2.2,2.2)}
-    for(var j=0;j<N;j++){if(kd[j]===0||py[j]>lim)continue;var r=kd[j]===2?3.4:2.4;c.fillStyle=kd[j]===2?'#ff6a13':'#35d6c6';c.beginPath();c.arc(px[j],py[j],r,0,7);c.fill()}
-    if(lim<Hc){var g=c.createLinearGradient(0,lim-60,0,lim);g.addColorStop(0,'rgba(30,168,102,0)');g.addColorStop(1,'rgba(30,168,102,.22)');c.fillStyle=g;c.fillRect(0,lim-60,Wc,60);c.fillStyle='#1ea866';c.fillRect(0,lim,Wc,1.5)}}
-  if(reduce){drawTo(Hc);ct.textContent=n(DOTS.n)+' parcels'}
-  else{var t0=null;function step(ts){if(!t0)t0=ts;var p=Math.min(1,(ts-t0)/3200),lim=pad+p*(Hc-pad);drawTo(p<1?lim:Hc);ct.textContent=p<1?'scanning '+n(DOTS.n*p)+' / '+n(DOTS.n):n(DOTS.n)+' parcels scanned';if(p<1)requestAnimationFrame(step);else setTimeout(function(){t0=null;requestAnimationFrame(step)},6000)}
-    drawTo(Hc);
+  var ct=document.getElementById('count');
+  function drawTo(lim){c.fillStyle='#141b1d';c.fillRect(0,0,Wc,Hc);
+    for(var i=0;i<N;i++){if(kd[i]!==0)continue;c.fillStyle='#34444a';c.fillRect(px[i]-1.2,py[i]-1.2,2.6,2.6)}
+    for(var j=0;j<N;j++){if(kd[j]===0||py[j]>lim)continue;c.fillStyle=kd[j]===2?'#ff6a13':'#35d6c6';c.beginPath();c.arc(px[j],py[j],kd[j]===2?4.2:3,0,7);c.fill()}
+    if(lim<Hc){c.fillStyle='rgba(30,168,102,.18)';c.fillRect(0,lim-50,Wc,50);c.fillStyle='#1ea866';c.fillRect(0,lim,Wc,3)}}
+  drawTo(Hc);
+  if(!reduce){var t0=null;function step(ts){if(!t0)t0=ts;var p=Math.min(1,(ts-t0)/3500);drawTo(p<1?pad+p*(Hc-pad):Hc);ct.innerHTML=p<1?'Checking <b>'+n(DOTS.n*p)+'</b> lots':'<b>'+n(DOTS.n)+'</b> lots checked';if(p<1)requestAnimationFrame(step);else setTimeout(function(){t0=null;requestAnimationFrame(step)},7000)}
     if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){if(es[0].isIntersecting){io.disconnect();requestAnimationFrame(step)}});io.observe(cv)}else requestAnimationFrame(step)}
 
   /* form */
   var f=document.getElementById('bform'),st=document.getElementById('sent');
-  f.addEventListener('submit',function(e){e.preventDefault();st.textContent='sending...';
+  f.addEventListener('submit',function(e){e.preventDefault();st.textContent='Sending...';
     fetch('/__forms.html',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(f)).toString()})
-      .then(function(r){if(!r.ok)throw 0;st.textContent="Got it. Your first list comes Monday at 7:00 AM.";f.reset()})
-      .catch(function(){st.innerHTML='Could not send here. Email <a href="mailto:emilio@montero.cool?subject=Next%20Lot">emilio@montero.cool</a>.'})});
+      .then(function(r){if(!r.ok)throw 0;st.textContent="Got it. Emilio will email you today.";f.reset()})
+      .catch(function(){st.innerHTML='That did not go through. Please call 475-977-1707.'})});
 })();
 </script>
 </body>
