@@ -5,7 +5,6 @@ const nextConfig = {
   async rewrites() {
     return [
       { source: '/builders', destination: '/builders/index.html' },
-      { source: '/lots', destination: '/builders/index.html' },
       { source: '/test', destination: '/test/index.html' },
       { source: '/p/astonishing', destination: '/p/astonishing/index.html' },
       { source: '/make', destination: '/make/index.html' },
@@ -17,7 +16,8 @@ const nextConfig = {
   async redirects() {
     const paused = ['/recruitment', '/recruiting', '/recruiting/:path*', '/weekly', '/video', '/video/:path*',
       '/v/:path*', '/ad/:path*', '/apply/:path*', '/start', '/jobmap/:path*']
-    return paused.map((source) => ({ source, destination: '/', permanent: false }))
+    return [{ source: '/lots', destination: '/builders/', permanent: false },
+      ...paused.map((source) => ({ source, destination: '/', permanent: false }))]
   },
 }
 export default nextConfig
