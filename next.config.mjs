@@ -5,6 +5,7 @@ const nextConfig = {
   async rewrites() {
     return [
       { source: '/builders', destination: '/builders/index.html' },
+      { source: '/contractors', destination: '/contractors/index.html' },
       { source: '/test', destination: '/test/index.html' },
       { source: '/p/astonishing', destination: '/p/astonishing/index.html' },
       { source: '/make', destination: '/make/index.html' },
